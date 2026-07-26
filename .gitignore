@@ -1,0 +1,7 @@
+node_modules/
+generated/*
+!generated/.gitkeep
+server-config.mjs
+.env
+.env.local
+.DS_Store
