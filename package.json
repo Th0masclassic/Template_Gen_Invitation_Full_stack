@@ -1,0 +1,29 @@
+{
+  "name": "wedding-invitation-gpt-image-2",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Wedding invitation portal with automated server-side ChatGPT Canva Image To Design delivery.",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "dev": "node --env-file-if-exists=.env --watch server.mjs",
+    "check": "node --check server.mjs && node --check chatgpt-canva-worker.mjs && node --check canva-link.mjs && node --check canva-template-link-service.mjs && node --check keyed-promise-queue.mjs && node --check wedding-site.mjs && node --check public/app-i18n.js",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser:edge": "node tests/browser-compat.mjs",
+    "test:browser:safari": "node tests/safari-compat.mjs",
+    "tunnel": "cloudflared tunnel --url http://127.0.0.1:3000"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "multer": "^2.2.0",
+    "openai": "6.48.0",
+    "pdf-lib": "^1.17.1",
+    "playwright-core": "^1.55.0",
+    "pngjs": "^7.0.0",
+    "pptxgenjs": "^3.12.0",
+    "sharp": "^0.35.3"
+  },
+  "engines": {
+    "node": ">=22.9.0"
+  }
+}
