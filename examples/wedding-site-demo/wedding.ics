@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//InviteLab//Wedding Demo//EN
+BEGIN:VEVENT
+UID:sofia-daniel-demo@invitelab
+DTSTAMP:20260729T000000Z
+DTSTART:20270918T163000
+SUMMARY:Sofia and Daniel's Wedding
+LOCATION:Quinta da Oliveirinha\, Alentejo\, Portugal
+DESCRIPTION:InviteLab fictional wedding website demo.
+END:VEVENT
+END:VCALENDAR

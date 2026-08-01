@@ -1,0 +1,1330 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f4f0e8">
+  <meta name="description" content="InviteLab creates personalised wedding and baby-shower invitations, editable Canva templates, digital PDFs and elegant event websites.">
+  <title>InviteLab · Invitations made personal</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #20271f;
+      --muted: #687064;
+      --olive: #586850;
+      --olive-deep: #34402f;
+      --olive-soft: #8e9a84;
+      --sage: #dfe6da;
+      --sage-soft: #edf1ea;
+      --cream: #f3efe7;
+      --paper: #fffdf8;
+      --gold: #b38a43;
+      --line: rgba(43, 53, 39, .14);
+      --line-strong: rgba(43, 53, 39, .24);
+      --shadow: 0 28px 80px rgba(45, 52, 40, .13);
+      --serif: "Iowan Old Style", "Baskerville", Georgia, "Times New Roman", serif;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      overflow-x: clip;
+      scroll-behavior: smooth;
+      background: var(--cream);
+    }
+    body {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      margin: 0;
+      overflow-x: hidden;
+      overflow-x: clip;
+      background:
+        radial-gradient(circle at 0 0, rgba(255,255,255,.92), transparent 34rem),
+        linear-gradient(180deg, #f5f1e9 0, #f1ede5 48rem, #fffdf8 105rem);
+      color: var(--ink);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+    body.menu-open { overflow: hidden; }
+    a { color: inherit; }
+    button, select { font: inherit; }
+    img { display: block; max-width: 100%; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 3px solid rgba(179,138,67,.58); outline-offset: 4px; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .shell { width: min(1320px, calc(100% - 48px)); margin-inline: auto; }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      color: var(--olive);
+      font-size: 11px;
+      font-weight: 850;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { width: 36px; height: 1px; content: ""; background: currentColor; }
+
+    .site-header {
+      position: relative;
+      z-index: 40;
+      display: flex;
+      min-height: 92px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 19px;
+      font-weight: 830;
+      letter-spacing: -.035em;
+    }
+    .brand-mark {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
+      overflow: hidden;
+      border: 1px solid rgba(179,138,67,.25);
+      border-radius: 50%;
+      background: #f2eadc;
+      box-shadow: 0 10px 24px rgba(58, 53, 43, .12);
+    }
+    .brand-mark img {
+      position: absolute;
+      width: 315%;
+      max-width: none;
+      transform: translate(-34%, -17%);
+    }
+    .nav-wrap { display: flex; align-items: center; gap: 22px; }
+    .site-nav { display: flex; align-items: center; gap: 25px; }
+    .site-nav a {
+      color: #444c41;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 740;
+    }
+    .site-nav a:hover { color: var(--olive); }
+    .language {
+      width: 134px;
+      height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 38px 0 16px;
+      background: rgba(255,255,255,.74);
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .nav-toggle {
+      display: none;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: rgba(255,255,255,.82);
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .hero { padding: 18px 0 54px; }
+    .hero-heading {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 40px;
+      padding: 20px 0 30px;
+    }
+    .hero-heading h1 {
+      max-width: 940px;
+      margin: 13px 0 0;
+      font-family: var(--serif);
+      font-size: clamp(46px, 6vw, 86px);
+      font-weight: 400;
+      line-height: .96;
+      letter-spacing: -.052em;
+    }
+    .hero-heading h1 em {
+      color: var(--olive);
+      font-weight: 400;
+    }
+    .hero-intro {
+      max-width: 330px;
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .hero-carousel {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.78);
+      border-radius: 30px;
+      background: #e8e3d9;
+      box-shadow: var(--shadow);
+      isolation: isolate;
+      touch-action: pan-y;
+    }
+    .hero-track {
+      display: flex;
+      width: 100%;
+      transition: transform .72s cubic-bezier(.22,.7,.2,1);
+      will-change: transform;
+    }
+    .hero-slide {
+      position: relative;
+      display: flex;
+      min-width: 100%;
+      min-height: clamp(410px, 41vw, 548px);
+      align-items: flex-end;
+      padding: clamp(22px, 4vw, 52px);
+      overflow: hidden;
+    }
+    .hero-slide::after {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(90deg, rgba(28,35,27,.16), transparent 52%);
+      content: "";
+    }
+    .hero-slide > img {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .hero-panel {
+      width: min(485px, 48%);
+      padding: clamp(24px, 3.2vw, 42px);
+      border: 1px solid rgba(255,255,255,.8);
+      border-radius: 24px;
+      background: rgba(255,253,248,.91);
+      box-shadow: 0 20px 60px rgba(42,49,38,.15);
+      backdrop-filter: blur(12px);
+    }
+    .hero-panel .slide-count {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 24px;
+      color: var(--olive);
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+    .hero-panel .slide-count::after { width: 45px; height: 1px; background: currentColor; content: ""; }
+    .hero-panel h2 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(32px, 3.5vw, 49px);
+      font-weight: 400;
+      line-height: .98;
+      letter-spacing: -.035em;
+    }
+    .hero-panel p {
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.62;
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
+    .button {
+      display: inline-flex;
+      min-height: 49px;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 1px solid var(--olive);
+      border-radius: 999px;
+      padding: 0 21px;
+      background: var(--olive);
+      color: #fff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 820;
+      box-shadow: 0 12px 26px rgba(66,79,61,.2);
+      transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .button:hover {
+      transform: translateY(-2px);
+      background: var(--olive-deep);
+      box-shadow: 0 17px 34px rgba(66,79,61,.25);
+    }
+    .button.secondary {
+      border-color: var(--line-strong);
+      background: rgba(255,255,255,.78);
+      color: var(--ink);
+      box-shadow: none;
+    }
+    .button.secondary:hover { background: #fff; }
+    .button .arrow { font-size: 17px; line-height: 1; }
+    .hero-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 17px 5px 0;
+    }
+    .hero-dots { display: flex; align-items: center; gap: 9px; }
+    .hero-dot {
+      width: 28px;
+      height: 4px;
+      border: 0;
+      border-radius: 99px;
+      padding: 0;
+      background: rgba(70,82,66,.2);
+      cursor: pointer;
+      transition: width .25s ease, background .25s ease;
+    }
+    .hero-dot.active { width: 54px; background: var(--olive); }
+    .hero-arrows { display: flex; gap: 8px; }
+    .hero-arrow {
+      display: inline-grid;
+      width: 43px;
+      height: 43px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: rgba(255,255,255,.75);
+      color: var(--ink);
+      cursor: pointer;
+      transition: transform .2s ease, background .2s ease;
+    }
+    .hero-arrow:hover { transform: translateY(-2px); background: #fff; }
+
+    .promise-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-top: 42px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255,253,248,.72);
+    }
+    .promise {
+      display: grid;
+      grid-template-columns: 40px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      min-width: 0;
+      padding: 21px 22px;
+      border-right: 1px solid var(--line);
+    }
+    .promise:last-child { border-right: 0; }
+    .promise-icon {
+      display: grid;
+      width: 40px;
+      height: 40px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--sage);
+      color: var(--olive-deep);
+      font-size: 18px;
+    }
+    .promise strong { display: block; font-size: 13px; }
+    .promise span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+
+    .intro-section { padding: 105px 0 76px; text-align: center; }
+    .intro-section h2 {
+      max-width: 930px;
+      margin: 18px auto 0;
+      font-family: var(--serif);
+      font-size: clamp(42px, 5.8vw, 75px);
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -.045em;
+    }
+    .intro-section > p {
+      max-width: 680px;
+      margin: 24px auto 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .occasion-section { padding: 40px 0 120px; }
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 440px);
+      gap: 44px;
+      align-items: end;
+      margin-bottom: 35px;
+    }
+    .section-head > * { min-width: 0; }
+    .section-head h2 {
+      max-width: 760px;
+      margin: 14px 0 0;
+      font-family: var(--serif);
+      font-size: clamp(42px, 5.4vw, 70px);
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -.04em;
+    }
+    .section-head > p { margin: 0 0 5px; color: var(--muted); font-size: 15px; line-height: 1.65; }
+    .occasion-grid { display: grid; grid-template-columns: 1.24fr .76fr; gap: 18px; }
+    .occasion-card {
+      position: relative;
+      display: flex;
+      min-height: 600px;
+      align-items: flex-end;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.76);
+      border-radius: 28px;
+      padding: 32px;
+      color: #fff;
+      text-decoration: none;
+      box-shadow: 0 20px 55px rgba(40,48,37,.13);
+      isolation: isolate;
+    }
+    .occasion-card.secondary-card { min-height: 600px; }
+    .occasion-card::after {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(180deg, transparent 36%, rgba(22,30,20,.12) 54%, rgba(22,30,20,.88) 100%);
+      content: "";
+    }
+    .occasion-card img {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .65s cubic-bezier(.2,.7,.2,1);
+    }
+    .occasion-card:hover img { transform: scale(1.035); }
+    .occasion-card.wedding img { object-position: 50% 50%; }
+    .occasion-card.baby img { object-position: 58% 50%; }
+    .occasion-content { width: 100%; }
+    .occasion-index {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 14px;
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: .17em;
+      text-transform: uppercase;
+    }
+    .occasion-index::after { width: 38px; height: 1px; background: currentColor; content: ""; }
+    .occasion-card h3 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(40px, 5vw, 68px);
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -.035em;
+    }
+    .occasion-card.secondary-card h3 { font-size: clamp(38px, 4vw, 56px); }
+    .occasion-bottom {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-top: 16px;
+    }
+    .occasion-bottom p { max-width: 490px; margin: 0; color: rgba(255,255,255,.78); font-size: 13px; line-height: 1.55; }
+    .round-arrow {
+      display: grid;
+      width: 52px;
+      height: 52px;
+      flex: 0 0 52px;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.5);
+      border-radius: 50%;
+      background: rgba(255,255,255,.13);
+      font-size: 20px;
+      backdrop-filter: blur(8px);
+      transition: transform .2s ease, background .2s ease;
+    }
+    .occasion-card:hover .round-arrow { transform: translate(3px,-3px); background: rgba(255,255,255,.2); }
+
+    .studio-section {
+      padding: 118px 0 126px;
+      background: var(--olive-deep);
+      color: #fff;
+    }
+    .studio-section .eyebrow { color: #d7dfd1; }
+    .studio-section .section-head > p { color: rgba(255,255,255,.62); }
+    .studio-rail {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      counter-reset: studio;
+    }
+    .studio-card {
+      counter-increment: studio;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 20px;
+      background: rgba(255,255,255,.055);
+    }
+    .studio-image {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 4 / 4.8;
+      background: #e7e5df;
+    }
+    .studio-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+    .studio-card:hover .studio-image img { transform: scale(1.025); }
+    .studio-card:nth-child(1) .studio-image img { object-position: 50% 27%; }
+    .studio-card:nth-child(2) .studio-image img { object-position: 50% 8%; }
+    .studio-card:nth-child(3) .studio-image img { object-position: 50% 35%; }
+    .studio-card:nth-child(4) .studio-image img { object-position: 50% 15%; }
+    .studio-copy { min-height: 152px; padding: 23px 22px 25px; }
+    .studio-copy::before {
+      display: block;
+      margin-bottom: 15px;
+      color: #c7d2c0;
+      content: "0" counter(studio);
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: .18em;
+    }
+    .studio-copy h3 { margin: 0; font-family: var(--serif); font-size: 25px; font-weight: 400; }
+    .studio-copy p { margin: 9px 0 0; color: rgba(255,255,255,.6); font-size: 12px; line-height: 1.55; }
+
+    .journey-section { padding: 128px 0; }
+    .journey-card {
+      display: grid;
+      grid-template-columns: .78fr 1.22fr;
+      align-items: stretch;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .journey-copy {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: clamp(40px, 6vw, 78px);
+    }
+    .journey-copy h2 {
+      margin: 17px 0 0;
+      font-family: var(--serif);
+      font-size: clamp(41px, 5vw, 65px);
+      font-weight: 400;
+      line-height: .98;
+      letter-spacing: -.04em;
+    }
+    .journey-copy p { margin: 22px 0 0; color: var(--muted); font-size: 15px; line-height: 1.7; }
+    .journey-copy .button { margin-top: 27px; }
+    .journey-image { min-height: 510px; }
+    .journey-image img { width: 100%; height: 100%; object-fit: cover; object-position: 49% 50%; }
+
+    .review-section { padding: 0 0 120px; }
+    .review-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 48px;
+      align-items: center;
+      overflow: hidden;
+      border: 1px solid rgba(179,138,67,.28);
+      border-radius: 28px;
+      padding: clamp(42px, 6vw, 72px);
+      background:
+        radial-gradient(circle at 87% 15%, rgba(255,255,255,.85), transparent 19rem),
+        linear-gradient(135deg, #e7e6dc, #d8dfd2);
+    }
+    .review-card::after {
+      position: absolute;
+      right: 16%;
+      bottom: -44px;
+      width: 180px;
+      height: 180px;
+      border: 1px solid rgba(86,103,79,.18);
+      border-radius: 50%;
+      box-shadow: 0 0 0 32px rgba(255,255,255,.13), 0 0 0 64px rgba(255,255,255,.08);
+      content: "";
+    }
+    .review-card > * { position: relative; z-index: 1; min-width: 0; }
+    .review-card h2 {
+      max-width: 770px;
+      margin: 14px 0 0;
+      font-family: var(--serif);
+      font-size: clamp(39px, 4.7vw, 62px);
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -.04em;
+    }
+    .review-card p { max-width: 700px; margin: 20px 0 0; color: #5c6657; font-size: 15px; line-height: 1.65; }
+    .review-card .button { min-width: 188px; }
+
+    .site-footer { border-top: 1px solid var(--line); background: rgba(255,253,248,.6); }
+    .footer-inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(150px, .4fr));
+      gap: 50px;
+      padding: 62px 0 44px;
+    }
+    .footer-brand p { max-width: 410px; margin: 18px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .footer-column h3 { margin: 0 0 16px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
+    .footer-column a { display: block; width: fit-content; margin-top: 11px; color: var(--muted); font-size: 13px; text-decoration: none; }
+    .footer-column a:hover { color: var(--ink); }
+    .footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+      padding: 22px 0 30px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    @media (max-width: 1040px) {
+      .hero-heading { display: block; }
+      .hero-intro { max-width: 640px; margin-top: 20px; }
+      .hero-slide { min-height: 520px; }
+      .hero-panel { width: min(520px, 58%); }
+      .promise-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .promise:nth-child(2) { border-right: 0; }
+      .promise:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .occasion-grid { grid-template-columns: 1fr 1fr; }
+      .occasion-card, .occasion-card.secondary-card { min-height: 540px; }
+      .studio-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .journey-card { grid-template-columns: 1fr; }
+      .journey-image { min-height: 430px; order: -1; }
+      .journey-image img { object-position: center; }
+    }
+
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 28px, 1320px); }
+      .site-header { min-height: 78px; }
+      .brand { font-size: 17px; }
+      .brand-mark { width: 42px; height: 42px; flex-basis: 42px; }
+      .nav-toggle { display: inline-grid; place-items: center; }
+      .nav-wrap { gap: 8px; }
+      .language { width: 72px; min-width: 72px; padding: 0 10px; color: transparent; }
+      .language option { color: var(--ink); }
+      .language-wrap { position: relative; }
+      .language-wrap::after {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        pointer-events: none;
+        content: attr(data-label);
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 850;
+      }
+      .site-nav {
+        position: fixed;
+        inset: 78px 14px auto;
+        z-index: 50;
+        display: none;
+        align-items: stretch;
+        gap: 0;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: rgba(255,253,248,.98);
+        box-shadow: var(--shadow);
+      }
+      body.menu-open .site-nav { display: grid; }
+      .site-nav a { padding: 18px 20px; border-bottom: 1px solid var(--line); font-size: 14px; }
+      .site-nav a:last-child { border-bottom: 0; }
+
+      .hero { padding: 8px 0 38px; }
+      .hero-heading { padding: 14px 0 24px; }
+      .hero-heading h1 { max-width: 100%; font-size: clamp(43px, 13vw, 62px); line-height: .97; }
+      .hero-intro { max-width: 100%; margin-top: 18px; font-size: 14px; }
+      .hero-carousel { border-radius: 22px; }
+      .hero-slide {
+        display: flex;
+        min-height: 0;
+        align-items: flex-end;
+        padding: 0;
+        padding-top: min(79vw, 330px);
+        background: var(--paper);
+      }
+      .hero-slide::after { display: none; }
+      .hero-slide > img { z-index: 0; height: min(79vw, 330px); object-position: center; }
+      .hero-slide:nth-child(1) > img { object-position: 74% center; }
+      .hero-slide:nth-child(2) > img { object-position: 23% center; }
+      .hero-slide:nth-child(3) > img { object-position: 76% center; }
+      .hero-panel {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        min-height: 300px;
+        padding: 27px 24px 29px;
+        border: 0;
+        border-top: 1px solid var(--line);
+        border-radius: 0;
+        background: var(--paper);
+        box-shadow: none;
+        backdrop-filter: none;
+      }
+      .hero-panel .slide-count { margin-bottom: 16px; }
+      .hero-panel h2 { font-size: clamp(34px, 10vw, 44px); }
+      .hero-panel p { margin-top: 13px; }
+      .hero-actions { margin-top: 21px; }
+      .button { min-height: 47px; padding-inline: 18px; }
+      .hero-controls { padding-top: 14px; }
+      .promise-strip { margin-top: 30px; }
+      .promise { padding: 17px 15px; }
+      .promise-icon { width: 36px; height: 36px; }
+
+      .intro-section { padding: 82px 0 44px; }
+      .intro-section h2 { font-size: clamp(39px, 12vw, 55px); }
+      .intro-section > p { font-size: 15px; }
+      .occasion-section { padding: 30px 0 86px; }
+      .section-head { grid-template-columns: 1fr; gap: 18px; }
+      .section-head h2 { font-size: clamp(39px, 12vw, 55px); }
+      .occasion-grid { grid-template-columns: 1fr; }
+      .occasion-card, .occasion-card.secondary-card { min-height: 520px; padding: 26px; }
+      .occasion-card h3, .occasion-card.secondary-card h3 { font-size: 46px; }
+      .occasion-bottom { gap: 12px; }
+      .occasion-card.wedding img,
+      .occasion-card.baby img { object-position: center; }
+
+      .studio-section { padding: 84px 0 90px; }
+      .studio-rail {
+        display: flex;
+        width: calc(100% + 14px);
+        gap: 12px;
+        overflow-x: auto;
+        padding: 0 14px 13px 0;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+      }
+      .studio-rail::-webkit-scrollbar { display: none; }
+      .studio-card { min-width: min(78vw, 310px); scroll-snap-align: start; }
+      .studio-copy { min-height: 145px; }
+
+      .journey-section { padding: 88px 0; }
+      .journey-card { border-radius: 23px; }
+      .journey-image { min-height: 315px; }
+      .journey-copy { padding: 38px 25px 42px; }
+      .journey-copy h2 { font-size: 45px; }
+      .review-section { padding-bottom: 86px; }
+      .review-card { grid-template-columns: 1fr; gap: 28px; padding: 39px 25px; border-radius: 23px; }
+      .review-card .button { width: 100%; }
+      .footer-inner { grid-template-columns: 1fr 1fr; gap: 35px 20px; padding-top: 50px; }
+      .footer-brand { grid-column: 1 / -1; }
+      .footer-bottom { align-items: flex-start; flex-direction: column; gap: 8px; }
+    }
+
+    @media (max-width: 430px) {
+      .shell { width: calc(100% - 24px); }
+      .hero-heading h1 { font-size: 45px; }
+      .hero-slide { padding-top: 78vw; }
+      .hero-slide > img { height: 78vw; }
+      .hero-panel { min-height: 318px; }
+      .hero-panel h2 { font-size: 35px; }
+      .hero-actions .button { width: 100%; }
+      .promise-strip { grid-template-columns: 1fr; }
+      .promise { border-right: 0; border-bottom: 1px solid var(--line); }
+      .promise:nth-child(2) { border-right: 0; }
+      .promise:nth-child(3) { border-bottom: 1px solid var(--line); }
+      .promise:last-child { border-bottom: 0; }
+      .occasion-card, .occasion-card.secondary-card { min-height: 475px; }
+      .occasion-bottom p { font-size: 12px; }
+      .round-arrow { width: 47px; height: 47px; flex-basis: 47px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header shell">
+    <a class="brand" href="/" aria-label="InviteLab home">
+      <span class="brand-mark"><img src="/assets/home/invitelab-logo.png" alt=""></span>
+      <span>InviteLab</span>
+    </a>
+
+    <div class="nav-wrap">
+      <nav class="site-nav" id="siteNav" aria-label="Main navigation">
+        <a href="#occasions" data-i18n="navOccasions">Occasions</a>
+        <a href="#studio" data-i18n="navStudio">The studio</a>
+        <a href="#process" data-i18n="navProcess">How it works</a>
+        <a href="#reviews" data-i18n="navReviews">Reviews</a>
+      </nav>
+      <div class="language-wrap" id="languageWrap" data-label="EN">
+        <label class="sr-only" for="languageSelect">Language</label>
+        <select class="language" id="languageSelect">
+          <option value="pt">Português</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+        </select>
+      </div>
+      <button class="nav-toggle" id="navToggle" type="button" aria-controls="siteNav" aria-expanded="false" aria-label="Open menu">
+        <span aria-hidden="true">☰</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero shell" aria-labelledby="heroTitle">
+      <div class="hero-heading">
+        <div>
+          <p class="eyebrow" data-i18n="heroEyebrow">Digital invitations, thoughtfully made</p>
+          <h1 id="heroTitle" data-i18n-html="heroTitle">One beautiful story.<br><em>Every format.</em></h1>
+        </div>
+        <p class="hero-intro" data-i18n="heroIntro">From the first invitation to the event website, every piece feels unmistakably yours.</p>
+      </div>
+
+      <div class="hero-carousel" id="heroCarousel" aria-roledescription="carousel" aria-label="InviteLab services">
+        <div class="hero-track" id="carouselTrack">
+          <article class="hero-slide" aria-label="1 of 3">
+            <img src="/assets/home/showcase-wedding-suite.png" alt="Coordinated wedding invitation, envelope, laptop and phone">
+            <div class="hero-panel">
+              <span class="slide-count" data-i18n="slide1Count">01 · Complete wedding suite</span>
+              <h2 data-i18n="slide1Title">Your invitation, website and details—together.</h2>
+              <p data-i18n="slide1Copy">A coordinated experience for every screen and every guest, created from one beautiful design direction.</p>
+              <div class="hero-actions">
+                <a class="button event-link" data-event-path="/wedding" href="/wedding" data-i18n-html="startWedding">Create a wedding invitation <span class="arrow" aria-hidden="true">→</span></a>
+              </div>
+            </div>
+          </article>
+
+          <article class="hero-slide" aria-label="2 of 3">
+            <img src="/assets/home/showcase-wedding-journey.png" alt="Wedding photograph, stationery, envelope, tablet and phone">
+            <div class="hero-panel">
+              <span class="slide-count" data-i18n="slide2Count">02 · Made from your story</span>
+              <h2 data-i18n="slide2Title">From your photos to a polished celebration.</h2>
+              <p data-i18n="slide2Copy">Choose a style, share your details and let InviteLab turn them into a cohesive digital suite.</p>
+              <div class="hero-actions">
+                <a class="button event-link" data-event-path="/wedding" href="/wedding" data-i18n-html="exploreWedding">Explore wedding designs <span class="arrow" aria-hidden="true">→</span></a>
+              </div>
+            </div>
+          </article>
+
+          <article class="hero-slide" aria-label="3 of 3">
+            <img src="/assets/home/showcase-baby-suite.png" alt="Baby shower invitation, envelope, laptop and phone">
+            <div class="hero-panel">
+              <span class="slide-count" data-i18n="slide3Count">03 · Baby shower collection</span>
+              <h2 data-i18n="slide3Title">A tender welcome, made beautifully simple.</h2>
+              <p data-i18n="slide3Copy">Create a refined invitation and matching digital experience for the sweetest new beginning.</p>
+              <div class="hero-actions">
+                <a class="button event-link" data-event-path="/babyshower" href="/babyshower" data-i18n-html="startBaby">Create a baby-shower invitation <span class="arrow" aria-hidden="true">→</span></a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="hero-controls">
+        <div class="hero-dots" role="tablist" aria-label="Choose a slide">
+          <button class="hero-dot active" type="button" aria-label="Show slide 1" aria-selected="true"></button>
+          <button class="hero-dot" type="button" aria-label="Show slide 2" aria-selected="false"></button>
+          <button class="hero-dot" type="button" aria-label="Show slide 3" aria-selected="false"></button>
+        </div>
+        <div class="hero-arrows">
+          <button class="hero-arrow" id="heroPrev" type="button" aria-label="Previous slide">←</button>
+          <button class="hero-arrow" id="heroNext" type="button" aria-label="Next slide">→</button>
+        </div>
+      </div>
+
+      <div class="promise-strip" aria-label="InviteLab products">
+        <div class="promise">
+          <span class="promise-icon" aria-hidden="true">✎</span>
+          <div><strong data-i18n="promiseCanva">Editable in Canva</strong><span data-i18n="promiseCanvaCopy">Change text and finishing details</span></div>
+        </div>
+        <div class="promise">
+          <span class="promise-icon" aria-hidden="true">↓</span>
+          <div><strong data-i18n="promisePdf">Digital PDF</strong><span data-i18n="promisePdfCopy">Easy to save and share</span></div>
+        </div>
+        <div class="promise">
+          <span class="promise-icon" aria-hidden="true">◎</span>
+          <div><strong data-i18n="promiseWebsite">Event website</strong><span data-i18n="promiseWebsiteCopy">Beautiful on mobile and desktop</span></div>
+        </div>
+        <div class="promise">
+          <span class="promise-icon" aria-hidden="true">♡</span>
+          <div><strong data-i18n="promisePersonal">Personalised for you</strong><span data-i18n="promisePersonalCopy">Your names, colours and story</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="intro-section shell">
+      <p class="eyebrow" data-i18n="introEyebrow">More than an invitation</p>
+      <h2 data-i18n="introTitle">A complete visual story for your most meaningful moments.</h2>
+      <p data-i18n="introCopy">InviteLab brings together invitation design, editable templates, digital delivery and a matching event website—without the complicated process.</p>
+    </section>
+
+    <section class="occasion-section shell" id="occasions">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow" data-i18n="occasionEyebrow">Choose your celebration</p>
+          <h2 data-i18n="occasionTitle">Begin with the moment that is yours.</h2>
+        </div>
+        <p data-i18n="occasionCopy">Each path guides you through the right details, styles and products for your event.</p>
+      </div>
+
+      <div class="occasion-grid">
+        <a class="occasion-card wedding event-link" data-event-path="/wedding" href="/wedding">
+          <img src="/assets/home/showcase-wedding-journey.png" alt="">
+          <div class="occasion-content">
+            <span class="occasion-index" data-i18n="weddingIndex">01 · Wedding</span>
+            <h3 data-i18n-html="weddingTitle">Your wedding,<br>beautifully told.</h3>
+            <div class="occasion-bottom">
+              <p data-i18n="weddingCopy">Design the invitation, prepare the website and bring every important detail into one elegant experience.</p>
+              <span class="round-arrow" aria-hidden="true">↗</span>
+            </div>
+          </div>
+        </a>
+
+        <a class="occasion-card secondary-card baby event-link" data-event-path="/babyshower" href="/babyshower">
+          <img src="/assets/home/showcase-baby-suite.png" alt="">
+          <div class="occasion-content">
+            <span class="occasion-index" data-i18n="babyIndex">02 · Baby shower</span>
+            <h3 data-i18n-html="babyTitle">A beautiful<br>new beginning.</h3>
+            <div class="occasion-bottom">
+              <p data-i18n="babyCopy">Create a warm invitation suite to welcome the little person everyone already loves.</p>
+              <span class="round-arrow" aria-hidden="true">↗</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="studio-section" id="studio">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow" data-i18n="studioEyebrow">Inside the InviteLab studio</p>
+            <h2 data-i18n="studioTitle">A simple process. A polished result.</h2>
+          </div>
+          <p data-i18n="studioIntro">Choose your direction once. We carry it through the invitation, envelope, website and final delivery.</p>
+        </div>
+
+        <div class="studio-rail">
+          <article class="studio-card">
+            <div class="studio-image"><img src="/assets/home/studio-styles.png" alt="Invitation style selection"></div>
+            <div class="studio-copy">
+              <h3 data-i18n="studio1Title">Choose a style</h3>
+              <p data-i18n="studio1Copy">Start with a curated template or request a personalised creation.</p>
+            </div>
+          </article>
+          <article class="studio-card">
+            <div class="studio-image"><img src="/assets/home/studio-builder.png" alt="InviteLab invitation builder"></div>
+            <div class="studio-copy">
+              <h3 data-i18n="studio2Title">Share the details</h3>
+              <p data-i18n="studio2Copy">Add names, date, venue, photos and the parts you want guests to see.</p>
+            </div>
+          </article>
+          <article class="studio-card">
+            <div class="studio-image"><img src="/assets/home/studio-progress.png" alt="Invitation generation in progress"></div>
+            <div class="studio-copy">
+              <h3 data-i18n="studio3Title">Watch it take shape</h3>
+              <p data-i18n="studio3Copy">Your chosen direction becomes a coordinated invitation and envelope.</p>
+            </div>
+          </article>
+          <article class="studio-card">
+            <div class="studio-image"><img src="/assets/home/studio-website.png" alt="Generated wedding website"></div>
+            <div class="studio-copy">
+              <h3 data-i18n="studio4Title">Share the experience</h3>
+              <p data-i18n="studio4Copy">Receive the final pieces and a responsive website ready for your guests.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="journey-section shell" id="process">
+      <div class="journey-card">
+        <div class="journey-copy">
+          <p class="eyebrow" data-i18n="journeyEyebrow">One design language</p>
+          <h2 data-i18n="journeyTitle">Made to look beautiful everywhere.</h2>
+          <p data-i18n="journeyCopy">Your invitation is more than a single image. The same colours, atmosphere and details continue into the envelope, PDF and event website.</p>
+          <a class="button event-link" data-event-path="/wedding" href="/wedding" data-i18n-html="journeyButton">Start your project <span class="arrow" aria-hidden="true">→</span></a>
+        </div>
+        <div class="journey-image">
+          <img src="/assets/home/showcase-wedding-suite.png" alt="A complete coordinated wedding invitation suite">
+        </div>
+      </div>
+    </section>
+
+    <section class="review-section shell" id="reviews">
+      <div class="review-card">
+        <div>
+          <p class="eyebrow" data-i18n="reviewEyebrow">A note from InviteLab</p>
+          <h2 data-i18n="reviewTitle">Your words help our small studio grow.</h2>
+          <p data-i18n="reviewCopy">If InviteLab helped make your celebration feel more special, thank you for sharing your experience on Etsy. Every review truly means a lot to us.</p>
+        </div>
+        <a class="button" href="https://www.etsy.com/your/purchases" target="_blank" rel="noopener noreferrer" data-i18n-html="reviewButton">Review on Etsy <span class="arrow" aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner shell">
+      <div class="footer-brand">
+        <a class="brand" href="/" aria-label="InviteLab home">
+          <span class="brand-mark"><img src="/assets/home/invitelab-logo.png" alt=""></span>
+          <span>InviteLab</span>
+        </a>
+        <p data-i18n="footerCopy">Personalised digital invitations and event websites, created with care for the moments worth remembering.</p>
+      </div>
+      <div class="footer-column">
+        <h3 data-i18n="footerCreate">Create</h3>
+        <a class="event-link" data-event-path="/wedding" href="/wedding" data-i18n="footerWedding">Wedding</a>
+        <a class="event-link" data-event-path="/babyshower" href="/babyshower" data-i18n="footerBaby">Baby shower</a>
+      </div>
+      <div class="footer-column">
+        <h3 data-i18n="footerDiscover">Discover</h3>
+        <a href="#studio" data-i18n="footerStudio">Our process</a>
+        <a href="https://www.etsy.com/your/purchases" target="_blank" rel="noopener noreferrer" data-i18n="footerEtsy">Etsy reviews</a>
+      </div>
+    </div>
+    <div class="footer-bottom shell">
+      <span>© <span id="year"></span> InviteLab</span>
+      <span data-i18n="footerMade">Made with care in Portugal.</span>
+    </div>
+  </footer>
+
+  <script>
+    const translations = {
+      en: {
+        navOccasions: "Occasions", navStudio: "The studio", navProcess: "How it works", navReviews: "Reviews",
+        heroEyebrow: "Digital invitations, thoughtfully made", heroTitle: "One beautiful story.<br><em>Every format.</em>",
+        heroIntro: "From the first invitation to the event website, every piece feels unmistakably yours.",
+        slide1Count: "01 · Complete wedding suite", slide1Title: "Your invitation, website and details—together.",
+        slide1Copy: "A coordinated experience for every screen and every guest, created from one beautiful design direction.",
+        startWedding: "Create a wedding invitation <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        slide2Count: "02 · Made from your story", slide2Title: "From your photos to a polished celebration.",
+        slide2Copy: "Choose a style, share your details and let InviteLab turn them into a cohesive digital suite.",
+        exploreWedding: "Explore wedding designs <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        slide3Count: "03 · Baby shower collection", slide3Title: "A tender welcome, made beautifully simple.",
+        slide3Copy: "Create a refined invitation and matching digital experience for the sweetest new beginning.",
+        startBaby: "Create a baby-shower invitation <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        promiseCanva: "Editable in Canva", promiseCanvaCopy: "Change text and finishing details",
+        promisePdf: "Digital PDF", promisePdfCopy: "Easy to save and share",
+        promiseWebsite: "Event website", promiseWebsiteCopy: "Beautiful on mobile and desktop",
+        promisePersonal: "Personalised for you", promisePersonalCopy: "Your names, colours and story",
+        introEyebrow: "More than an invitation", introTitle: "A complete visual story for your most meaningful moments.",
+        introCopy: "InviteLab brings together invitation design, editable templates, digital delivery and a matching event website—without the complicated process.",
+        occasionEyebrow: "Choose your celebration", occasionTitle: "Begin with the moment that is yours.",
+        occasionCopy: "Each path guides you through the right details, styles and products for your event.",
+        weddingIndex: "01 · Wedding", weddingTitle: "Your wedding,<br>beautifully told.",
+        weddingCopy: "Design the invitation, prepare the website and bring every important detail into one elegant experience.",
+        babyIndex: "02 · Baby shower", babyTitle: "A beautiful<br>new beginning.",
+        babyCopy: "Create a warm invitation suite to welcome the little person everyone already loves.",
+        studioEyebrow: "Inside the InviteLab studio", studioTitle: "A simple process. A polished result.",
+        studioIntro: "Choose your direction once. We carry it through the invitation, envelope, website and final delivery.",
+        studio1Title: "Choose a style", studio1Copy: "Start with a curated template or request a personalised creation.",
+        studio2Title: "Share the details", studio2Copy: "Add names, date, venue, photos and the parts you want guests to see.",
+        studio3Title: "Watch it take shape", studio3Copy: "Your chosen direction becomes a coordinated invitation and envelope.",
+        studio4Title: "Share the experience", studio4Copy: "Receive the final pieces and a responsive website ready for your guests.",
+        journeyEyebrow: "One design language", journeyTitle: "Made to look beautiful everywhere.",
+        journeyCopy: "Your invitation is more than a single image. The same colours, atmosphere and details continue into the envelope, PDF and event website.",
+        journeyButton: "Start your project <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        reviewEyebrow: "A note from InviteLab", reviewTitle: "Your words help our small studio grow.",
+        reviewCopy: "If InviteLab helped make your celebration feel more special, thank you for sharing your experience on Etsy. Every review truly means a lot to us.",
+        reviewButton: "Review on Etsy <span class=\"arrow\" aria-hidden=\"true\">↗</span>",
+        footerCopy: "Personalised digital invitations and event websites, created with care for the moments worth remembering.",
+        footerCreate: "Create", footerWedding: "Wedding", footerBaby: "Baby shower", footerDiscover: "Discover",
+        footerStudio: "Our process", footerEtsy: "Etsy reviews", footerMade: "Made with care in Portugal."
+      },
+      pt: {
+        navOccasions: "Celebrações", navStudio: "O estúdio", navProcess: "Como funciona", navReviews: "Avaliações",
+        heroEyebrow: "Convites digitais criados com cuidado", heroTitle: "Uma história bonita.<br><em>Em todos os formatos.</em>",
+        heroIntro: "Do primeiro convite ao website do evento, cada elemento tem a vossa identidade.",
+        slide1Count: "01 · Conjunto de casamento", slide1Title: "Convite, website e detalhes—tudo em harmonia.",
+        slide1Copy: "Uma experiência coordenada para todos os ecrãs e convidados, criada a partir de uma única direção visual.",
+        startWedding: "Criar convite de casamento <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        slide2Count: "02 · Feito a partir da vossa história", slide2Title: "Das vossas fotografias a uma celebração elegante.",
+        slide2Copy: "Escolham um estilo, partilhem os detalhes e a InviteLab transforma tudo num conjunto digital coerente.",
+        exploreWedding: "Explorar designs de casamento <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        slide3Count: "03 · Coleção baby shower", slide3Title: "Uma doce chegada, criada de forma simples.",
+        slide3Copy: "Criem um convite elegante e uma experiência digital a condizer para este novo começo.",
+        startBaby: "Criar convite de baby shower <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        promiseCanva: "Editável no Canva", promiseCanvaCopy: "Altere textos e detalhes finais",
+        promisePdf: "PDF digital", promisePdfCopy: "Fácil de guardar e partilhar",
+        promiseWebsite: "Website do evento", promiseWebsiteCopy: "Bonito no telemóvel e computador",
+        promisePersonal: "Personalizado para vocês", promisePersonalCopy: "Os vossos nomes, cores e história",
+        introEyebrow: "Mais do que um convite", introTitle: "Uma história visual completa para os momentos mais importantes.",
+        introCopy: "A InviteLab reúne o design do convite, templates editáveis, entrega digital e um website do evento a condizer—sem complicações.",
+        occasionEyebrow: "Escolham a celebração", occasionTitle: "Comecem pelo momento que é vosso.",
+        occasionCopy: "Cada caminho apresenta os detalhes, estilos e produtos certos para o vosso evento.",
+        weddingIndex: "01 · Casamento", weddingTitle: "O vosso casamento,<br>contado com beleza.",
+        weddingCopy: "Criem o convite, preparem o website e reúnam cada detalhe importante numa experiência elegante.",
+        babyIndex: "02 · Baby shower", babyTitle: "Um bonito<br>novo começo.",
+        babyCopy: "Criem um conjunto acolhedor para receber o bebé que todos já adoram.",
+        studioEyebrow: "Dentro do estúdio InviteLab", studioTitle: "Um processo simples. Um resultado elegante.",
+        studioIntro: "Escolham uma direção. Nós aplicamo-la ao convite, envelope, website e entrega final.",
+        studio1Title: "Escolher um estilo", studio1Copy: "Comecem com um template selecionado ou peçam uma criação personalizada.",
+        studio2Title: "Partilhar os detalhes", studio2Copy: "Adicionem nomes, data, local, fotografias e as secções que os convidados devem ver.",
+        studio3Title: "Ver o projeto ganhar forma", studio3Copy: "A direção escolhida transforma-se num convite e envelope coordenados.",
+        studio4Title: "Partilhar a experiência", studio4Copy: "Recebam os ficheiros finais e um website responsivo pronto para os convidados.",
+        journeyEyebrow: "Uma só linguagem visual", journeyTitle: "Criado para ficar bonito em todo o lado.",
+        journeyCopy: "O vosso convite é mais do que uma imagem. As mesmas cores, ambiente e detalhes continuam no envelope, PDF e website.",
+        journeyButton: "Começar o projeto <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        reviewEyebrow: "Uma nota da InviteLab", reviewTitle: "As vossas palavras ajudam o nosso pequeno estúdio a crescer.",
+        reviewCopy: "Se a InviteLab tornou a vossa celebração ainda mais especial, obrigado por partilharem a experiência no Etsy. Cada avaliação significa muito para nós.",
+        reviewButton: "Avaliar no Etsy <span class=\"arrow\" aria-hidden=\"true\">↗</span>",
+        footerCopy: "Convites digitais personalizados e websites de eventos, criados com cuidado para momentos inesquecíveis.",
+        footerCreate: "Criar", footerWedding: "Casamento", footerBaby: "Baby shower", footerDiscover: "Descobrir",
+        footerStudio: "O nosso processo", footerEtsy: "Avaliações Etsy", footerMade: "Criado com cuidado em Portugal."
+      },
+      es: {
+        navOccasions: "Celebraciones", navStudio: "El estudio", navProcess: "Cómo funciona", navReviews: "Reseñas",
+        heroEyebrow: "Invitaciones digitales hechas con mimo", heroTitle: "Una historia preciosa.<br><em>En todos los formatos.</em>",
+        heroIntro: "Desde la primera invitación hasta la web del evento, cada pieza se siente completamente vuestra.",
+        slide1Count: "01 · Conjunto de boda completo", slide1Title: "Invitación, web y detalles—todo en armonía.",
+        slide1Copy: "Una experiencia coordinada para cada pantalla e invitado, creada desde una única dirección visual.",
+        startWedding: "Crear invitación de boda <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        slide2Count: "02 · Hecho desde vuestra historia", slide2Title: "De vuestras fotos a una celebración impecable.",
+        slide2Copy: "Elegid un estilo, compartid los detalles y dejad que InviteLab cree un conjunto digital coherente.",
+        exploreWedding: "Explorar diseños de boda <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        slide3Count: "03 · Colección baby shower", slide3Title: "Una tierna bienvenida, hecha sencilla y hermosa.",
+        slide3Copy: "Cread una invitación elegante y una experiencia digital a juego para este dulce comienzo.",
+        startBaby: "Crear invitación de baby shower <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        promiseCanva: "Editable en Canva", promiseCanvaCopy: "Cambia textos y detalles finales",
+        promisePdf: "PDF digital", promisePdfCopy: "Fácil de guardar y compartir",
+        promiseWebsite: "Web del evento", promiseWebsiteCopy: "Perfecta en móvil y ordenador",
+        promisePersonal: "Personalizado para vosotros", promisePersonalCopy: "Vuestros nombres, colores e historia",
+        introEyebrow: "Más que una invitación", introTitle: "Una historia visual completa para vuestros momentos más importantes.",
+        introCopy: "InviteLab reúne diseño de invitaciones, plantillas editables, entrega digital y una web a juego—sin complicaciones.",
+        occasionEyebrow: "Elegid vuestra celebración", occasionTitle: "Empezad por el momento que es vuestro.",
+        occasionCopy: "Cada camino os guía por los detalles, estilos y productos adecuados para vuestro evento.",
+        weddingIndex: "01 · Boda", weddingTitle: "Vuestra boda,<br>contada con belleza.",
+        weddingCopy: "Diseñad la invitación, preparad la web y reunid cada detalle importante en una experiencia elegante.",
+        babyIndex: "02 · Baby shower", babyTitle: "Un precioso<br>nuevo comienzo.",
+        babyCopy: "Cread un conjunto cálido para dar la bienvenida a la personita que todos ya quieren.",
+        studioEyebrow: "Dentro del estudio InviteLab", studioTitle: "Un proceso sencillo. Un resultado impecable.",
+        studioIntro: "Elegid una dirección. Nosotros la aplicamos a la invitación, el sobre, la web y la entrega final.",
+        studio1Title: "Elegir un estilo", studio1Copy: "Empezad con una plantilla seleccionada o pedid una creación personalizada.",
+        studio2Title: "Compartir los detalles", studio2Copy: "Añadid nombres, fecha, lugar, fotos y las secciones que verán los invitados.",
+        studio3Title: "Ver cómo cobra vida", studio3Copy: "La dirección elegida se convierte en una invitación y un sobre coordinados.",
+        studio4Title: "Compartir la experiencia", studio4Copy: "Recibid las piezas finales y una web responsive lista para vuestros invitados.",
+        journeyEyebrow: "Un solo lenguaje visual", journeyTitle: "Creado para verse bonito en todas partes.",
+        journeyCopy: "Vuestra invitación es más que una imagen. Los mismos colores, ambiente y detalles continúan en el sobre, el PDF y la web.",
+        journeyButton: "Empezar el proyecto <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        reviewEyebrow: "Una nota de InviteLab", reviewTitle: "Vuestras palabras ayudan a crecer a nuestro pequeño estudio.",
+        reviewCopy: "Si InviteLab hizo vuestra celebración aún más especial, gracias por compartir la experiencia en Etsy. Cada reseña significa mucho para nosotros.",
+        reviewButton: "Reseñar en Etsy <span class=\"arrow\" aria-hidden=\"true\">↗</span>",
+        footerCopy: "Invitaciones digitales personalizadas y webs para eventos, creadas con mimo para momentos inolvidables.",
+        footerCreate: "Crear", footerWedding: "Boda", footerBaby: "Baby shower", footerDiscover: "Descubrir",
+        footerStudio: "Nuestro proceso", footerEtsy: "Reseñas de Etsy", footerMade: "Creado con cariño en Portugal."
+      },
+      fr: {
+        navOccasions: "Événements", navStudio: "Le studio", navProcess: "Comment ça marche", navReviews: "Avis",
+        heroEyebrow: "Invitations numériques créées avec soin", heroTitle: "Une belle histoire.<br><em>Dans tous les formats.</em>",
+        heroIntro: "De la première invitation au site de l’événement, chaque élément vous ressemble.",
+        slide1Count: "01 · Suite de mariage complète", slide1Title: "Invitation, site et détails—en parfaite harmonie.",
+        slide1Copy: "Une expérience coordonnée pour chaque écran et chaque invité, issue d’une seule direction visuelle.",
+        startWedding: "Créer une invitation de mariage <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        slide2Count: "02 · Créé à partir de votre histoire", slide2Title: "De vos photos à une célébration raffinée.",
+        slide2Copy: "Choisissez un style, partagez vos détails et InviteLab les transforme en une suite numérique cohérente.",
+        exploreWedding: "Découvrir les modèles mariage <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        slide3Count: "03 · Collection baby shower", slide3Title: "Une douce bienvenue, simplement magnifique.",
+        slide3Copy: "Créez une invitation raffinée et une expérience numérique assortie pour ce nouveau départ.",
+        startBaby: "Créer une invitation baby shower <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        promiseCanva: "Modifiable sur Canva", promiseCanvaCopy: "Modifiez le texte et les finitions",
+        promisePdf: "PDF numérique", promisePdfCopy: "Facile à enregistrer et partager",
+        promiseWebsite: "Site de l’événement", promiseWebsiteCopy: "Élégant sur mobile et ordinateur",
+        promisePersonal: "Personnalisé pour vous", promisePersonalCopy: "Vos noms, couleurs et histoire",
+        introEyebrow: "Plus qu’une invitation", introTitle: "Une histoire visuelle complète pour vos moments les plus précieux.",
+        introCopy: "InviteLab réunit le design, les modèles modifiables, la livraison numérique et un site assorti—sans complexité.",
+        occasionEyebrow: "Choisissez votre célébration", occasionTitle: "Commencez par le moment qui est le vôtre.",
+        occasionCopy: "Chaque parcours vous guide vers les détails, styles et produits adaptés à votre événement.",
+        weddingIndex: "01 · Mariage", weddingTitle: "Votre mariage,<br>raconté avec élégance.",
+        weddingCopy: "Créez l’invitation, préparez le site et rassemblez chaque détail important dans une expérience raffinée.",
+        babyIndex: "02 · Baby shower", babyTitle: "Un merveilleux<br>nouveau départ.",
+        babyCopy: "Créez une suite chaleureuse pour accueillir ce petit être déjà tant aimé.",
+        studioEyebrow: "Dans le studio InviteLab", studioTitle: "Un processus simple. Un résultat raffiné.",
+        studioIntro: "Choisissez une direction. Nous la déclinons sur l’invitation, l’enveloppe, le site et la livraison finale.",
+        studio1Title: "Choisir un style", studio1Copy: "Commencez par un modèle sélectionné ou demandez une création personnalisée.",
+        studio2Title: "Partager les détails", studio2Copy: "Ajoutez noms, date, lieu, photos et les sections destinées aux invités.",
+        studio3Title: "Voir le projet prendre vie", studio3Copy: "La direction choisie devient une invitation et une enveloppe coordonnées.",
+        studio4Title: "Partager l’expérience", studio4Copy: "Recevez les éléments finaux et un site responsive prêt pour vos invités.",
+        journeyEyebrow: "Un seul langage visuel", journeyTitle: "Créé pour être beau partout.",
+        journeyCopy: "Votre invitation est plus qu’une image. Les mêmes couleurs, l’atmosphère et les détails continuent sur l’enveloppe, le PDF et le site.",
+        journeyButton: "Commencer votre projet <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        reviewEyebrow: "Un mot d’InviteLab", reviewTitle: "Vos mots aident notre petit studio à grandir.",
+        reviewCopy: "Si InviteLab a rendu votre célébration encore plus spéciale, merci de partager votre expérience sur Etsy. Chaque avis compte énormément pour nous.",
+        reviewButton: "Laisser un avis Etsy <span class=\"arrow\" aria-hidden=\"true\">↗</span>",
+        footerCopy: "Invitations numériques personnalisées et sites événementiels, créés avec soin pour les moments inoubliables.",
+        footerCreate: "Créer", footerWedding: "Mariage", footerBaby: "Baby shower", footerDiscover: "Découvrir",
+        footerStudio: "Notre processus", footerEtsy: "Avis Etsy", footerMade: "Créé avec soin au Portugal."
+      },
+      de: {
+        navOccasions: "Anlässe", navStudio: "Das Studio", navProcess: "So funktioniert es", navReviews: "Bewertungen",
+        heroEyebrow: "Digitale Einladungen mit Sorgfalt gestaltet", heroTitle: "Eine wunderschöne Geschichte.<br><em>In jedem Format.</em>",
+        heroIntro: "Von der ersten Einladung bis zur Event-Website fühlt sich jedes Element unverkennbar nach euch an.",
+        slide1Count: "01 · Komplettes Hochzeitsset", slide1Title: "Einladung, Website und Details—perfekt vereint.",
+        slide1Copy: "Ein abgestimmtes Erlebnis für jeden Bildschirm und jeden Gast, gestaltet aus einer visuellen Richtung.",
+        startWedding: "Hochzeitseinladung erstellen <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        slide2Count: "02 · Aus eurer Geschichte gestaltet", slide2Title: "Von euren Fotos zu einem stilvollen Fest.",
+        slide2Copy: "Wählt einen Stil, teilt eure Details und InviteLab verwandelt alles in ein harmonisches digitales Set.",
+        exploreWedding: "Hochzeitsdesigns entdecken <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        slide3Count: "03 · Babyshower-Kollektion", slide3Title: "Ein zarter Empfang, wunderschön und einfach.",
+        slide3Copy: "Gestaltet eine elegante Einladung und ein passendes digitales Erlebnis für diesen neuen Anfang.",
+        startBaby: "Babyshower-Einladung erstellen <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        promiseCanva: "In Canva bearbeitbar", promiseCanvaCopy: "Texte und Details anpassen",
+        promisePdf: "Digitales PDF", promisePdfCopy: "Einfach speichern und teilen",
+        promiseWebsite: "Event-Website", promiseWebsiteCopy: "Schön auf Handy und Computer",
+        promisePersonal: "Für euch personalisiert", promisePersonalCopy: "Eure Namen, Farben und Geschichte",
+        introEyebrow: "Mehr als eine Einladung", introTitle: "Eine vollständige visuelle Geschichte für eure schönsten Momente.",
+        introCopy: "InviteLab vereint Einladungsdesign, bearbeitbare Vorlagen, digitale Lieferung und eine passende Event-Website—ganz unkompliziert.",
+        occasionEyebrow: "Wählt euren Anlass", occasionTitle: "Beginnt mit dem Moment, der euch gehört.",
+        occasionCopy: "Jeder Weg führt euch durch die passenden Details, Stile und Produkte für euren Anlass.",
+        weddingIndex: "01 · Hochzeit", weddingTitle: "Eure Hochzeit,<br>wunderschön erzählt.",
+        weddingCopy: "Gestaltet die Einladung, bereitet die Website vor und vereint alle wichtigen Details in einem eleganten Erlebnis.",
+        babyIndex: "02 · Babyshower", babyTitle: "Ein wunderschöner<br>neuer Anfang.",
+        babyCopy: "Gestaltet ein liebevolles Set für den kleinen Menschen, den schon jetzt alle lieben.",
+        studioEyebrow: "Im InviteLab-Studio", studioTitle: "Ein einfacher Prozess. Ein stilvolles Ergebnis.",
+        studioIntro: "Wählt eine Richtung. Wir übertragen sie auf Einladung, Umschlag, Website und finale Lieferung.",
+        studio1Title: "Einen Stil wählen", studio1Copy: "Startet mit einer kuratierten Vorlage oder wünscht euch eine persönliche Kreation.",
+        studio2Title: "Details teilen", studio2Copy: "Ergänzt Namen, Datum, Ort, Fotos und die Bereiche, die eure Gäste sehen sollen.",
+        studio3Title: "Zusehen, wie alles entsteht", studio3Copy: "Eure gewählte Richtung wird zu einer abgestimmten Einladung und einem Umschlag.",
+        studio4Title: "Das Erlebnis teilen", studio4Copy: "Erhaltet die finalen Dateien und eine responsive Website für eure Gäste.",
+        journeyEyebrow: "Eine visuelle Sprache", journeyTitle: "Gemacht, um überall schön auszusehen.",
+        journeyCopy: "Eure Einladung ist mehr als ein Bild. Dieselben Farben, dieselbe Atmosphäre und dieselben Details finden sich in Umschlag, PDF und Website wieder.",
+        journeyButton: "Projekt starten <span class=\"arrow\" aria-hidden=\"true\">→</span>",
+        reviewEyebrow: "Eine Nachricht von InviteLab", reviewTitle: "Eure Worte helfen unserem kleinen Studio zu wachsen.",
+        reviewCopy: "Wenn InviteLab eure Feier noch besonderer gemacht hat, danken wir euch für eure Bewertung auf Etsy. Jede Rückmeldung bedeutet uns sehr viel.",
+        reviewButton: "Auf Etsy bewerten <span class=\"arrow\" aria-hidden=\"true\">↗</span>",
+        footerCopy: "Personalisierte digitale Einladungen und Event-Websites, mit Sorgfalt für unvergessliche Momente gestaltet.",
+        footerCreate: "Erstellen", footerWedding: "Hochzeit", footerBaby: "Babyshower", footerDiscover: "Entdecken",
+        footerStudio: "Unser Prozess", footerEtsy: "Etsy-Bewertungen", footerMade: "Mit Sorgfalt in Portugal gestaltet."
+      }
+    };
+
+    const languageSelect = document.getElementById("languageSelect");
+    const languageWrap = document.getElementById("languageWrap");
+    const navToggle = document.getElementById("navToggle");
+    const navLinks = document.querySelectorAll(".site-nav a");
+    const track = document.getElementById("carouselTrack");
+    const carousel = document.getElementById("heroCarousel");
+    const slides = [...track.children];
+    const dots = [...document.querySelectorAll(".hero-dot")];
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let currentSlide = 0;
+    let carouselTimer = null;
+    let pointerStart = null;
+
+    function normaliseLanguage(value) {
+      const short = String(value || "").toLowerCase().split("-")[0];
+      return translations[short] ? short : "en";
+    }
+
+    function setLanguage(language, pushState = true) {
+      const lang = normaliseLanguage(language);
+      const copy = translations[lang];
+      document.documentElement.lang = lang === "en" ? "en-GB" : lang;
+      languageSelect.value = lang;
+      languageWrap.dataset.label = lang.toUpperCase();
+
+      document.querySelectorAll("[data-i18n]").forEach(element => {
+        const value = copy[element.dataset.i18n];
+        if (value !== undefined) element.textContent = value;
+      });
+      document.querySelectorAll("[data-i18n-html]").forEach(element => {
+        const value = copy[element.dataset.i18nHtml];
+        if (value !== undefined) element.innerHTML = value;
+      });
+
+      for (const element of document.querySelectorAll(".event-link")) {
+        const path = element.dataset.eventPath;
+        element.href = `${path}?lang=${encodeURIComponent(lang)}`;
+      }
+
+      if (pushState) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("lang", lang);
+        history.replaceState({}, "", url);
+      }
+    }
+
+    function goToSlide(index, userInitiated = false) {
+      currentSlide = (index + slides.length) % slides.length;
+      track.style.transform = `translateX(-${currentSlide * 100}%)`;
+      dots.forEach((dot, dotIndex) => {
+        const active = dotIndex === currentSlide;
+        dot.classList.toggle("active", active);
+        dot.setAttribute("aria-selected", String(active));
+      });
+      if (userInitiated) restartCarousel();
+    }
+
+    function restartCarousel() {
+      window.clearInterval(carouselTimer);
+      if (!reduceMotion.matches) {
+        carouselTimer = window.setInterval(() => goToSlide(currentSlide + 1), 6500);
+      }
+    }
+
+    languageSelect.addEventListener("change", event => setLanguage(event.target.value));
+    navToggle.addEventListener("click", () => {
+      const open = document.body.classList.toggle("menu-open");
+      navToggle.setAttribute("aria-expanded", String(open));
+      navToggle.querySelector("span").textContent = open ? "×" : "☰";
+    });
+    navLinks.forEach(link => link.addEventListener("click", () => {
+      document.body.classList.remove("menu-open");
+      navToggle.setAttribute("aria-expanded", "false");
+      navToggle.querySelector("span").textContent = "☰";
+    }));
+
+    dots.forEach((dot, index) => dot.addEventListener("click", () => goToSlide(index, true)));
+    document.getElementById("heroPrev").addEventListener("click", () => goToSlide(currentSlide - 1, true));
+    document.getElementById("heroNext").addEventListener("click", () => goToSlide(currentSlide + 1, true));
+
+    carousel.addEventListener("pointerdown", event => {
+      pointerStart = { x: event.clientX, y: event.clientY };
+    });
+    carousel.addEventListener("pointerup", event => {
+      if (!pointerStart) return;
+      const deltaX = event.clientX - pointerStart.x;
+      const deltaY = event.clientY - pointerStart.y;
+      pointerStart = null;
+      if (Math.abs(deltaX) > 52 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        goToSlide(currentSlide + (deltaX < 0 ? 1 : -1), true);
+      }
+    });
+    carousel.addEventListener("pointercancel", () => { pointerStart = null; });
+    carousel.addEventListener("mouseenter", () => window.clearInterval(carouselTimer));
+    carousel.addEventListener("mouseleave", restartCarousel);
+    carousel.addEventListener("focusin", () => window.clearInterval(carouselTimer));
+    carousel.addEventListener("focusout", restartCarousel);
+    document.addEventListener("keydown", event => {
+      if (event.key === "ArrowLeft") goToSlide(currentSlide - 1, true);
+      if (event.key === "ArrowRight") goToSlide(currentSlide + 1, true);
+    });
+    reduceMotion.addEventListener?.("change", restartCarousel);
+
+    const requestedLanguage = new URL(window.location.href).searchParams.get("lang") || navigator.language;
+    setLanguage(requestedLanguage, false);
+    goToSlide(0);
+    restartCarousel();
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

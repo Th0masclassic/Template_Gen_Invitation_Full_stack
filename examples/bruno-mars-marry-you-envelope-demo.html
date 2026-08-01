@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#616b52" />
+    <title>Envelope musical — Marry You</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,500&family=Montserrat:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --envelope: #616b52;
+        --envelope-dark: #4f5843;
+        --envelope-light: #747f64;
+        --gold: #c99355;
+        --ink: #293126;
+        --paper: #f6f2ea;
+        --white: #fffefb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        margin: 0;
+      }
+
+      body {
+        overflow: hidden;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "Montserrat", sans-serif;
+      }
+
+      button,
+      a {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .demo {
+        position: relative;
+        min-height: 100svh;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      /* The existing-style photo introduction revealed after the envelope opens. */
+      .photo-intro {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        opacity: 0;
+        background:
+          radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.94), transparent 36%),
+          linear-gradient(145deg, #e8e4d7 0%, #f8f5ee 44%, #d9dece 100%);
+        transition: opacity 700ms ease;
+      }
+
+      .photo-intro::before {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(58, 66, 52, 0.12) 0.7px, transparent 0.7px);
+        background-size: 5px 5px;
+        content: "";
+        opacity: 0.35;
+        pointer-events: none;
+      }
+
+      .photo-intro.is-visible {
+        opacity: 1;
+      }
+
+      .names {
+        position: absolute;
+        z-index: 2;
+        top: clamp(28px, 7vh, 72px);
+        left: 50%;
+        width: 100%;
+        transform: translateX(-50%);
+        text-align: center;
+      }
+
+      .names p {
+        margin: 0 0 8px;
+        color: #77806e;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.34em;
+        text-transform: uppercase;
+      }
+
+      .names h1 {
+        margin: 0;
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(50px, 8vw, 92px);
+        font-style: italic;
+        font-weight: 400;
+        line-height: 0.85;
+      }
+
+      .names span {
+        display: block;
+        margin-top: 15px;
+        color: #87907d;
+        font-family: "Cormorant Garamond", serif;
+        font-size: 16px;
+        letter-spacing: 0.16em;
+      }
+
+      .photo {
+        --rise-y: -12vh;
+        --rotation: -4deg;
+        position: absolute;
+        z-index: 4;
+        bottom: -54vh;
+        left: 50%;
+        width: clamp(160px, 25vw, 280px);
+        aspect-ratio: 3 / 4;
+        padding: 8px 8px 34px;
+        transform: translateX(-50%) rotate(var(--rotation));
+        background: #fff;
+        box-shadow: 0 20px 50px rgba(37, 45, 35, 0.23);
+        opacity: 0;
+      }
+
+      .photo img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+
+      .photo-one {
+        --rise-y: -66vh;
+        --rotation: -7deg;
+        margin-left: -20vw;
+      }
+
+      .photo-two {
+        --rise-y: -53vh;
+        --rotation: 4deg;
+        z-index: 5;
+      }
+
+      .photo-three {
+        --rise-y: -63vh;
+        --rotation: 8deg;
+        margin-left: 20vw;
+      }
+
+      .photo-intro.is-visible .photo {
+        animation: photo-rise 2.4s cubic-bezier(0.18, 0.76, 0.22, 1) forwards;
+      }
+
+      .photo-intro.is-visible .photo-two {
+        animation-delay: 180ms;
+      }
+
+      .photo-intro.is-visible .photo-three {
+        animation-delay: 340ms;
+      }
+
+      @keyframes photo-rise {
+        0% {
+          opacity: 0;
+          transform: translate(-50%, 0) rotate(0);
+        }
+        18% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 1;
+          transform: translate(-50%, var(--rise-y)) rotate(var(--rotation));
+        }
+      }
+
+      .inner-envelope {
+        position: absolute;
+        z-index: 8;
+        right: -4%;
+        bottom: -7vh;
+        left: -4%;
+        height: 36vh;
+        min-height: 250px;
+        overflow: hidden;
+        background: var(--envelope);
+        box-shadow: 0 -16px 45px rgba(45, 52, 41, 0.12);
+        clip-path: polygon(0 12%, 50% 43%, 100% 12%, 100% 100%, 0 100%);
+      }
+
+      .inner-envelope::before,
+      .inner-envelope::after {
+        position: absolute;
+        bottom: -10%;
+        width: 70%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.035);
+        content: "";
+      }
+
+      .inner-envelope::before {
+        left: -22%;
+        transform: rotate(31deg);
+      }
+
+      .inner-envelope::after {
+        right: -22%;
+        transform: rotate(-31deg);
+      }
+
+      /* Mobile-only cover inspired by the supplied reference video. */
+      .mobile-envelope {
+        position: fixed;
+        z-index: 30;
+        inset: 0;
+        overflow: hidden;
+        background: transparent;
+        color: var(--white);
+      }
+
+      .envelope-layer {
+        position: absolute;
+        inset: 0;
+        isolation: isolate;
+        pointer-events: none;
+        transform: translate3d(0, 0, 0);
+        will-change: transform, opacity;
+      }
+
+      .envelope-layer img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .envelope-layer-bottom {
+        z-index: 2;
+      }
+
+      .envelope-layer-top {
+        z-index: 3;
+      }
+
+      .envelope-layer-seal {
+        z-index: 6;
+      }
+
+      .envelope-layer-bottom::after,
+      .envelope-layer-top::after {
+        position: absolute;
+        inset: 0;
+        background: var(--envelope);
+        content: "";
+        mix-blend-mode: color;
+        opacity: 0.92;
+        pointer-events: none;
+      }
+
+      .envelope-layer-bottom::after {
+        mask: url("../website-template/assets/mobile-envelope-layer-bottom.webp") center / cover
+          no-repeat;
+        -webkit-mask: url("../website-template/assets/mobile-envelope-layer-bottom.webp") center /
+          cover no-repeat;
+      }
+
+      .envelope-layer-top::after {
+        mask: url("../website-template/assets/mobile-envelope-layer-top.webp") center / cover
+          no-repeat;
+        -webkit-mask: url("../website-template/assets/mobile-envelope-layer-top.webp") center /
+          cover no-repeat;
+      }
+
+      .wax-personalisation {
+        position: absolute;
+        z-index: 7;
+        top: 50.8%;
+        left: 50%;
+        display: grid;
+        width: clamp(102px, 15.2vh, 146px);
+        height: clamp(58px, 8.2vh, 78px);
+        place-items: center;
+        border-radius: 48%;
+        background: radial-gradient(
+          ellipse at 50% 48%,
+          #761317 0 52%,
+          rgba(94, 9, 12, 0.96) 68%,
+          transparent 82%
+        );
+        color: rgba(215, 139, 137, 0.82);
+        transform: translate(-50%, -50%);
+      }
+
+      .wax-personalisation::after {
+        position: absolute;
+        top: -28%;
+        bottom: -28%;
+        left: 50%;
+        width: 1px;
+        background: linear-gradient(
+          transparent,
+          rgba(224, 154, 150, 0.72) 22% 78%,
+          transparent
+        );
+        content: "";
+      }
+
+      .seal-initials {
+        position: relative;
+        z-index: 1;
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(2rem, 5.4vh, 3.15rem);
+        font-style: normal;
+        letter-spacing: 0.48em;
+        line-height: 1;
+        text-indent: 0.48em;
+        text-shadow: 0 1px 1px rgba(43, 0, 0, 0.78), 0 -1px rgba(255, 182, 178, 0.22);
+      }
+
+      .seal {
+        position: absolute;
+        z-index: 9;
+        top: 51.8%;
+        left: 50%;
+        width: clamp(122px, 27vh, 225px);
+        aspect-ratio: 1;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        cursor: pointer;
+        transform: translate(-50%, -50%);
+      }
+
+      .seal:focus-visible {
+        outline: 2px solid rgba(255, 239, 224, 0.9);
+        outline-offset: 7px;
+      }
+
+      .tap-note {
+        position: absolute;
+        z-index: 9;
+        top: 67%;
+        left: 50%;
+        width: min(82vw, 340px);
+        margin: 0;
+        color: rgba(255, 244, 235, 0.88);
+        font-family: "Cormorant Garamond", serif;
+        font-size: 15px;
+        font-style: italic;
+        text-align: center;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+        transform: translateX(-50%);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+
+      .mobile-envelope.is-opening .tap-note {
+        opacity: 0;
+        transform: translateX(-50%) translateY(12px);
+      }
+
+      .mobile-envelope.is-opening .seal {
+        pointer-events: none;
+      }
+
+      .mobile-envelope.is-opening .envelope-layer-top {
+        animation: layer-top-open 5.4s cubic-bezier(0.45, 0, 0.18, 1) forwards;
+      }
+
+      .mobile-envelope.is-opening .envelope-layer-seal {
+        animation: layer-seal-open 5.4s cubic-bezier(0.45, 0, 0.18, 1) forwards;
+      }
+
+      .mobile-envelope.is-opening .envelope-layer-bottom {
+        animation: layer-bottom-open 5.6s cubic-bezier(0.45, 0, 0.18, 1) forwards;
+      }
+
+      .mobile-envelope.is-gone {
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      @keyframes layer-top-open {
+        0% {
+          transform: translate3d(0, 0, 0);
+        }
+        18% {
+          transform: translate3d(0, -2.5%, 0);
+        }
+        100% {
+          transform: translate3d(0, -72%, 0);
+        }
+      }
+
+      @keyframes layer-seal-open {
+        0% {
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+        18% {
+          transform: translate3d(0, -2.5%, 0) scale(1.025);
+        }
+        100% {
+          transform: translate3d(0, -72%, 0) scale(0.96);
+        }
+      }
+
+      @keyframes layer-bottom-open {
+        0% {
+          transform: translate3d(0, 0, 0);
+        }
+        18% {
+          transform: translate3d(0, 2%, 0);
+        }
+        100% {
+          transform: translate3d(0, 72%, 0);
+        }
+      }
+
+      /* Floating music player, based on the supplied player reference. */
+      .music-player {
+        position: fixed;
+        z-index: 20;
+        right: 50%;
+        bottom: max(18px, env(safe-area-inset-bottom));
+        display: grid;
+        width: min(350px, calc(100vw - 32px));
+        grid-template-columns: 48px 1fr 38px;
+        align-items: center;
+        gap: 12px;
+        padding: 9px 13px 9px 9px;
+        transform: translateX(50%);
+        border: 1px solid rgba(56, 61, 50, 0.08);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 12px 32px rgba(44, 48, 39, 0.16);
+        backdrop-filter: blur(12px);
+      }
+
+      .music-toggle {
+        display: grid;
+        width: 48px;
+        height: 48px;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        background: #bd762b;
+        color: white;
+        cursor: pointer;
+      }
+
+      .music-toggle span {
+        width: 14px;
+        height: 16px;
+        background: currentColor;
+        clip-path: polygon(0 0, 100% 50%, 0 100%);
+      }
+
+      .music-player.is-playing .music-toggle span {
+        background: linear-gradient(
+          to right,
+          currentColor 0 36%,
+          transparent 36% 64%,
+          currentColor 64% 100%
+        );
+        clip-path: none;
+      }
+
+      .track {
+        min-width: 0;
+      }
+
+      .track strong,
+      .track small {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .track strong {
+        color: #a65e25;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .track small {
+        margin-top: 3px;
+        color: #bd762b;
+        font-size: 9px;
+      }
+
+      .equalizer {
+        display: flex;
+        height: 22px;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+      }
+
+      .equalizer i {
+        width: 3px;
+        height: 5px;
+        border-radius: 3px;
+        background: #bd762b;
+        transform-origin: center;
+      }
+
+      .music-player.is-playing .equalizer i {
+        animation: equalize 720ms ease-in-out infinite alternate;
+      }
+
+      .music-player.is-playing .equalizer i:nth-child(2) {
+        animation-delay: -240ms;
+      }
+
+      .music-player.is-playing .equalizer i:nth-child(3) {
+        animation-delay: -430ms;
+      }
+
+      .music-player.is-playing .equalizer i:nth-child(4) {
+        animation-delay: -120ms;
+      }
+
+      @keyframes equalize {
+        from {
+          height: 5px;
+        }
+        to {
+          height: 18px;
+        }
+      }
+
+      .preview-link {
+        position: fixed;
+        z-index: 20;
+        right: 18px;
+        top: 16px;
+        color: rgba(44, 50, 40, 0.62);
+        font-size: 9px;
+        letter-spacing: 0.08em;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+
+      @media (min-width: 601px) {
+        .mobile-envelope {
+          display: none;
+        }
+
+        .photo-intro {
+          opacity: 1;
+        }
+
+        .inner-envelope {
+          bottom: -15vh;
+        }
+
+        .music-player {
+          right: 34px;
+          transform: none;
+        }
+
+        .preview-link {
+          top: auto;
+          right: auto;
+          bottom: 25px;
+          left: 26px;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .names {
+          top: 30px;
+        }
+
+        .names h1 {
+          font-size: 50px;
+        }
+
+        .photo {
+          width: min(47vw, 205px);
+          padding: 6px 6px 25px;
+        }
+
+        .photo-one {
+          --rise-y: -61vh;
+          --rotation: -8deg;
+          margin-left: -24vw;
+        }
+
+        .photo-two {
+          --rise-y: -48vh;
+          --rotation: 3deg;
+          margin-left: 1vw;
+        }
+
+        .photo-three {
+          --rise-y: -59vh;
+          --rotation: 9deg;
+          margin-left: 25vw;
+        }
+
+        .preview-link {
+          color: rgba(255, 255, 255, 0.7);
+        }
+
+        .photo-intro.is-visible ~ .preview-link {
+          color: rgba(44, 50, 40, 0.62);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 1ms !important;
+          animation-delay: 0ms !important;
+          transition-duration: 1ms !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="demo">
+      <section class="photo-intro" id="photoIntro" aria-label="Convite de casamento">
+        <header class="names">
+          <p>Vamos casar</p>
+          <h1>Tomás &amp; Rita</h1>
+          <span>18 · 12 · 2028</span>
+        </header>
+
+        <figure class="photo photo-one">
+          <img
+            src="./wedding-site-demo/couple-detail.png"
+            alt="Os noivos juntos"
+            style="object-position: 24% center"
+          />
+        </figure>
+        <figure class="photo photo-two">
+          <img
+            src="./wedding-site-demo/couple.png"
+            alt="Retrato dos noivos"
+            style="object-position: center"
+          />
+        </figure>
+        <figure class="photo photo-three">
+          <img
+            src="./wedding-site-demo/couple-portrait.png"
+            alt="Os noivos no local do casamento"
+            style="object-position: 76% center"
+          />
+        </figure>
+
+        <div class="inner-envelope" aria-hidden="true"></div>
+      </section>
+
+      <section class="mobile-envelope" id="mobileEnvelope" aria-label="Abrir convite">
+        <div class="envelope-layer envelope-layer-bottom" aria-hidden="true">
+          <img src="../website-template/assets/mobile-envelope-layer-bottom.webp" alt="" />
+        </div>
+        <div class="envelope-layer envelope-layer-top" aria-hidden="true">
+          <img src="../website-template/assets/mobile-envelope-layer-top.webp" alt="" />
+        </div>
+        <div class="envelope-layer envelope-layer-seal" aria-hidden="true">
+          <img src="../website-template/assets/mobile-envelope-layer-seal.webp" alt="" />
+          
+        </div>
+        <button class="seal" id="openInvitation" type="button" aria-label="Abrir o convite"></button>
+        <span class="tap-note">Toque no brasão para abrir</span>
+      </section>
+
+      <a
+        class="preview-link"
+        href="https://music.apple.com/us/song/marry-you/576655099"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Prévia oficial · Apple Music
+      </a>
+
+      <aside class="music-player" id="musicPlayer" aria-label="Leitor de música">
+        <button
+          class="music-toggle"
+          id="musicToggle"
+          type="button"
+          aria-label="Reproduzir Marry You"
+        >
+          <span aria-hidden="true"></span>
+        </button>
+        <div class="track">
+          <strong>Marry You</strong>
+          <small>Bruno Mars · prévia oficial</small>
+        </div>
+        <div class="equalizer" aria-hidden="true">
+          <i></i><i></i><i></i><i></i>
+        </div>
+      </aside>
+
+      <!-- Replace this official short preview with the client's licensed direct
+           audio file before using the invitation in production. -->
+      <audio
+        id="weddingAudio"
+        preload="auto"
+        playsinline
+        loop
+        src="https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/18/e1/ba/18e1ba5e-57d9-959c-d5bd-0a6b495b6c66/mzaf_5396521971477773377.plus.aac.p.m4a"
+      ></audio>
+    </main>
+
+    <script>
+      (() => {
+        const envelope = document.querySelector("#mobileEnvelope");
+        const openButton = document.querySelector("#openInvitation");
+        const photoIntro = document.querySelector("#photoIntro");
+        const player = document.querySelector("#musicPlayer");
+        const toggle = document.querySelector("#musicToggle");
+        const audio = document.querySelector("#weddingAudio");
+        const desktop = window.matchMedia("(min-width: 601px)");
+        let invitationOpened = desktop.matches;
+
+        const updatePlayer = () => {
+          const playing = !audio.paused;
+          player.classList.toggle("is-playing", playing);
+          toggle.setAttribute("aria-label", playing ? "Pausar Marry You" : "Reproduzir Marry You");
+        };
+
+        const resetMusic = () => {
+          try {
+            audio.currentTime = 0;
+          } catch {
+            // Some streams do not expose currentTime until metadata is ready.
+          }
+        };
+
+        const startMusic = async ({ restart = false } = {}) => {
+          if (restart) resetMusic();
+          try {
+            await audio.play();
+          } catch {
+            // Mobile browsers may require the first user tap.
+          }
+          updatePlayer();
+        };
+
+        const openInvitation = () => {
+          if (invitationOpened) return;
+          invitationOpened = true;
+
+          // Music starts from the same deliberate tap that opens the envelope.
+          void startMusic({ restart: true });
+          envelope.classList.add("is-opening");
+
+          window.setTimeout(() => {
+            photoIntro.classList.add("is-visible");
+          }, 1200);
+
+          window.setTimeout(() => {
+            envelope.classList.add("is-gone");
+          }, 5800);
+        };
+
+        openButton.addEventListener("click", openInvitation);
+
+        toggle.addEventListener("click", () => {
+          if (audio.paused) {
+            void startMusic({ restart: true });
+          } else {
+            audio.pause();
+            resetMusic();
+          }
+        });
+
+        audio.addEventListener("play", updatePlayer);
+        audio.addEventListener("pause", updatePlayer);
+        audio.addEventListener("error", () => {
+          player.querySelector("small").textContent = "Prévia indisponível · abra o Apple Music";
+          updatePlayer();
+        });
+
+        const stopMusicWhileHidden = () => {
+          if (!document.hidden) return;
+          audio.pause();
+          resetMusic();
+          updatePlayer();
+        };
+        document.addEventListener("visibilitychange", stopMusicWhileHidden);
+        window.addEventListener("pagehide", () => {
+          audio.pause();
+          resetMusic();
+          updatePlayer();
+        });
+
+        if (desktop.matches) {
+          photoIntro.classList.add("is-visible");
+        }
+      })();
+    </script>
+  </body>
+</html>

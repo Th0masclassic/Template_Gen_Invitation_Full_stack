@@ -1,0 +1,3800 @@
+<!doctype html>
+<!-- InviteLab event builder, served by /wedding and /babyshower. -->
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f6f2eb" />
+  <meta name="description" content="Portal de criação de convites digitais de casamento." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23123b5d'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Georgia,serif' font-size='32' fill='white'%3EV%3C/text%3E%3C/svg%3E" />
+  <title>InviteLab — Convites feitos para a tua história</title>
+  <style>
+    :root {
+      --ink: #24211e;
+      --muted: #736c64;
+      --surface: #fffdf9;
+      --surface-2: #f6f2eb;
+      --surface-3: #eee7dd;
+      --line: rgba(51, 43, 36, .12);
+      --accent: #6f7c68;
+      --accent-dark: #4e5d49;
+      --accent-soft: #dfe6dc;
+      --gold: #b49a73;
+      --danger: #a55454;
+      --radius-lg: 30px;
+      --radius-md: 20px;
+      --shadow: 0 24px 70px rgba(60, 48, 37, .12);
+      --content: 1240px;
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(181, 154, 115, .12), transparent 26rem),
+        radial-gradient(circle at 90% 20%, rgba(111, 124, 104, .12), transparent 28rem),
+        var(--surface-2);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    body[data-event-type="baby_shower"] {
+      --ink: #102f4c;
+      --muted: #45647d;
+      --surface: #ffffff;
+      --surface-2: #eef8ff;
+      --surface-3: #d9edfb;
+      --line: rgba(18, 59, 93, .16);
+      --accent: #23689f;
+      --accent-dark: #123b5d;
+      --accent-soft: #dcefff;
+      --gold: #5b9fc9;
+      --shadow: 0 24px 70px rgba(17, 59, 91, .14);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(126, 195, 235, .24), transparent 26rem),
+        radial-gradient(circle at 90% 20%, rgba(63, 137, 190, .17), transparent 28rem),
+        var(--surface-2);
+    }
+
+    body[data-event-type="baby_shower"] .brand-mark {
+      box-shadow: 0 10px 22px rgba(18, 59, 93, .25);
+    }
+    body[data-event-type="baby_shower"] .top-note {
+      background: rgba(255, 255, 255, .82);
+    }
+    body[data-event-type="baby_shower"] .top-note::before {
+      background: #3484bd;
+      box-shadow: 0 0 0 4px rgba(52, 132, 189, .16);
+    }
+    body[data-event-type="baby_shower"] .hero-copy,
+    body[data-event-type="baby_shower"] .hero-card {
+      border-color: rgba(18, 59, 93, .13);
+    }
+    body[data-event-type="baby_shower"] .hero-copy {
+      background:
+        linear-gradient(130deg, rgba(255,255,255,.97), rgba(228,244,255,.92)),
+        repeating-linear-gradient(0deg, transparent 0 8px, rgba(35,104,159,.025) 9px 10px);
+    }
+    body[data-event-type="baby_shower"] .hero-copy::after {
+      border-color: rgba(35, 104, 159, .22);
+      box-shadow:
+        0 0 0 30px rgba(77, 157, 211, .07),
+        0 0 0 60px rgba(77, 157, 211, .04);
+    }
+    body[data-event-type="baby_shower"] .button.primary {
+      box-shadow: 0 12px 28px rgba(18, 59, 93, .28);
+    }
+    body[data-event-type="baby_shower"] .hero-card {
+      background: #0d2941;
+    }
+    body[data-event-type="baby_shower"] .hero-card::before {
+      background:
+        linear-gradient(to top, rgba(7,35,57,.86), rgba(14,56,87,.12)),
+        url("/assets/templates/baby-shower/01_baby_clouds.png") center/cover;
+      opacity: .9;
+    }
+    body[data-event-type="baby_shower"] .hero-card-badge {
+      background: rgba(8, 42, 67, .44);
+    }
+    body[data-event-type="baby_shower"] .step,
+    body[data-event-type="baby_shower"] .panel {
+      background: rgba(255, 255, 255, .9);
+      box-shadow: 0 16px 55px rgba(17, 59, 91, .09);
+    }
+    body[data-event-type="baby_shower"] .mode-button[aria-pressed="true"] {
+      border-color: rgba(35, 104, 159, .55);
+      box-shadow: inset 0 0 0 1px rgba(35, 104, 159, .12);
+    }
+    body[data-event-type="baby_shower"] .template-card[aria-pressed="true"] {
+      box-shadow: 0 0 0 3px rgba(35, 104, 159, .16), 0 18px 38px rgba(17, 59, 91, .14);
+    }
+    body[data-event-type="baby_shower"] .field label {
+      color: var(--ink);
+    }
+    body[data-event-type="baby_shower"] .field input:focus,
+    body[data-event-type="baby_shower"] .field textarea:focus,
+    body[data-event-type="baby_shower"] .field select:focus {
+      box-shadow: 0 0 0 4px rgba(35, 104, 159, .13);
+    }
+    body[data-event-type="baby_shower"] .photo-uploader {
+      border-color: rgba(35, 104, 159, .44);
+      background: rgba(220, 239, 255, .5);
+    }
+    body[data-event-type="baby_shower"] .photo-uploader:hover,
+    body[data-event-type="baby_shower"] .photo-uploader.dragover {
+      background: rgba(204, 232, 252, .78);
+    }
+    body[data-event-type="baby_shower"] .phone-frame {
+      background: #0d2941;
+      box-shadow: 0 30px 75px rgba(13, 41, 65, .25);
+    }
+    body[data-event-type="baby_shower"] .phone-screen {
+      background: #dcefff;
+    }
+    body[data-event-type="baby_shower"] .preview-summary {
+      background: rgba(13, 41, 65, .84);
+    }
+    body[data-event-type="baby_shower"] .loading-overlay {
+      background:
+        radial-gradient(circle at center, rgba(77, 157, 211, .18), transparent 38rem),
+        rgba(238, 248, 255, .97);
+    }
+    body[data-event-type="baby_shower"] .loading-card {
+      background: rgba(255, 255, 255, .97);
+    }
+    body[data-event-type="baby_shower"] .loader-orbit {
+      border-color: rgba(35, 104, 159, .22);
+    }
+    body[data-event-type="baby_shower"] .loader-orbit::after {
+      box-shadow: 0 0 0 7px rgba(91, 159, 201, .17);
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    img { display: block; max-width: 100%; }
+
+    .app-shell {
+      width: min(var(--content), calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 72px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 10px 0 28px;
+    }
+    .language-select-wrap { margin-left: auto; }
+    .language-select {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 0 34px 0 12px;
+      cursor: pointer;
+    }
+    .choice-field {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-2);
+    }
+    .choice-field input { width: 19px; height: 19px; margin: 2px 0 0; accent-color: var(--accent); }
+    .choice-field strong, .choice-field small { display: block; }
+    .choice-field small { margin-top: 4px; color: var(--muted); }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--ink);
+      font-weight: 760;
+      letter-spacing: -.02em;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, var(--accent), var(--accent-dark));
+      color: white;
+      box-shadow: 0 10px 22px rgba(78, 93, 73, .26);
+      font-family: Georgia, serif;
+      font-size: 20px;
+    }
+
+    .top-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255, 253, 249, .72);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      font-size: 13px;
+    }
+
+    .top-note::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #75a46d;
+      box-shadow: 0 0 0 4px rgba(117, 164, 109, .13);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 34px;
+      align-items: stretch;
+      margin-bottom: 32px;
+    }
+
+    .hero-copy,
+    .hero-card {
+      border: 1px solid rgba(72, 62, 54, .1);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-copy {
+      position: relative;
+      padding: clamp(34px, 6vw, 70px);
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background:
+        linear-gradient(130deg, rgba(255,255,255,.94), rgba(249,245,238,.88)),
+        repeating-linear-gradient(0deg, transparent 0 8px, rgba(108,93,80,.025) 9px 10px);
+    }
+
+    .hero-copy::after {
+      content: "";
+      position: absolute;
+      right: -80px;
+      bottom: -80px;
+      width: 250px;
+      height: 250px;
+      border: 1px solid rgba(111, 124, 104, .2);
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 30px rgba(111, 124, 104, .04),
+        0 0 0 60px rgba(111, 124, 104, .025);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      color: var(--accent-dark);
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 36px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 780px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(42px, 6vw, 74px);
+      line-height: .98;
+      font-weight: 500;
+      letter-spacing: -.045em;
+    }
+
+    .hero-copy p {
+      max-width: 670px;
+      margin: 24px 0 0;
+      font-size: clamp(16px, 2vw, 19px);
+      color: var(--muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .button {
+      border: 0;
+      border-radius: 999px;
+      min-height: 48px;
+      padding: 0 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      text-decoration: none;
+      font-weight: 760;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .button:hover { transform: translateY(-2px); }
+    .button.primary {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      box-shadow: 0 12px 28px rgba(78, 93, 73, .28);
+    }
+    .button.secondary {
+      color: var(--ink);
+      background: rgba(255, 255, 255, .72);
+      border: 1px solid var(--line);
+    }
+
+    .hero-card {
+      min-height: 420px;
+      background: var(--ink);
+      color: white;
+      position: relative;
+      padding: 34px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to top, rgba(20,18,16,.8), rgba(20,18,16,.08)),
+        url("/assets/templates/01_editorial_photo.png") center/cover;
+      opacity: .78;
+    }
+
+    .hero-card > * { position: relative; z-index: 1; }
+    .hero-card-badge {
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.26);
+      background: rgba(24,22,20,.32);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      font-size: 12px;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .hero-card h2 {
+      font-family: Georgia, serif;
+      font-weight: 500;
+      font-size: 36px;
+      line-height: 1.02;
+      margin: 0 0 12px;
+    }
+    .hero-card p { margin: 0; color: rgba(255,255,255,.78); }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,253,249,.75);
+      color: var(--muted);
+    }
+    .step strong { display: block; color: var(--ink); font-size: 14px; }
+    .step span:last-child { font-size: 12px; }
+    .step-number {
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-weight: 850;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(320px, .7fr);
+      gap: 28px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: rgba(255,253,249,.9);
+      box-shadow: 0 16px 55px rgba(60,48,37,.08);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 28px 28px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-header h2 {
+      margin: 0 0 7px;
+      font-family: Georgia, serif;
+      font-weight: 500;
+      font-size: 30px;
+    }
+    .panel-header p { margin: 0; color: var(--muted); }
+    .redo-banner {
+      display: none;
+      margin: 18px 24px 0;
+      padding: 16px 18px;
+      border: 1px solid rgba(92, 107, 83, .2);
+      border-radius: 16px;
+      background: linear-gradient(135deg, #eef3e9, #fbfaf6);
+      color: #40503d;
+      line-height: 1.55;
+    }
+    .redo-banner.visible { display: block; }
+    .redo-banner strong { display: block; margin-bottom: 3px; }
+    .redo-banner.error { border-color: rgba(143, 55, 49, .22); background: #f9ecea; color: #8f3731; }
+    .purchase-summary {
+      padding: 20px 22px;
+      border: 1px solid rgba(111,124,104,.25);
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--accent-soft), #fff);
+    }
+    .purchase-summary h3 { margin: 6px 0; font-family: Georgia,serif; font-size: 25px; font-weight: 500; }
+    .purchase-summary p { margin: 0 0 10px; color: var(--muted); }
+    .purchase-summary ul { margin: 0; padding-left: 20px; color: var(--ink); line-height: 1.65; }
+    .purchase-method { display: inline-flex; margin-top: 12px; padding: 7px 10px; border-radius: 999px; background: #fff; color: #52604d; font-size: 12px; font-weight: 800; }
+
+    .mode-switch {
+      padding: 18px 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    .mode-button {
+      min-height: 62px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: white;
+      color: var(--muted);
+      text-align: left;
+      transition: .18s ease;
+    }
+    .mode-button strong { display: block; color: var(--ink); margin-bottom: 2px; }
+    .mode-button[aria-pressed="true"] {
+      border-color: rgba(111,124,104,.5);
+      background: var(--accent-soft);
+      box-shadow: inset 0 0 0 1px rgba(111,124,104,.1);
+    }
+
+    .section-body { padding: 28px; }
+    .section-title-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    .section-title-row h3 { margin: 0; font-size: 18px; }
+    .section-title-row p { margin: 0; font-size: 13px; color: var(--muted); }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 14px;
+    }
+
+    .template-card {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      background: white;
+      padding: 0;
+      text-align: left;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .template-card:hover { transform: translateY(-4px); box-shadow: 0 18px 38px rgba(57,44,34,.13); }
+    .template-card[aria-pressed="true"] {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(111,124,104,.13), 0 18px 38px rgba(57,44,34,.13);
+    }
+    .template-card img {
+      width: 100%;
+      aspect-ratio: 9 / 14;
+      object-fit: cover;
+      object-position: top center;
+      background: #ece7df;
+    }
+    .template-info {
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .template-info strong { font-size: 13px; }
+    .template-info span { font-size: 11px; color: var(--muted); }
+    .selected-check {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: transparent;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(0,0,0,.08);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+    .template-card[aria-pressed="true"] .selected-check {
+      color: white;
+      background: var(--accent-dark);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--line);
+      margin: 30px 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .field { display: grid; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label {
+      font-size: 13px;
+      font-weight: 760;
+      color: #4a443e;
+    }
+    .field small { color: var(--muted); font-size: 11px; }
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+      padding: 13px 14px;
+      transition: border-color .18s, box-shadow .18s;
+    }
+    .field textarea { min-height: 112px; resize: vertical; }
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(111,124,104,.1);
+    }
+    .field.invalid input,
+    .field.invalid textarea { border-color: var(--danger); }
+    .error-text { display: none; color: var(--danger); font-size: 12px; }
+    .field.invalid .error-text { display: block; }
+
+    .photo-uploader {
+      border: 1.5px dashed rgba(111,124,104,.42);
+      border-radius: 18px;
+      min-height: 148px;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      text-align: center;
+      background: rgba(223,230,220,.28);
+      transition: background .18s, border-color .18s;
+      position: relative;
+      overflow: hidden;
+    }
+    .photo-uploader:hover,
+    .photo-uploader.dragover { background: rgba(223,230,220,.58); border-color: var(--accent); }
+    .photo-uploader:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+    .photo-uploader input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .photo-icon {
+      width: 46px;
+      height: 46px;
+      margin: 0 auto 10px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      background: white;
+      box-shadow: 0 8px 22px rgba(71,61,53,.1);
+      color: var(--accent-dark);
+      font-size: 22px;
+    }
+    .photo-uploader strong { display: block; font-size: 14px; }
+    .photo-uploader span { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+    .website-photo-uploader { min-height: 132px; }
+    .website-photo-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 34px;
+    }
+    .website-photo-count {
+      color: var(--accent-dark);
+      font-size: 12px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+    .website-photo-clear {
+      border: 0;
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: var(--accent-dark);
+      background: var(--accent-soft);
+      font-size: 12px;
+      font-weight: 760;
+    }
+    .website-photo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .website-photo-card {
+      position: relative;
+      min-width: 0;
+      margin: 0;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .website-photo-card img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: 11px;
+      object-fit: cover;
+      background: var(--surface-3);
+    }
+    .website-photo-card figcaption {
+      padding: 7px 3px 2px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.2;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .website-photo-remove {
+      position: absolute;
+      top: 11px;
+      right: 11px;
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.74);
+      border-radius: 50%;
+      color: white;
+      background: rgba(13, 41, 65, .84);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      font-size: 18px;
+      line-height: 1;
+    }
+    .website-photo-remove:focus-visible,
+    .website-photo-clear:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .website-photo-status {
+      min-height: 18px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .submit-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-top: 26px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+    .privacy-note { max-width: 420px; color: var(--muted); font-size: 12px; }
+    .submit-button { min-width: 188px; }
+
+    .preview-panel {
+      position: sticky;
+      top: 18px;
+    }
+    .preview-wrap { padding: 24px; }
+    .phone-frame {
+      max-width: 360px;
+      margin: 0 auto;
+      padding: 9px;
+      border-radius: 38px;
+      background: #24211e;
+      box-shadow: 0 30px 75px rgba(35,31,27,.25);
+    }
+    .phone-screen {
+      border-radius: 30px;
+      min-height: 620px;
+      overflow: hidden;
+      position: relative;
+      background: #eee7dd;
+    }
+    .phone-screen img.template-preview {
+      width: 100%;
+      height: 620px;
+      object-fit: cover;
+      object-position: top center;
+      transition: opacity .2s ease;
+    }
+    .photo-overlay {
+      position: absolute;
+      inset: auto 26px 124px;
+      height: 170px;
+      border-radius: 18px;
+      object-fit: cover;
+      opacity: 0;
+      box-shadow: 0 16px 40px rgba(0,0,0,.22);
+      border: 3px solid rgba(255,255,255,.85);
+      transition: opacity .2s ease;
+    }
+    .photo-overlay.visible { opacity: 1; }
+
+    .preview-summary {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      border-radius: 20px;
+      padding: 14px 16px;
+      color: white;
+      background: rgba(34,31,28,.78);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.16);
+    }
+    .preview-summary strong {
+      display: block;
+      font-family: Georgia, serif;
+      font-size: 22px;
+      font-weight: 500;
+      line-height: 1.05;
+    }
+    .preview-summary span { display: block; margin-top: 5px; font-size: 12px; color: rgba(255,255,255,.75); }
+
+    .preview-meta {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+    }
+    .preview-meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+    }
+    .preview-meta-row:last-child { border-bottom: 0; }
+    .preview-meta-row span { color: var(--muted); }
+    .preview-meta-row strong { text-align: right; font-weight: 700; }
+
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: none;
+      place-items: center;
+      padding: 22px;
+      background:
+        radial-gradient(circle at center, rgba(111,124,104,.16), transparent 38rem),
+        rgba(246,242,235,.96);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+    }
+    .website-preview { display: none; margin: 24px 0 0; text-align: left; }
+    .website-preview.visible { display: block; }
+    .website-preview h3 { margin: 0 0 10px; font-family: Georgia, serif; font-size: 24px; font-weight: 500; }
+    .website-preview-frame { overflow: hidden; min-height: 420px; border: 1px solid var(--line); border-radius: 20px; background: #eee; box-shadow: var(--shadow); }
+    .website-preview-frame iframe { display: block; width: 100%; height: min(78vh, 820px); min-height: 420px; border: 0; background: #fff; }
+    @media(max-width:640px) { .website-preview-frame { border-radius: 14px; } .website-preview-frame iframe { height: 76vh; min-height: 520px; } }
+    .loading-overlay.visible { display: grid; }
+    .website-details-overlay {
+      position: fixed; inset: 0; z-index: 998; display: none; overflow-y: auto; padding: 28px 18px;
+      background: rgba(36,33,30,.48); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px);
+    }
+    .website-details-overlay.visible { display: grid; place-items: start center; }
+    .website-details-card { width: min(760px, 100%); margin: auto; padding: clamp(26px,5vw,48px); border-radius: 28px; background: var(--surface); box-shadow: var(--shadow); }
+    .website-details-card h2 { margin: 0; font-family: Georgia, serif; font-size: clamp(28px,4vw,42px); font-weight: 500; }
+    .website-details-card > p { color: var(--muted); margin: 10px 0 26px; }
+    .website-details-card .form-grid { gap: 16px; }
+    .website-details-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 26px; }
+    .website-details-close { position: absolute; top: 16px; right: 16px; width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--ink); font-size: 24px; line-height: 1; cursor: pointer; }
+    .website-details-card { position: relative; }
+    .website-detail-groups { display: grid; gap: 12px; }
+    .website-detail-group { border: 1px solid var(--line); border-radius: 16px; background: #fffdfa; overflow: hidden; }
+    .website-detail-group[hidden] { display: none; }
+    .website-detail-group summary { display: flex; align-items: center; min-height: 54px; padding: 14px 18px; cursor: pointer; font-weight: 750; list-style: none; }
+    .website-detail-group summary::-webkit-details-marker { display: none; }
+    .website-detail-group summary::after { content: '+'; margin-left: auto; color: #53634e; font-size: 22px; font-weight: 400; }
+    .website-detail-group[open] summary { border-bottom: 1px solid var(--line); }
+    .website-detail-group[open] summary::after { content: '−'; }
+    .website-detail-group .form-grid { padding: 18px; }
+    .envelope-colour-field { display: grid; gap: 12px; }
+    .envelope-colour-palette { display: flex; flex-wrap: wrap; gap: 10px; }
+    .envelope-colour-swatch {
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      border: 3px solid #fff;
+      border-radius: 50%;
+      background: var(--swatch);
+      box-shadow: 0 0 0 1px rgba(34,41,32,.2);
+      cursor: pointer;
+      transition: transform .18s ease,box-shadow .18s ease;
+    }
+    .envelope-colour-swatch:hover { transform: translateY(-2px); }
+    .envelope-colour-swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px #53634e,0 7px 18px rgba(45,55,42,.18); }
+    .envelope-custom-colour { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 13px; }
+    .envelope-custom-colour input { width: 48px; min-height: 36px; padding: 2px; border-radius: 8px; cursor: pointer; }
+    .music-rights-note { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .website-photo-warning { display: flex; gap: 10px; align-items: flex-start; margin: 18px 0 0; padding: 13px 15px; border: 1px solid rgba(180,137,70,.32); border-radius: 14px; background: #fff9ec; color: #73562c; line-height: 1.45; }
+    .website-photo-warning::before { content: '!'; flex: 0 0 auto; width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: #b48946; color: #fff; font-size: 13px; font-weight: 800; }
+    .website-setup { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:16px; align-items:center; padding:18px; border:1px solid rgba(82,105,72,.2); border-radius:18px; background:linear-gradient(135deg,#f5f8f2,#fffdfa); }.website-setup-icon { width:44px; height:44px; display:grid; place-items:center; border-radius:14px; background:#53634e; color:#fff; font-size:20px; }.website-setup strong,.website-setup small { display:block; }.website-setup small { margin-top:4px; color:var(--muted); line-height:1.45; }.website-setup-actions { display:flex; align-items:center; gap:10px; }.website-setup-actions .button { min-height:40px; padding:0 14px; }.website-switch { position:relative; width:44px; height:26px; flex:0 0 auto; cursor:pointer; }.website-switch input { position:absolute; opacity:0; }.website-switch span { display:block; width:100%; height:100%; border-radius:999px; background:#c9c4bd; transition:.2s ease; }.website-switch span::after { content:''; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:.2s ease; }.website-switch input:checked + span { background:#53634e; }.website-switch input:checked + span::after { transform:translateX(18px); }
+    .website-section-picker { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:20px; }.website-section-choice { display:flex; gap:10px; align-items:center; padding:12px; border:1px solid var(--line); border-radius:14px; cursor:pointer; }.website-section-choice input { accent-color:#53634e; width:17px; height:17px; }.website-section-choice small { color:var(--muted); display:block; margin-top:2px; }.website-section-preview { margin-top:20px; padding:14px; border-radius:16px; background:#f5f3ee; }.website-section-preview > span { display:block; margin-bottom:9px; color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }.website-preview-bars { display:grid; gap:6px; }.website-preview-bars i { display:block; height:17px; border-radius:5px; background:#d7dfd1; }.website-preview-bars i:nth-child(2n) { width:78%; background:#e3e8df; }.website-preview-bars i.is-hidden { display:none; }
+    @media(max-width:640px) { .website-setup { grid-template-columns:auto minmax(0,1fr); }.website-setup-actions { grid-column:1/-1; justify-content:space-between; }.website-section-picker { grid-template-columns:1fr; } }
+    @media(max-width:640px) { .website-details-overlay { padding: 12px; } .website-details-card { border-radius: 22px; } .website-details-actions { flex-direction: column-reverse; } .website-details-actions .button { width: 100%; } }
+    .loading-card {
+      width: min(520px, 100%);
+      padding: 42px;
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      background: rgba(255,253,249,.95);
+      box-shadow: var(--shadow);
+    }
+    .loader-orbit {
+      width: 94px;
+      height: 94px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      position: relative;
+      border: 1px solid rgba(111,124,104,.2);
+    }
+    .loader-orbit::before,
+    .loader-orbit::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+    }
+    .loader-orbit::before {
+      inset: 12px;
+      border: 3px solid transparent;
+      border-top-color: var(--accent);
+      border-right-color: var(--accent);
+      animation: spin 1s linear infinite;
+    }
+    .loader-orbit::after {
+      width: 16px;
+      height: 16px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      background: var(--gold);
+      box-shadow: 0 0 0 7px rgba(180,154,115,.14);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-card h2 {
+      font-family: Georgia, serif;
+      font-weight: 500;
+      font-size: 34px;
+      line-height: 1.04;
+      margin: 0 0 12px;
+    }
+    .loading-card p { margin: 0; color: var(--muted); }
+    .progress-meta {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 28px 0 9px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+    }
+    .progress-meta strong {
+      color: var(--accent-dark);
+      font-size: 18px;
+      font-variant-numeric: tabular-nums;
+    }
+    .progress-track {
+      height: 9px;
+      margin: 0 0 14px;
+      border-radius: 999px;
+      background: var(--surface-3);
+      overflow: hidden;
+    }
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--gold));
+      transition: width .45s ease;
+    }
+    .loading-status { font-size: 13px; font-weight: 750; color: var(--accent-dark); min-height: 22px; }
+    .delivery-steps {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin: 4px 0 18px;
+      padding: 0;
+      list-style: none;
+    }
+    .delivery-step {
+      min-width: 0;
+      padding: 10px 8px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: var(--muted);
+      background: rgba(255,255,255,.55);
+      font-size: 11px;
+      font-weight: 720;
+      text-align: center;
+    }
+    .delivery-step::before {
+      content: "";
+      display: block;
+      width: 8px;
+      height: 8px;
+      margin: 0 auto 7px;
+      border-radius: 50%;
+      background: var(--line);
+    }
+    .delivery-step.active {
+      border-color: color-mix(in srgb, var(--accent) 46%, transparent);
+      color: var(--accent-dark);
+      background: var(--accent-soft);
+    }
+    .delivery-step.active::before { background: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent); }
+    .delivery-step.done { color: var(--accent-dark); }
+    .delivery-step.done::before { content: "✓"; width: 17px; height: 17px; margin-bottom: -2px; color: white; background: var(--accent); font-size: 11px; line-height: 17px; }
+    .live-generation {
+      display: grid;
+      grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      text-align: left;
+    }
+    .live-composite-frame {
+      aspect-ratio: 9 / 16;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background-color: #f7f7f4;
+      background-image:
+        linear-gradient(45deg, #e9e8e3 25%, transparent 25%),
+        linear-gradient(-45deg, #e9e8e3 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e9e8e3 75%),
+        linear-gradient(-45deg, transparent 75%, #e9e8e3 75%);
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+      background-size: 16px 16px;
+    }
+    .live-composite-frame img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+    .live-layer-feed { min-width: 0; }
+    .live-layer-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      color: var(--ink);
+      font-size: 13px;
+    }
+    .live-layer-head span {
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .live-layer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      max-height: 340px;
+      overflow-y: auto;
+      padding-right: 3px;
+    }
+    .live-layer-item {
+      min-width: 0;
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+    }
+    .live-layer-item img {
+      width: 100%;
+      aspect-ratio: 1;
+      display: block;
+      object-fit: contain;
+      background-color: #f7f7f4;
+      background-image:
+        linear-gradient(45deg, #e9e8e3 25%, transparent 25%),
+        linear-gradient(-45deg, #e9e8e3 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e9e8e3 75%),
+        linear-gradient(-45deg, transparent 75%, #e9e8e3 75%);
+      background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+      background-size: 12px 12px;
+    }
+    .live-layer-item figcaption {
+      padding: 6px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.25;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .live-layer-item.fallback { opacity: .55; }
+    .success-mark {
+      width: 84px;
+      height: 84px;
+      display: none;
+      place-items: center;
+      margin: 0 auto 22px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-size: 36px;
+    }
+    .loading-card.success .loader-orbit { display: none; }
+    .loading-card.success .success-mark { display: grid; }
+    .loading-card.success .progress-meta,
+    .loading-card.success .progress-track,
+    .loading-card.success .loading-status { display: none; }
+    .close-success { display: none; margin: 24px auto 0; }
+    .loading-card.success .close-success { display: inline-flex; }
+    .loading-card.has-image {
+      width: min(760px, 100%);
+      max-height: calc(100vh - 44px);
+      overflow: auto;
+    }
+    .loading-card.has-image.has-asset-pair { width: min(940px, 100%); }
+    .loading-card.has-live-preview {
+      width: min(880px, 100%);
+      max-height: calc(100vh - 44px);
+      overflow: auto;
+    }
+    .generation-result {
+      display: none;
+      margin-top: 24px;
+    }
+    .loading-card.success.has-image .generation-result,
+    .loading-card.has-canva-link .generation-result { display: block; }
+    .loading-card.has-canva-link:not(.has-image) .generated-frame { display: none; }
+    .generated-pair {
+      display: grid;
+      grid-template-columns: minmax(0, 390px);
+      justify-content: center;
+      gap: 18px;
+    }
+    .generated-pair.has-envelope {
+      grid-template-columns: repeat(2, minmax(0, 390px));
+    }
+    .generated-frame {
+      width: 100%;
+      margin: 0;
+      padding: 9px;
+      border-radius: 24px;
+      background: white;
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 44px rgba(47, 39, 32, .14);
+    }
+    .generated-frame figcaption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 4px 7px 11px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+      text-align: left;
+    }
+    .generated-frame figcaption span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .generated-frame img {
+      width: 100%;
+      max-height: 58vh;
+      object-fit: contain;
+      border-radius: 17px;
+      background: var(--surface-2);
+    }
+    .attempt-summary {
+      margin: 14px auto 0 !important;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .result-actions .button { min-width: 190px; }
+    .final-files {
+      margin-top: 22px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(135deg, #f7f3ec, #fff);
+      text-align: left;
+    }
+    .final-files h3 { margin: 0 0 5px; font-family: Georgia, serif; font-size: 23px; font-weight: 500; }
+    .final-files p { margin: 0; color: var(--muted); font-size: 13px; }
+    .final-files .result-actions { margin-top: 14px; }
+    .revision-context { display: grid; gap: 8px; text-align: left; }
+    .revision-context label {
+      font-size: 13px;
+      font-weight: 760;
+      color: #4a443e;
+    }
+    .revision-context textarea {
+      width: 100%;
+      min-height: 88px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: white;
+      color: var(--ink);
+    }
+    .revision-context small { color: var(--muted); font-size: 12px; }
+    .asset-revision-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1002;
+      display: none;
+      place-items: center;
+      overflow-y: auto;
+      padding: 22px;
+      background: rgba(34, 31, 28, .56);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+    .asset-revision-overlay.visible { display: grid; }
+    .asset-revision-modal {
+      width: min(620px, 100%);
+      padding: clamp(24px, 5vw, 38px);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--surface);
+      box-shadow: 0 30px 90px rgba(35, 29, 24, .26);
+      text-align: left;
+    }
+    .asset-revision-modal h2 {
+      margin: 0;
+      font-family: Georgia, serif;
+      font-size: clamp(28px, 5vw, 38px);
+      font-weight: 500;
+    }
+    .asset-revision-modal > p {
+      margin: 9px 0 22px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .asset-choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .asset-choice {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 11px;
+      align-items: start;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: white;
+      cursor: pointer;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+    .asset-choice:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in srgb, var(--accent) 48%, var(--line));
+    }
+    .asset-choice:has(input:checked) {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 13%, transparent);
+    }
+    .asset-choice.disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .asset-choice input { margin-top: 3px; accent-color: var(--accent); }
+    .asset-choice strong { display: block; color: var(--ink); }
+    .asset-choice small { display: block; margin-top: 4px; color: var(--muted); line-height: 1.35; }
+    .asset-revision-error {
+      min-height: 20px;
+      margin: 12px 0 0 !important;
+      color: var(--danger) !important;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .asset-revision-actions {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .canva-note {
+      display: none;
+      margin: 14px auto 0;
+      max-width: 520px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .canva-note.visible { display: block; }
+    .job-link {
+      margin: 14px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+      word-break: break-word;
+    }
+    .job-link a { color: var(--accent-dark); font-weight: 800; }
+    .loading-card.error .success-mark {
+      background: rgba(165,84,84,.12);
+      color: var(--danger);
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 30px;
+    }
+
+    @media (max-width: 1020px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-card { min-height: 340px; }
+      .workspace { grid-template-columns: 1fr; }
+      .preview-panel { position: static; order: -1; }
+      .template-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell { width: min(100% - 20px, var(--content)); padding-top: 10px; }
+      .topbar { padding-bottom: 16px; }
+      .top-note { display: none; }
+      .hero-copy { min-height: 390px; padding: 34px 24px; }
+      .hero-card { min-height: 300px; padding: 24px; }
+      .steps { grid-template-columns: 1fr; }
+      .step { padding: 12px 14px; }
+      .panel-header, .section-body { padding: 22px 18px; }
+      .mode-switch { padding: 14px 18px; grid-template-columns: 1fr; }
+      .template-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .website-photo-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .submit-row { align-items: stretch; flex-direction: column; }
+      .submit-button { width: 100%; }
+      .loading-card { padding: 34px 22px; }
+      .generated-pair.has-envelope { grid-template-columns: minmax(0, 390px); }
+      .asset-revision-overlay { padding: 12px; }
+      .asset-revision-modal { border-radius: 22px; }
+      .asset-choice-grid { grid-template-columns: 1fr; }
+      .asset-revision-actions { flex-direction: column-reverse; }
+      .asset-revision-actions .button { width: 100%; }
+      .live-generation { grid-template-columns: 1fr; }
+      .live-composite-frame { width: min(260px, 100%); margin: 0 auto; }
+      .live-layer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: 250px; }
+      .phone-screen, .phone-screen img.template-preview { min-height: 550px; height: 550px; }
+    }
+  </style>
+  <script src="/app-i18n.js?v=3"></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="InviteLab — início">
+        <span class="brand-mark">TG</span>
+        <span>InviteLab</span>
+      </a>
+      <span class="top-note">Acesso privado do cliente</span>
+    </header>
+
+    <section class="hero" id="top">
+      <article class="hero-copy">
+        <span class="eyebrow">O teu convite, à tua medida</span>
+        <h1>Um convite bonito começa com uma história verdadeira.</h1>
+        <p>Escolhe um dos nossos estilos ou cria algo mais pessoal. Adiciona os detalhes do casamento, uma fotografia e envia-nos o pedido — nós tratamos do resto.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#create">Começar agora <span aria-hidden="true">→</span></a>
+          <a class="button secondary" href="#templates">Ver os 10 estilos</a>
+        </div>
+      </article>
+      <aside class="hero-card" aria-label="Exemplo de convite">
+        <span class="hero-card-badge">Digital · clean · personalizado</span>
+        <div>
+          <h2>Feito para guardar.<br />Pensado para partilhar.</h2>
+          <p>Um processo simples, mesmo a partir do telemóvel.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="steps" aria-label="Etapas do processo">
+      <div class="step"><span class="step-number">1</span><span><strong>Escolhe o estilo</strong>Um template ou criação personalizada</span></div>
+      <div class="step"><span class="step-number">2</span><span><strong>Adiciona os detalhes</strong>Nomes, mensagem, data e local</span></div>
+      <div class="step"><span class="step-number">3</span><span><strong>Envia o pedido</strong>Recebemos e processamos o convite</span></div>
+    </section>
+
+    <section class="workspace" id="create">
+      <article class="panel">
+        <header class="panel-header">
+          <h2>Cria o teu convite</h2>
+          <p>Podes partir de um dos estilos existentes ou pedir um convite mais personalizado.</p>
+        </header>
+        <div class="redo-banner" id="redoBanner" role="status"></div>
+
+        <div class="section-body" style="padding-bottom:0">
+          <input id="eventType" name="eventType" type="hidden" value="wedding" />
+          <input id="packType" name="packType" type="hidden" value="Full_pack" />
+          <aside class="purchase-summary" id="purchaseSummary" aria-live="polite">
+            <span class="eyebrow">O produto que compraste</span>
+            <h3 id="purchasedProductName">Full Pack</h3>
+            <p id="purchasedProductDescription"></p>
+            <ul id="purchasedProductFeatures"></ul>
+            <span class="purchase-method" id="purchasedCreationAccess"></span>
+          </aside>
+        </div>
+
+        <div class="mode-switch" role="group" aria-label="Modo de criação">
+          <button class="mode-button" type="button" data-mode="template" aria-pressed="true">
+            <strong>Escolher um template</strong>
+            Usa um dos 10 estilos como base.
+          </button>
+          <button class="mode-button" type="button" data-mode="custom_import" aria-pressed="false">
+            <strong>Importar template personalizado</strong>
+            Carrega a imagem do teu próprio template.
+          </button>
+        </div>
+
+        <form id="invitationForm" novalidate>
+          <section class="section-body" id="templates">
+            <div class="section-title-row">
+              <div>
+                <h3>Escolhe a inspiração</h3>
+                <p>No modo personalizado esta escolha é opcional.</p>
+              </div>
+            </div>
+            <div class="template-grid" id="templateGrid"></div>
+            <div class="field full" id="customTemplateField" hidden style="margin-top:18px"><label>Template personalizado</label><div class="photo-uploader" id="customTemplateDropzone"><input id="customTemplate" name="customTemplate" type="file" accept="image/jpeg,image/png,image/webp" /><div><div class="photo-icon" aria-hidden="true">＋</div><strong id="customTemplateTitle">Adicionar imagem do template</strong><span id="customTemplateSubtitle">JPG, PNG ou WebP · máximo 20 MB · compressão automática</span></div></div></div>
+
+            <div class="divider"></div>
+
+            <div class="section-title-row">
+              <div>
+                <h3>Detalhes do casamento</h3>
+                <p>Estas informações serão usadas para criar o convite.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="field" data-required-field>
+                <label for="person1">Primeiro nome</label>
+                <input id="person1" name="person1" maxlength="40" placeholder="Tomas" autocomplete="given-name" required />
+                <span class="error-text">Indica o primeiro nome.</span>
+              </div>
+              <div class="field" data-required-field>
+                <label for="person2">Segundo nome</label>
+                <input id="person2" name="person2" maxlength="40" placeholder="Rita" autocomplete="additional-name" required />
+                <span class="error-text">Indica o segundo nome.</span>
+              </div>
+              <div class="field" data-required-field>
+                <label for="date">Data</label>
+                <input id="date" name="date" type="date" required />
+                <span class="error-text">Seleciona a data.</span>
+              </div>
+              <div class="field">
+                <label for="time">Hora <small>(opcional)</small></label>
+                <input id="time" name="time" type="time" />
+              </div>
+              <div class="field full" data-required-field>
+                <label for="location">Local</label>
+                <input id="location" name="location" maxlength="100" placeholder="Quinta X" required />
+                <span class="error-text">Indica o local do casamento.</span>
+              </div>
+              <div class="field full">
+                <label for="mapsUrl">Link ou referencia Google Maps <small>(opcional)</small></label>
+                <input id="mapsUrl" name="mapsUrl" maxlength="500" placeholder="Cola o link, escreve o local ou deixa vazio" inputmode="text" />
+                <small>Usamos este link no botão Localização. Se ficar vazio, procuramos automaticamente pelo local indicado.</small>
+              </div>
+              <div class="field full">
+                <label for="message">Mensagem do convite</label>
+                <textarea id="message" name="message" maxlength="260" placeholder="Juntamente com as suas famílias, convidam para celebrar o seu casamento.">Juntamente com as suas famílias, convidam para celebrar o seu casamento.</textarea>
+                <small>Até 260 caracteres. Podes ajustar o texto mais tarde.</small>
+              </div>
+              <div class="field full">
+                <div class="website-setup" id="websiteSetup">
+                  <div class="website-setup-icon" aria-hidden="true">&#10022;</div>
+                  <div><strong data-website-copy="setupTitle">Criar website do casamento</strong><small data-website-copy="setupDescription">Um website elegante, publicado automaticamente com o teu convite.</small></div>
+                  <div class="website-setup-actions"><label class="website-switch" data-website-copy-aria="setupTitle" aria-label="Criar website do casamento"><input id="websiteEnabled" name="websiteEnabled" type="checkbox" checked /><span></span></label></div>
+                </div>
+                <label class="choice-field" for="websiteEnabled" hidden>
+                  <input id="legacyWebsiteEnabled" type="checkbox" checked disabled />
+                  <span><strong id="websiteEnabledLabel" data-website-copy="legacyTitle">Criar também um website do casamento</strong><small id="websiteEnabledHelp" data-website-copy="legacyDescription">Depois de aprovares a imagem, podes pré-visualizar e publicar o site no teu link InviteLab.</small></span>
+                </label>
+              </div>
+              <div class="field full" id="websitePhotosField" hidden>
+                <label id="websitePhotosLabel" for="websitePhotos"><span data-website-copy="photosLabel">Fotografias para o website</span> <small data-website-copy="optional">(opcional)</small></label>
+                <div class="photo-uploader website-photo-uploader" id="websitePhotosDropzone">
+                  <input id="websitePhotos" name="websitePhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple data-max-files="5" aria-describedby="websitePhotosSubtitle websitePhotosStatus" />
+                  <div>
+                    <div class="photo-icon" aria-hidden="true">＋</div>
+                    <strong id="websitePhotosTitle" data-website-copy="photosTitle">Adicionar fotografias do casal</strong>
+                    <span id="websitePhotosSubtitle" data-website-copy="photosSubtitle">Até 5 imagens · JPG, PNG ou WebP · máximo 20 MB · compressão automática cada</span>
+                  </div>
+                </div>
+                <div class="website-photo-meta">
+                  <span class="website-photo-count" id="websitePhotosCount">0 / 5 fotografias selecionadas</span>
+                  <button class="website-photo-clear" id="websitePhotosClear" type="button" hidden data-website-copy="photosClear">Remover todas</button>
+                </div>
+                <div class="website-photo-grid" id="websitePhotosPreview" hidden></div>
+                <p class="website-photo-status" id="websitePhotosStatus" aria-live="polite"></p>
+              </div>
+              <div class="field full">
+                <label for="photo">Fotografia do casal <small>(opcional)</small></label>
+                <div class="photo-uploader" id="photoDropzone">
+                  <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" />
+                  <div>
+                    <div class="photo-icon" aria-hidden="true">＋</div>
+                    <strong id="photoTitle">Adicionar uma fotografia</strong>
+                    <span id="photoSubtitle">JPG, PNG ou WebP · máximo 20 MB · compressão automática</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="submit-row">
+              <p class="privacy-note">Ao enviar, os dados serão usados apenas para preparar o convite deste pedido. Podes manter esta página aberta enquanto processamos.</p>
+              <button class="button primary submit-button" type="submit">Enviar pedido <span aria-hidden="true">→</span></button>
+              <div id="localTestControls" hidden>
+                <input id="localTestImage" type="file" accept="image/jpeg,image/png,image/webp" hidden />
+                <button class="button secondary" id="localTestButton" type="button">Testar imagem local (sem gerar)</button>
+                <small>Disponível apenas neste servidor local. Usa os restantes dados deste formulário.</small>
+              </div>
+            </div>
+          </section>
+        </form>
+      </article>
+
+      <aside class="panel preview-panel" aria-label="Pré-visualização">
+        <header class="panel-header">
+          <h2>Pré-visualização</h2>
+          <p>Uma referência do estilo e dos dados enviados.</p>
+        </header>
+        <div class="preview-wrap">
+          <div class="phone-frame">
+            <div class="phone-screen">
+              <img id="templatePreview" class="template-preview" src="/assets/templates/01_editorial_photo.png" alt="Template selecionado" />
+              <img id="photoPreview" class="photo-overlay" alt="Fotografia carregada" />
+              <div class="preview-summary">
+                <strong id="previewNames">Tomas &amp; Rita</strong>
+                <span id="previewDetails">20 de março de 2027 · Quinta X</span>
+              </div>
+            </div>
+          </div>
+          <div class="preview-meta">
+            <div class="preview-meta-row"><span>Modo</span><strong id="previewMode">Template</strong></div>
+            <div class="preview-meta-row"><span>Estilo</span><strong id="previewTemplateName">Editorial Foto</strong></div>
+            <div class="preview-meta-row"><span>Fotografia</span><strong id="previewPhotoState">Sem fotografia</strong></div>
+            <div class="preview-meta-row"><span>PDF digital</span><strong id="previewPdfState">Localização</strong></div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <p class="footer">InviteLab · Convites digitais feitos para a tua história</p>
+  </main>
+
+  <div class="loading-overlay" id="loadingOverlay" role="dialog" aria-modal="true" aria-labelledby="loadingTitle">
+    <div class="loading-card" id="loadingCard">
+      <div class="loader-orbit" aria-hidden="true"></div>
+      <div class="success-mark" aria-hidden="true">✓</div>
+      <h2 id="loadingTitle">Estamos a preparar o teu pedido</h2>
+      <p id="loadingMessage">O processamento pode demorar alguns minutos. O teu pedido será tratado o mais depressa possível.</p>
+      <div class="progress-meta"><span>Progresso</span><strong id="progressPercent">0%</strong></div>
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+      <ol class="delivery-steps" id="deliverySteps" aria-label="Etapas do pedido">
+        <li class="delivery-step active" data-phase="design">Design</li>
+        <li class="delivery-step" data-phase="approval">Aprovação</li>
+        <li class="delivery-step" data-phase="pdf">PDF</li>
+        <li class="delivery-step" data-phase="template">Editável</li>
+      </ol>
+      <div class="loading-status" id="loadingStatus">A validar as informações…</div>
+      <section class="live-generation" id="liveGeneration" hidden aria-live="polite">
+        <div class="live-composite-frame">
+          <img id="liveComposite" alt="Pre-visualização do convite em construção" />
+        </div>
+        <div class="live-layer-feed">
+          <div class="live-layer-head">
+            <strong>O convite está a ganhar forma</strong>
+          </div>
+          <p id="livePreviewNote">A primeira pré-visualização aparece assim que estiver disponível.</p>
+        </div>
+      </section>
+      <p class="job-link" id="jobLinkWrap" hidden>Link guardado: <a id="jobStatusLink" href="#" target="_blank" rel="noopener">abrir estado do pedido</a></p>
+      <div class="generation-result" id="generationResult">
+        <div class="generated-pair" id="generatedPair" hidden>
+          <figure class="generated-frame" id="invitationFrame">
+            <figcaption>Convite <span id="invitationAttemptState"></span></figcaption>
+            <img id="generatedImage" alt="Convite de casamento gerado" />
+          </figure>
+          <figure class="generated-frame" id="envelopeFrame" hidden>
+            <figcaption>Envelope <span id="envelopeAttemptState"></span></figcaption>
+            <img id="generatedEnvelope" alt="Envelope de casamento gerado" />
+          </figure>
+        </div>
+        <p class="attempt-summary" id="attemptSummary" hidden></p>
+        <div class="result-actions">
+          <a class="button primary" id="downloadGenerated" href="#" hidden>Descarregar imagem</a>
+          <button class="button secondary" id="regenerateImage" type="button" hidden>Não aprovar</button>
+          <button class="button primary" id="confirmImage" type="button" hidden>Aprovar</button>
+          <button class="button primary" id="generatePdf" type="button" hidden>Gerar PDF</button>
+          <a class="button secondary" id="canvaGenerated" target="_blank" rel="noopener" hidden>Abrir no Canva</a>
+          <button class="button secondary" id="retryCanvaTemplateLink" type="button" hidden>Tentar criar link Canva novamente</button>
+          <a class="button secondary" id="previewWebsite" target="_blank" rel="noopener" hidden>Pré-visualizar website</a>
+          <a class="button secondary" id="statusGenerated" href="#" target="_blank" rel="noopener" hidden>Link do pedido</a>
+        </div>
+        <section class="final-files" id="finalFiles" hidden>
+          <h3>Ficheiros finais</h3>
+          <p>Abre o convite digital e o website sempre que quiseres.</p>
+          <div class="result-actions">
+            <a class="button secondary" id="openPdf" href="#" target="_blank" rel="noopener" hidden>Abrir PDF</a>
+            <a class="button primary" id="openWebsite" target="_blank" rel="noopener" hidden>Abrir Website</a>
+          </div>
+        </section>
+        <section class="website-preview" id="websitePreviewPanel" aria-label="Pré-visualização do website">
+          <h3>Pré-visualização do website</h3>
+          <div class="website-preview-frame"><iframe id="websitePreviewFrame" title="Pré-visualização do website do casamento" loading="lazy"></iframe></div>
+        </section>
+        <p class="canva-note" id="canvaNote"></p>
+      </div>
+      <button type="button" class="button secondary close-success" id="closeSuccess">Voltar ao editor</button>
+    </div>
+  </div>
+
+  <div class="asset-revision-overlay" id="assetRevisionOverlay" hidden>
+    <form class="asset-revision-modal" id="assetRevisionForm" role="dialog" aria-modal="true" aria-labelledby="assetRevisionTitle" aria-describedby="assetRevisionDescription">
+      <h2 id="assetRevisionTitle">O que queres gerar novamente?</h2>
+      <p id="assetRevisionDescription">Escolhe apenas a peça que queres alterar. A outra versão fica guardada enquanto preparamos a nova.</p>
+      <div class="asset-choice-grid">
+        <label class="asset-choice" id="invitationRevisionChoice">
+          <input id="revisionInvitation" type="radio" name="revisionTarget" value="invitation" />
+          <span><strong>Convite</strong><small id="invitationRevisionAttempts">Escolhe esta opção para refazer o convite.</small></span>
+        </label>
+        <label class="asset-choice" id="envelopeRevisionChoice">
+          <input id="revisionEnvelope" type="radio" name="revisionTarget" value="envelope" />
+          <span><strong>Envelope</strong><small id="envelopeRevisionAttempts">Escolhe esta opção para refazer o envelope.</small></span>
+        </label>
+      </div>
+      <div class="revision-context" id="revisionContextWrap">
+        <label for="revisionContext">O que queres alterar? <small>(opcional)</small></label>
+        <textarea id="revisionContext" maxlength="240" placeholder="Ex.: nomes maiores, tons mais claros, selo mais discreto, menos flores"></textarea>
+        <small>Máximo 240 caracteres. Esta nota é usada apenas como orientação visual.</small>
+      </div>
+      <p class="asset-revision-error" id="assetRevisionError" role="alert"></p>
+      <div class="asset-revision-actions">
+        <button class="button secondary" id="cancelAssetRevision" type="button">Cancelar</button>
+        <button class="button primary" id="confirmAssetRevision" type="submit">Gerar novamente</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="website-details-overlay" id="websiteDetailsOverlay" role="dialog" aria-modal="true" aria-labelledby="websiteDetailsTitle" hidden>
+    <form class="website-details-card" id="websiteDetailsForm">
+      <button class="website-details-close" id="closeWebsiteDetails" type="button" data-website-copy-aria="closeModal" aria-label="Fechar">×</button>
+      <h2 id="websiteDetailsTitle" data-website-copy="modalTitle">Personaliza o website do casamento</h2>
+      <div class="website-section-picker" id="websiteSectionPicker">
+        <label class="website-section-choice"><input type="checkbox" data-website-section="story" checked><span><strong data-website-copy="sectionStory">A nossa história</strong><small data-website-copy="sectionStoryHint">O vosso percurso e fotografias.</small></span></label>
+        <label class="website-section-choice"><input type="checkbox" data-website-section="rsvp" checked><span><strong>RSVP</strong><small data-website-copy="sectionRsvpHint">Confirmação dos convidados.</small></span></label>
+        <label class="website-section-choice"><input type="checkbox" data-website-section="venueParking" checked><span><strong data-website-copy="sectionVenue">Local e estacionamento</strong><small data-website-copy="sectionVenueHint">Detalhes de chegada.</small></span></label>
+        <label class="website-section-choice"><input type="checkbox" data-website-section="programme" checked><span><strong data-website-copy="sectionProgramme">O programa</strong><small data-website-copy="sectionProgrammeHint">Horários do dia.</small></span></label>
+        <label class="website-section-choice"><input type="checkbox" data-website-section="menu" checked><span><strong data-website-copy="sectionMenu">O menu</strong><small data-website-copy="sectionMenuHint">Refeição e discursos.</small></span></label>
+        <label class="website-section-choice"><input type="checkbox" data-website-section="dressCode" checked><span><strong data-website-copy="sectionDressCode">Dress code</strong><small data-website-copy="sectionDressCodeHint">Estilo e cores.</small></span></label>
+        <label class="website-section-choice"><input type="checkbox" data-website-section="stayTravel" checked><span><strong data-website-copy="sectionStayTravel">Alojamento e viagem</strong><small data-website-copy="sectionStayTravelHint">Onde ficar e como chegar.</small></span></label>
+        <label class="website-section-choice"><input type="checkbox" data-website-section="faq" checked><span><strong>FAQ</strong><small data-website-copy="sectionFaqHint">Perguntas úteis.</small></span></label>
+      </div>
+      <div class="website-section-preview" aria-live="polite"><span id="websiteSectionSummary">8 secções incluídas</span><div class="website-preview-bars" aria-hidden="true"><i data-preview-section="story"></i><i data-preview-section="rsvp"></i><i data-preview-section="venueParking"></i><i data-preview-section="programme"></i><i data-preview-section="menu"></i><i data-preview-section="dressCode"></i><i data-preview-section="stayTravel"></i><i data-preview-section="faq"></i></div></div>
+      <p data-website-copy="modalDescription">Estes detalhes aparecem nas secções do site. São opcionais — se ficares sem preencher, usamos o texto e horários elegantes predefinidos.</p>
+      <p class="website-photo-warning" id="websitePhotoWarning" role="status" data-website-copy="noWebsitePhotosWarning" hidden>No website photos have been added. We will use the invitation artwork instead.</p>
+      <div class="form-grid">
+        <div class="field full"><label for="websiteStory"><span data-website-copy="storyLabel">A vossa história ou mensagem para os convidados</span> <small data-website-copy="optional">(opcional)</small></label><textarea id="websiteStory" maxlength="900" data-website-copy-placeholder="storyPlaceholder" placeholder="Ex.: Conhecemo-nos há 8 anos e mal podemos esperar por celebrar este dia convosco."></textarea></div>
+        <div class="field"><label for="ceremonyTime"><span data-website-copy="ceremonyTimeLabel">Hora da cerimónia</span> <small data-website-copy="optional">(opcional)</small></label><input id="ceremonyTime" type="time" /></div>
+        <div class="field"><label for="receptionTime"><span data-website-copy="receptionTimeLabel">Hora da receção / cocktail</span> <small data-website-copy="optional">(opcional)</small></label><input id="receptionTime" type="time" /></div>
+        <div class="field full"><label for="ceremonyDescription"><span data-website-copy="ceremonyDescriptionLabel">Descrição da cerimónia</span> <small data-website-copy="optional">(opcional)</small></label><input id="ceremonyDescription" maxlength="300" data-website-copy-placeholder="ceremonyDescriptionPlaceholder" placeholder="Ex.: Troca de votos na capela da quinta." /></div>
+        <div class="field full"><label for="receptionDescription"><span data-website-copy="receptionDescriptionLabel">Descrição da receção</span> <small data-website-copy="optional">(opcional)</small></label><input id="receptionDescription" maxlength="300" data-website-copy-placeholder="receptionDescriptionPlaceholder" placeholder="Ex.: Cocktail no jardim, seguido de jantar e festa." /></div>
+        <div class="field"><label for="arrivalTime"><span data-website-copy="arrivalTimeLabel">Chegada dos convidados</span> <small data-website-copy="optional">(opcional)</small></label><input id="arrivalTime" type="time" /></div>
+        <div class="field"><label for="partyTime"><span data-website-copy="partyTimeLabel">Jantar, brindes e dança</span> <small data-website-copy="optional">(opcional)</small></label><input id="partyTime" type="time" /></div>
+      </div>
+      <div class="website-detail-groups">
+        <details class="website-detail-group" open><summary data-website-copy="groupExperience">Envelope e música</summary><div class="form-grid">
+          <div class="field full envelope-colour-field">
+            <label><span data-website-copy="envelopeColourLabel">Cor do envelope no telemóvel</span></label>
+            <input id="envelopeColor" type="hidden" value="#5F694F" />
+            <div class="envelope-colour-palette" id="envelopeColourPalette" role="group" aria-label="Escolher cor do envelope">
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#5F694F" style="--swatch:#5F694F" aria-label="Oliveira" aria-pressed="true"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#89947B" style="--swatch:#89947B" aria-label="Sálvia" aria-pressed="false"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#9B6A59" style="--swatch:#9B6A59" aria-label="Terracota" aria-pressed="false"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#743442" style="--swatch:#743442" aria-label="Bordô" aria-pressed="false"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#B8919B" style="--swatch:#B8919B" aria-label="Rosa" aria-pressed="false"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#304A61" style="--swatch:#304A61" aria-label="Azul-marinho" aria-pressed="false"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#C0AE91" style="--swatch:#C0AE91" aria-label="Champanhe" aria-pressed="false"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#343436" style="--swatch:#343436" aria-label="Carvão" aria-pressed="false"></button>
+            </div>
+            <label class="envelope-custom-colour" for="envelopeColourCustom"><input id="envelopeColourCustom" type="color" value="#5F694F" /><span data-website-copy="customEnvelopeColour">Ou escolhe uma cor personalizada</span></label>
+          </div>
+          <div class="field full"><label for="weddingMusic"><span data-website-copy="musicFileLabel">Ficheiro MP3 da música</span> <small data-website-copy="optional">(opcional)</small></label><input id="weddingMusic" name="weddingMusic" type="file" accept=".mp3,audio/mpeg" /></div>
+          <div class="field"><label for="musicTitle"><span data-website-copy="musicTitleLabel">Nome da música</span> <small data-website-copy="optional">(opcional)</small></label><input id="musicTitle" maxlength="160" /></div>
+          <div class="field"><label for="musicArtist"><span data-website-copy="musicArtistLabel">Artista</span> <small data-website-copy="optional">(opcional)</small></label><input id="musicArtist" maxlength="160" /></div>
+          <p class="field full music-rights-note" data-website-copy="musicRightsNote">Carrega um ficheiro MP3 que tenhas autorização para utilizar, até 20 MB. Se não carregares nenhum ficheiro, o website não terá música.</p>
+        </div></details>
+        <details class="website-detail-group" data-website-detail-for="story"><summary data-website-copy="groupStory">Story details</summary><div class="form-grid">
+          <div class="field full"><label for="storyIntro"><span data-website-copy="storyIntroLabel">Story introduction</span> <small data-website-copy="optional">(optional)</small></label><textarea id="storyIntro" maxlength="700" data-website-copy-placeholder="storyIntroPlaceholder"></textarea></div>
+          <div class="field full"><label for="howWeMet"><span data-website-copy="howWeMetLabel">How we met</span> <small data-website-copy="optional">(optional)</small></label><textarea id="howWeMet" maxlength="500"></textarea></div>
+          <div class="field full"><label for="proposal"><span data-website-copy="proposalLabel">The proposal</span> <small data-website-copy="optional">(optional)</small></label><textarea id="proposal" maxlength="500"></textarea></div>
+          <div class="field full"><label for="nextChapter"><span data-website-copy="nextChapterLabel">Our next chapter</span> <small data-website-copy="optional">(optional)</small></label><textarea id="nextChapter" maxlength="500"></textarea></div>
+        </div></details>
+        <details class="website-detail-group" data-website-detail-for="rsvp"><summary data-website-copy="groupRsvp">RSVP details</summary><div class="form-grid"><div class="field full"><label for="rsvpDeadline"><span data-website-copy="rsvpDeadlineLabel">RSVP deadline</span> <small data-website-copy="optional">(optional)</small></label><input id="rsvpDeadline" type="date" /></div></div></details>
+        <details class="website-detail-group" data-website-detail-for="venueParking"><summary data-website-copy="groupVenue">Venue and parking details</summary><div class="form-grid">
+          <div class="field full"><label for="venueTitle"><span data-website-copy="venueTitleLabel">Venue heading</span> <small data-website-copy="optional">(optional)</small></label><input id="venueTitle" maxlength="140" /></div>
+          <div class="field full"><label for="venueDescription"><span data-website-copy="venueDescriptionLabel">Venue description</span> <small data-website-copy="optional">(optional)</small></label><textarea id="venueDescription" maxlength="700"></textarea></div>
+          <div class="field full"><label for="parkingInfo"><span data-website-copy="parkingInfoLabel">Parking and arrival</span> <small data-website-copy="optional">(optional)</small></label><textarea id="parkingInfo" maxlength="240"></textarea></div>
+        </div></details>
+        <details class="website-detail-group" data-website-detail-for="programme menu" open><summary data-website-copy="groupSchedule">Schedule and menu details</summary><div class="form-grid">
+          <div class="field full"><label for="arrivalDescription"><span data-website-copy="arrivalDescriptionLabel">Arrival description</span> <small data-website-copy="optional">(optional)</small></label><input id="arrivalDescription" maxlength="300" /></div>
+          <div class="field"><label for="mealTime"><span data-website-copy="mealTimeLabel">Dinner time</span> <small data-website-copy="optional">(optional)</small></label><input id="mealTime" type="time" /></div><div class="field"><label for="cakeTime"><span data-website-copy="cakeTimeLabel">Cake cutting time</span> <small data-website-copy="optional">(optional)</small></label><input id="cakeTime" type="time" /></div>
+          <div class="field full"><label for="mealDescription"><span data-website-copy="mealDescriptionLabel">Dinner and speeches description</span> <small data-website-copy="optional">(optional)</small></label><input id="mealDescription" maxlength="300" /></div><div class="field full"><label for="cakeDescription"><span data-website-copy="cakeDescriptionLabel">Cake cutting description</span> <small data-website-copy="optional">(optional)</small></label><input id="cakeDescription" maxlength="300" /></div><div class="field full"><label for="partyDescription"><span data-website-copy="partyDescriptionLabel">Party description</span> <small data-website-copy="optional">(optional)</small></label><input id="partyDescription" maxlength="300" /></div>
+        </div></details>
+        <details class="website-detail-group" data-website-detail-for="dressCode"><summary data-website-copy="groupDressCode">Dress code details</summary><div class="form-grid">
+          <div class="field full"><label for="dressCodeTitle"><span data-website-copy="dressCodeTitleLabel">Dress code heading</span> <small data-website-copy="optional">(optional)</small></label><input id="dressCodeTitle" maxlength="160" /></div><div class="field full"><label for="dressCodeIntro"><span data-website-copy="dressCodeIntroLabel">Short introduction</span> <small data-website-copy="optional">(optional)</small></label><textarea id="dressCodeIntro" maxlength="400"></textarea></div>
+          <div class="field full"><label for="dressCodeStyle"><span data-website-copy="dressCodeStyleLabel">Overall style</span> <small data-website-copy="optional">(optional)</small></label><textarea id="dressCodeStyle" maxlength="400"></textarea></div><div class="field full"><label for="dressCodeColors"><span data-website-copy="dressCodeColorsLabel">Suggested colours</span> <small data-website-copy="optional">(optional)</small></label><textarea id="dressCodeColors" maxlength="300"></textarea></div><div class="field full"><label for="dressCodeComfort"><span data-website-copy="dressCodeComfortLabel">Comfort note</span> <small data-website-copy="optional">(optional)</small></label><textarea id="dressCodeComfort" maxlength="300"></textarea></div>
+        </div></details>
+        <details class="website-detail-group" data-website-detail-for="stayTravel"><summary data-website-copy="groupStayTravel">Stay and travel details</summary><div class="form-grid">
+          <div class="field full"><label for="accommodationIntro"><span data-website-copy="accommodationIntroLabel">Accommodation introduction</span> <small data-website-copy="optional">(optional)</small></label><textarea id="accommodationIntro" maxlength="500"></textarea></div>
+          <div class="field"><label for="hotel1Name"><span data-website-copy="hotel1NameLabel">Accommodation 1</span> <small data-website-copy="optional">(optional)</small></label><input id="hotel1Name" maxlength="120" /></div><div class="field"><label for="hotel1Description"><span data-website-copy="hotel1DescriptionLabel">Accommodation 1 details</span> <small data-website-copy="optional">(optional)</small></label><input id="hotel1Description" maxlength="300" /></div>
+          <div class="field"><label for="hotel2Name"><span data-website-copy="hotel2NameLabel">Accommodation 2</span> <small data-website-copy="optional">(optional)</small></label><input id="hotel2Name" maxlength="120" /></div><div class="field"><label for="hotel2Description"><span data-website-copy="hotel2DescriptionLabel">Accommodation 2 details</span> <small data-website-copy="optional">(optional)</small></label><input id="hotel2Description" maxlength="300" /></div>
+          <div class="field"><label for="hotel3Name"><span data-website-copy="hotel3NameLabel">Accommodation 3</span> <small data-website-copy="optional">(optional)</small></label><input id="hotel3Name" maxlength="120" /></div><div class="field"><label for="hotel3Description"><span data-website-copy="hotel3DescriptionLabel">Accommodation 3 details</span> <small data-website-copy="optional">(optional)</small></label><input id="hotel3Description" maxlength="300" /></div>
+          <div class="field full"><label for="travelIntro"><span data-website-copy="travelIntroLabel">Travel introduction</span> <small data-website-copy="optional">(optional)</small></label><textarea id="travelIntro" maxlength="400"></textarea></div><div class="field full"><label for="travelAirport"><span data-website-copy="travelAirportLabel">Airport information</span> <small data-website-copy="optional">(optional)</small></label><textarea id="travelAirport" maxlength="400"></textarea></div><div class="field full"><label for="travelTransfers"><span data-website-copy="travelTransfersLabel">Transfer information</span> <small data-website-copy="optional">(optional)</small></label><textarea id="travelTransfers" maxlength="400"></textarea></div><div class="field full"><label for="travelParking"><span data-website-copy="travelParkingLabel">Parking information</span> <small data-website-copy="optional">(optional)</small></label><textarea id="travelParking" maxlength="400"></textarea></div>
+        </div></details>
+        <details class="website-detail-group" data-website-detail-for="faq"><summary data-website-copy="groupFaq">FAQ and closing message</summary><div class="form-grid"><div class="field full"><label for="faqPlusOne"><span data-website-copy="faqPlusOneLabel">Plus-one policy</span> <small data-website-copy="optional">(optional)</small></label><textarea id="faqPlusOne" maxlength="400"></textarea></div><div class="field full"><label for="footerMessage"><span data-website-copy="footerMessageLabel">Closing message</span> <small data-website-copy="optional">(optional)</small></label><textarea id="footerMessage" maxlength="400"></textarea></div></div></details>
+      </div>
+      <div class="website-details-actions"><button class="button secondary" type="button" id="skipWebsiteDetails" data-website-copy="useDefaults">Usar predefinições</button><button class="button primary" type="submit"><span data-website-copy="continueGeneration">Continuar para gerar</span> <span aria-hidden="true">→</span></button></div>
+    </form>
+  </div>
+
+  <script>
+    const CONFIG = {
+      demoMode: false,
+      submitEndpoint: '/api/customer/generate'
+    };
+    const requestedRedoId = new URL(window.location.href).searchParams.get('redo') || '';
+    const redoRequestId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestedRedoId)
+      ? requestedRedoId
+      : '';
+
+    const EVENT_PATHS = Object.freeze({
+      wedding: '/wedding',
+      baby_shower: '/babyshower'
+    });
+
+    function eventTypeFromPath(pathname) {
+      const normalizedPath = String(pathname || '/')
+        .replace(/\/+$/, '')
+        .toLowerCase() || '/';
+      if (normalizedPath === EVENT_PATHS.baby_shower) return 'baby_shower';
+      if (normalizedPath === EVENT_PATHS.wedding) return 'wedding';
+      return null;
+    }
+
+    function updateEventPath(eventType, mode = 'push') {
+      const nextPath = EVENT_PATHS[eventType] || EVENT_PATHS.wedding;
+      const url = new URL(window.location.href);
+      if (url.pathname === nextPath && mode !== 'replace') return;
+      url.pathname = nextPath;
+      const nextState = { ...(history.state || {}), eventType };
+      history[mode === 'replace' ? 'replaceState' : 'pushState'](nextState, '', url);
+    }
+
+    const initialEventType = eventTypeFromPath(window.location.pathname) || 'wedding';
+    let templates = window.WeddingI18n.getTemplates(initialEventType);
+
+    const state = {
+      mode: 'template',
+      selectedTemplate: templates[0],
+      photoFile: null,
+      photoDataUrl: null,
+      customTemplateFile: null,
+      customTemplateDataUrl: null,
+      musicFile: null,
+      websitePhotos: [],
+      eventType: initialEventType,
+      packType: 'Full_pack',
+      creationModeAccess: 'both',
+      language: window.WeddingI18n.locale,
+      bootstrap: null,
+      entitlement: null,
+      redoRequestId,
+      redoReady: !redoRequestId,
+      retainedPhoto: false,
+      retainedCustomTemplate: false,
+      retainedMusic: false
+    };
+
+    const grid = document.getElementById('templateGrid');
+    const form = document.getElementById('invitationForm');
+    const templatePreview = document.getElementById('templatePreview');
+    const previewTemplateName = document.getElementById('previewTemplateName');
+    const previewMode = document.getElementById('previewMode');
+    const photoInput = document.getElementById('photo');
+    const photoPreview = document.getElementById('photoPreview');
+    const previewPhotoState = document.getElementById('previewPhotoState');
+    const photoTitle = document.getElementById('photoTitle');
+    const photoSubtitle = document.getElementById('photoSubtitle');
+    const dropzone = document.getElementById('photoDropzone');
+    const customTemplateInput = document.getElementById('customTemplate');
+    const customTemplateField = document.getElementById('customTemplateField');
+    const customTemplateTitle = document.getElementById('customTemplateTitle');
+    const customTemplateSubtitle = document.getElementById('customTemplateSubtitle');
+    const eventTypeInput = document.getElementById('eventType');
+    const packTypeSelect = document.getElementById('packType');
+    const websitePhotosField = document.getElementById('websitePhotosField');
+    const websitePhotosInput = document.getElementById('websitePhotos');
+    const websitePhotosDropzone = document.getElementById('websitePhotosDropzone');
+    const websitePhotosPreview = document.getElementById('websitePhotosPreview');
+    const websitePhotosCount = document.getElementById('websitePhotosCount');
+    const websitePhotosClear = document.getElementById('websitePhotosClear');
+    const websitePhotosStatus = document.getElementById('websitePhotosStatus');
+    const websitePhotoWarning = document.getElementById('websitePhotoWarning');
+    const websiteDetailsOverlay = document.getElementById('websiteDetailsOverlay');
+    const websiteDetailsForm = document.getElementById('websiteDetailsForm');
+    const weddingMusicInput = document.getElementById('weddingMusic');
+    const websiteSectionInputs = [...document.querySelectorAll('[data-website-section]')];
+    const customizeWebsite = document.getElementById('customizeWebsite');
+    const localTestControls = document.getElementById('localTestControls');
+    const localTestImage = document.getElementById('localTestImage');
+    const localTestButton = document.getElementById('localTestButton');
+    const redoBanner = document.getElementById('redoBanner');
+
+    // The main editor is translated by WeddingI18n. These newer website
+    // controls also need their own copy so that no Portuguese leaks into a
+    // non-Portuguese project.
+    const websiteUiCopy = {
+      pt: {
+        setupTitle: 'Criar website do casamento', setupDescription: 'Um website elegante, publicado automaticamente com o teu convite.', customize: 'Personalizar',
+        legacyTitle: 'Criar também um website do casamento', legacyDescription: 'Depois de aprovares a imagem, podes pré-visualizar e publicar o site no teu link InviteLab.',
+        photosLabel: 'Fotografias para o website', optional: '(opcional)', photosTitle: 'Adicionar fotografias do casal', photosSubtitle: 'Até 5 imagens · JPG, PNG ou WebP · máximo 20 MB · compressão automática cada', photosClear: 'Remover todas',
+        modalTitle: 'Personaliza o website do casamento', sectionStory: 'A nossa história', sectionStoryHint: 'O vosso percurso e fotografias.', sectionRsvpHint: 'Confirmação dos convidados.', sectionVenue: 'Local e estacionamento', sectionVenueHint: 'Detalhes de chegada.', sectionProgramme: 'O programa', sectionProgrammeHint: 'Horários do dia.', sectionMenu: 'O menu', sectionMenuHint: 'Refeição e discursos.', sectionDressCode: 'Dress code', sectionDressCodeHint: 'Estilo e cores.', sectionStayTravel: 'Alojamento e viagem', sectionStayTravelHint: 'Onde ficar e como chegar.', sectionFaqHint: 'Perguntas úteis.',
+        modalDescription: 'Estes detalhes aparecem nas secções do site. São opcionais — se ficares sem preencher, usamos o texto e horários elegantes predefinidos.', storyLabel: 'A vossa história ou mensagem para os convidados', storyPlaceholder: 'Ex.: Conhecemo-nos há 8 anos e mal podemos esperar por celebrar este dia convosco.', ceremonyTimeLabel: 'Hora da cerimónia', receptionTimeLabel: 'Hora da receção / cocktail', ceremonyDescriptionLabel: 'Descrição da cerimónia', ceremonyDescriptionPlaceholder: 'Ex.: Troca de votos na capela da quinta.', receptionDescriptionLabel: 'Descrição da receção', receptionDescriptionPlaceholder: 'Ex.: Cocktail no jardim, seguido de jantar e festa.', arrivalTimeLabel: 'Chegada dos convidados', partyTimeLabel: 'Jantar, brindes e dança', useDefaults: 'Usar predefinições', continueGeneration: 'Continuar para gerar',
+        product: {
+          invite_only_pack: { description: 'Para criar e editar as imagens do convite e do envelope.', features: ['Convite em imagem', 'Envelope personalizado', 'Template Canva editável'] },
+          digital_pdf_pack: { description: 'Inclui as imagens editáveis e o convite digital em PDF.', features: ['Convite e envelope em imagem', 'Template Canva editável', 'PDF digital interativo'] },
+          Full_pack: { description: 'A experiência digital completa para o teu evento.', features: ['Convite e envelope em imagem', 'Template Canva editável', 'PDF digital interativo', 'Website publicado'] }
+        },
+        creation: { both: 'Criação incluída: template InviteLab ou imagem própria', template: 'Criação incluída: escolher um template InviteLab', custom_import: 'Criação incluída: carregar a tua própria imagem' }
+      },
+      en: {
+        setupTitle: 'Create a wedding website', setupDescription: 'An elegant website, published automatically with your invitation.', customize: 'Customise',
+        legacyTitle: 'Also create a wedding website', legacyDescription: 'After you approve the image, you can preview and publish the website at your InviteLab link.',
+        photosLabel: 'Website photos', optional: '(optional)', photosTitle: 'Add couple photos', photosSubtitle: 'Up to 5 images · JPG, PNG or WebP · 20 MB maximum · each image is compressed automatically', photosClear: 'Remove all',
+        modalTitle: 'Personalise the wedding website', sectionStory: 'Our story', sectionStoryHint: 'Your journey and photos.', sectionRsvpHint: 'Guest confirmations.', sectionVenue: 'Venue and parking', sectionVenueHint: 'Arrival details.', sectionProgramme: 'The schedule', sectionProgrammeHint: 'Timings for the day.', sectionMenu: 'The menu', sectionMenuHint: 'Meal and speeches.', sectionDressCode: 'Dress code', sectionDressCodeHint: 'Style and colours.', sectionStayTravel: 'Stay and travel', sectionStayTravelHint: 'Where to stay and how to get there.', sectionFaqHint: 'Useful questions.',
+        modalDescription: 'These details appear in the website sections. They are optional — if left blank, we use elegant default copy and timings.', storyLabel: 'Your story or message to guests', storyPlaceholder: 'E.g. We met eight years ago and cannot wait to celebrate this day with you.', ceremonyTimeLabel: 'Ceremony time', receptionTimeLabel: 'Reception / cocktail time', ceremonyDescriptionLabel: 'Ceremony description', ceremonyDescriptionPlaceholder: 'E.g. Exchange of vows in the venue chapel.', receptionDescriptionLabel: 'Reception description', receptionDescriptionPlaceholder: 'E.g. Garden cocktail followed by dinner and dancing.', arrivalTimeLabel: 'Guest arrival', partyTimeLabel: 'Dinner, toasts and dancing', useDefaults: 'Use defaults', continueGeneration: 'Continue to generation',
+        product: {
+          invite_only_pack: { description: 'Create and edit your invitation and envelope artwork.', features: ['Invitation artwork', 'Personalised envelope', 'Editable Canva template'] },
+          digital_pdf_pack: { description: 'Includes editable artwork and the digital PDF invitation.', features: ['Invitation and envelope artwork', 'Editable Canva template', 'Interactive digital PDF'] },
+          Full_pack: { description: 'The complete digital experience for your event.', features: ['Invitation and envelope artwork', 'Editable Canva template', 'Interactive digital PDF', 'Published wedding website'] }
+        },
+        creation: { both: 'Included: InviteLab template or your own image', template: 'Included: choose an InviteLab template', custom_import: 'Included: upload your own image' }
+      }
+    };
+
+    Object.assign(websiteUiCopy.pt, {
+      groupExperience: 'Envelope e música', envelopeColourLabel: 'Cor do envelope no telemóvel', customEnvelopeColour: 'Ou escolhe uma cor personalizada', musicFileLabel: 'Ficheiro MP3 da música', musicTitleLabel: 'Nome da música', musicArtistLabel: 'Artista', musicRightsNote: 'Carrega um ficheiro MP3 que tenhas autorização para utilizar, até 20 MB. Se não carregares nenhum ficheiro, o website não terá música.',
+      closeModal: 'Fechar', groupStory: 'Detalhes da história', storyIntroLabel: 'Introdução da história', storyIntroPlaceholder: 'Ex.: A nossa história começou de forma simples e trouxe-nos até este dia.', howWeMetLabel: 'Como nos conhecemos', proposalLabel: 'O pedido', nextChapterLabel: 'O nosso próximo capítulo',
+      groupRsvp: 'Detalhes de RSVP', rsvpDeadlineLabel: 'Data limite para confirmar presença',
+      groupVenue: 'Detalhes do local e estacionamento', venueTitleLabel: 'Título do local', venueDescriptionLabel: 'Descrição do local', parkingInfoLabel: 'Estacionamento e chegada',
+      groupSchedule: 'Programa e detalhes do menu', arrivalDescriptionLabel: 'Descrição da chegada', mealTimeLabel: 'Hora da refeição', cakeTimeLabel: 'Hora do corte do bolo', mealDescriptionLabel: 'Descrição da refeição e discursos', cakeDescriptionLabel: 'Descrição do corte do bolo', partyDescriptionLabel: 'Descrição da festa',
+      groupDressCode: 'Detalhes do dress code', dressCodeTitleLabel: 'Título do dress code', dressCodeIntroLabel: 'Introdução curta', dressCodeStyleLabel: 'Estilo geral', dressCodeColorsLabel: 'Cores sugeridas', dressCodeComfortLabel: 'Nota de conforto',
+      groupStayTravel: 'Detalhes de alojamento e viagem', accommodationIntroLabel: 'Introdução ao alojamento', hotel1NameLabel: 'Alojamento 1', hotel1DescriptionLabel: 'Detalhes do alojamento 1', hotel2NameLabel: 'Alojamento 2', hotel2DescriptionLabel: 'Detalhes do alojamento 2', hotel3NameLabel: 'Alojamento 3', hotel3DescriptionLabel: 'Detalhes do alojamento 3', travelIntroLabel: 'Introdução à viagem', travelAirportLabel: 'Informação sobre o aeroporto', travelTransfersLabel: 'Informação sobre transfers', travelParkingLabel: 'Informação sobre estacionamento',
+      groupFaq: 'FAQ e mensagem final', faqPlusOneLabel: 'Política de acompanhante', footerMessageLabel: 'Mensagem final', noWebsitePhotosWarning: 'Ainda não adicionaste fotografias para o website. Vamos usar a imagem do convite como alternativa.'
+    });
+    Object.assign(websiteUiCopy.en, {
+      groupExperience: 'Envelope and music', envelopeColourLabel: 'Mobile envelope colour', customEnvelopeColour: 'Or choose a custom colour', musicFileLabel: 'Music MP3 file', musicTitleLabel: 'Song title', musicArtistLabel: 'Artist', musicRightsNote: 'Upload an MP3 file you are authorised to use, up to 20 MB. If you do not upload a file, the website will not include music.',
+      closeModal: 'Close', groupStory: 'Story details', storyIntroLabel: 'Story introduction', storyIntroPlaceholder: 'E.g. Our story began simply and brought us to this day.', howWeMetLabel: 'How we met', proposalLabel: 'The proposal', nextChapterLabel: 'Our next chapter',
+      groupRsvp: 'RSVP details', rsvpDeadlineLabel: 'RSVP deadline',
+      groupVenue: 'Venue and parking details', venueTitleLabel: 'Venue heading', venueDescriptionLabel: 'Venue description', parkingInfoLabel: 'Parking and arrival',
+      groupSchedule: 'Schedule and menu details', arrivalDescriptionLabel: 'Arrival description', mealTimeLabel: 'Dinner time', cakeTimeLabel: 'Cake cutting time', mealDescriptionLabel: 'Dinner and speeches description', cakeDescriptionLabel: 'Cake cutting description', partyDescriptionLabel: 'Party description',
+      groupDressCode: 'Dress code details', dressCodeTitleLabel: 'Dress code heading', dressCodeIntroLabel: 'Short introduction', dressCodeStyleLabel: 'Overall style', dressCodeColorsLabel: 'Suggested colours', dressCodeComfortLabel: 'Comfort note',
+      groupStayTravel: 'Stay and travel details', accommodationIntroLabel: 'Accommodation introduction', hotel1NameLabel: 'Accommodation 1', hotel1DescriptionLabel: 'Accommodation 1 details', hotel2NameLabel: 'Accommodation 2', hotel2DescriptionLabel: 'Accommodation 2 details', hotel3NameLabel: 'Accommodation 3', hotel3DescriptionLabel: 'Accommodation 3 details', travelIntroLabel: 'Travel introduction', travelAirportLabel: 'Airport information', travelTransfersLabel: 'Transfer information', travelParkingLabel: 'Parking information',
+      groupFaq: 'FAQ and closing message', faqPlusOneLabel: 'Plus-one policy', footerMessageLabel: 'Closing message', noWebsitePhotosWarning: 'No website photos have been added. We will use the invitation artwork instead.'
+    });
+
+    function currentWebsiteUi() {
+      return websiteUiCopy[state.language === 'pt' ? 'pt' : 'en'];
+    }
+
+    function syncWebsiteUiCopy() {
+      const copy = currentWebsiteUi();
+      document.querySelectorAll('[data-website-copy]').forEach(element => {
+        const value = copy[element.dataset.websiteCopy];
+        if (value) element.textContent = value;
+      });
+      document.querySelectorAll('[data-website-copy-placeholder]').forEach(element => {
+        const value = copy[element.dataset.websiteCopyPlaceholder];
+        if (value) element.placeholder = value;
+      });
+      document.querySelectorAll('[data-website-copy-aria]').forEach(element => {
+        const value = copy[element.dataset.websiteCopyAria];
+        if (value) element.setAttribute('aria-label', value);
+      });
+      syncWebsiteSectionPreview();
+      renderWebsitePhotos();
+    }
+
+    function syncPurchasedProductCopy() {
+      const copy = currentWebsiteUi();
+      const product = copy.product[state.packType];
+      if (!product) return;
+      document.getElementById('purchasedProductDescription').textContent = product.description;
+      document.getElementById('purchasedProductFeatures').replaceChildren(...product.features.map(feature => {
+        const item = document.createElement('li');
+        item.textContent = feature;
+        return item;
+      }));
+      document.getElementById('purchasedCreationAccess').textContent = copy.creation[state.creationModeAccess] || copy.creation.both;
+    }
+
+    const websiteDetailFields = Object.freeze({
+      websiteStory: 'story', storyIntro: 'storyIntro', howWeMet: 'howWeMet', proposal: 'proposal', nextChapter: 'nextChapter', rsvpDeadline: 'rsvpDeadline',
+      venueTitle: 'venueTitle', venueDescription: 'venueDescription', parkingInfo: 'parkingInfo',
+      arrivalTime: 'arrivalTime', ceremonyTime: 'ceremonyTime', receptionTime: 'receptionTime', mealTime: 'mealTime', cakeTime: 'cakeTime', partyTime: 'partyTime',
+      arrivalDescription: 'arrivalDescription', ceremonyDescription: 'ceremonyDescription', receptionDescription: 'receptionDescription', mealDescription: 'mealDescription', cakeDescription: 'cakeDescription', partyDescription: 'partyDescription',
+      dressCodeTitle: 'dressCodeTitle', dressCodeIntro: 'dressCodeIntro', dressCodeStyle: 'dressCodeStyle', dressCodeColors: 'dressCodeColors', dressCodeComfort: 'dressCodeComfort',
+      accommodationIntro: 'accommodationIntro', hotel1Name: 'hotel1Name', hotel1Description: 'hotel1Description', hotel2Name: 'hotel2Name', hotel2Description: 'hotel2Description', hotel3Name: 'hotel3Name', hotel3Description: 'hotel3Description',
+      travelIntro: 'travelIntro', travelAirport: 'travelAirport', travelTransfers: 'travelTransfers', travelParking: 'travelParking', faqPlusOne: 'faqPlusOne', footerMessage: 'footerMessage',
+      envelopeColor: 'envelopeColor', musicTitle: 'musicTitle', musicArtist: 'musicArtist'
+    });
+
+    function setEnvelopeColour(value) {
+      const normalized = /^#[0-9A-Fa-f]{6}$/.test(String(value || '')) ? String(value).toUpperCase() : '#5F694F';
+      const hidden = document.getElementById('envelopeColor');
+      const custom = document.getElementById('envelopeColourCustom');
+      if (hidden) hidden.value = normalized;
+      if (custom) custom.value = normalized;
+      document.querySelectorAll('[data-envelope-colour]').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.envelopeColour.toUpperCase() === normalized));
+      });
+    }
+    document.getElementById('envelopeColourPalette')?.addEventListener('click', event => {
+      const swatch = event.target.closest('[data-envelope-colour]');
+      if (swatch) setEnvelopeColour(swatch.dataset.envelopeColour);
+    });
+    document.getElementById('envelopeColourCustom')?.addEventListener('input', event => setEnvelopeColour(event.target.value));
+    setEnvelopeColour(document.getElementById('envelopeColor')?.value);
+
+    function websiteDetailsFromForm() {
+      return {
+        ...Object.fromEntries(Object.entries(websiteDetailFields).map(([id, key]) => [key, document.getElementById(id)?.value || ''])),
+        sections: Object.fromEntries(websiteSectionInputs.map(input => [input.dataset.websiteSection, input.checked]))
+      };
+    }
+    weddingMusicInput?.addEventListener('change', () => {
+      const file = weddingMusicInput.files?.[0] || null;
+      if (!file) {
+        state.musicFile = null;
+        state.retainedMusic = false;
+        return;
+      }
+      const isMp3 = file.type === 'audio/mpeg' || /\.mp3$/i.test(file.name || '');
+      if (!isMp3 || file.size > 20 * 1024 * 1024) {
+        weddingMusicInput.value = '';
+        state.musicFile = null;
+        alert(state.language === 'pt'
+          ? 'Escolhe um ficheiro MP3 com no máximo 20 MB.'
+          : 'Choose an MP3 file no larger than 20 MB.');
+        return;
+      }
+      state.musicFile = file;
+      state.retainedMusic = false;
+    });
+    function syncWebsiteSectionPreview() {
+      const enabled = websiteSectionInputs.filter(input => input.checked);
+      const summary = document.getElementById('websiteSectionSummary');
+      if (summary) {
+        const language = state.language === 'pt' ? 'pt' : 'en';
+        summary.textContent = language === 'pt'
+          ? `${enabled.length} secç${enabled.length === 1 ? 'ão incluída' : 'ões incluídas'}`
+          : `${enabled.length} section${enabled.length === 1 ? '' : 's'} included`;
+      }
+      websiteSectionInputs.forEach(input => {
+        const enabledSection = input.checked;
+        document.querySelector(`[data-preview-section="${input.dataset.websiteSection}"]`)?.classList.toggle('is-hidden', !enabledSection);
+      });
+      document.querySelectorAll('[data-website-detail-for]').forEach(group => {
+        const sectionKeys = String(group.dataset.websiteDetailFor || '').split(/\s+/).filter(Boolean);
+        group.hidden = sectionKeys.length > 0 && !sectionKeys.some(key => websiteSectionInputs.some(input => input.dataset.websiteSection === key && input.checked));
+      });
+    }
+    function openWebsiteDetails() {
+      if (state.packType !== 'Full_pack' || !document.getElementById('websiteEnabled')?.checked) return;
+      syncWebsiteSectionPreview();
+      syncWebsitePhotoWarning();
+      websiteDetailsOverlay.hidden = false;
+      websiteDetailsOverlay.classList.add('visible');
+      document.body.style.overflow = 'hidden';
+      window.setTimeout(() => websiteSectionInputs[0]?.focus(), 50);
+    }
+    eventTypeInput.value = initialEventType;
+
+    function renderTemplates() {
+      grid.innerHTML = templates.map((template, index) => `
+        <button type="button" class="template-card" data-template-id="${template.id}" aria-pressed="${template.id === state.selectedTemplate?.id || (!state.selectedTemplate && index === 0)}">
+          <span class="selected-check" aria-hidden="true">✓</span>
+          <img src="${template.image}" alt="Template ${template.name}" loading="lazy" />
+          <span class="template-info">
+            <span><strong>${template.name}</strong><br /><span>${template.mood}</span></span>
+          </span>
+        </button>
+      `).join('');
+    }
+
+    function selectTemplate(id) {
+      const template = templates.find(item => item.id === id);
+      if (!template) return;
+      state.selectedTemplate = template;
+      document.querySelectorAll('.template-card').forEach(card => {
+        card.setAttribute('aria-pressed', String(card.dataset.templateId === id));
+      });
+      templatePreview.style.opacity = '.35';
+      setTimeout(() => {
+        templatePreview.src = template.image;
+        templatePreview.style.opacity = '1';
+      }, 130);
+      previewTemplateName.textContent = template.name;
+    }
+
+    function applyEventSelection(eventType, options = {}) {
+      const nextEventType = eventType === 'baby_shower' ? 'baby_shower' : 'wedding';
+      const selectedId = state.selectedTemplate?.id;
+      state.eventType = nextEventType;
+      eventTypeInput.value = nextEventType;
+      document.body.dataset.eventType = nextEventType;
+      document.querySelector('meta[name="theme-color"]')?.setAttribute(
+        'content',
+        nextEventType === 'baby_shower' ? '#eef8ff' : '#f6f2eb'
+      );
+      templates = window.WeddingI18n.getTemplates(nextEventType, state.language);
+      state.selectedTemplate = templates.find(item => item.id === selectedId) || templates[0];
+      renderTemplates();
+      selectTemplate(state.selectedTemplate.id);
+      window.WeddingI18n.applyEventType(nextEventType, {
+        resetDefaultMessage: Boolean(options.resetDefaultMessage)
+      });
+      renderWebsitePhotos();
+      updatePreview();
+      if (options.historyMode) updateEventPath(nextEventType, options.historyMode);
+    }
+
+    function setMode(mode) {
+      if (state.creationModeAccess !== 'both' && mode !== state.creationModeAccess) return;
+      state.mode = mode;
+      document.querySelectorAll('.mode-button').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
+      });
+      const custom = mode === 'custom_import';
+      customTemplateField.hidden = !custom;
+      grid.hidden = custom;
+      previewMode.textContent = custom ? 'Template personalizado' : window.WeddingI18n.t('templateMode');
+    }
+
+    function formatDate(value) {
+      if (!value) return new Intl.DateTimeFormat(window.WeddingI18n.localeTag(), { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date('2027-03-20T12:00:00'));
+      const date = new Date(`${value}T12:00:00`);
+      return new Intl.DateTimeFormat(window.WeddingI18n.localeTag(), { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+    }
+
+    function updatePreview() {
+      const eventUi = window.WeddingI18n.getEventUi(state.eventType);
+      const p1 = document.getElementById('person1').value.trim() || eventUi.person1Fallback;
+      const p2 = document.getElementById('person2').value.trim() || eventUi.person2Fallback;
+      const date = formatDate(document.getElementById('date').value);
+      const location = document.getElementById('location').value.trim() || eventUi.venueFallback;
+      const hasAttendance = state.packType === 'Full_pack' && Boolean(document.getElementById('websiteEnabled')?.checked);
+      document.getElementById('previewNames').textContent = `${p1} & ${p2}`;
+      document.getElementById('previewPdfState').textContent = [
+        window.WeddingI18n.t('location'),
+        hasAttendance ? window.WeddingI18n.t('attendance') : null
+      ].filter(Boolean).join(' · ');
+      document.getElementById('previewDetails').textContent = `${date} · ${location}`;
+    }
+
+    const MAX_SOURCE_PHOTO_BYTES = 20 * 1024 * 1024;
+    const MAX_PHOTO_BYTES = Math.floor(4.75 * 1024 * 1024);
+    const MAX_PHOTO_SIDE = 2400;
+
+    function formatMb(bytes) {
+      return (Math.max(0, Number(bytes || 0)) / 1024 / 1024).toFixed(1);
+    }
+
+    function uploadLabel(key) {
+      return window.WeddingI18n.t(key);
+    }
+
+    function uploadError(key, values) {
+      return new Error(window.WeddingI18n.format(key, values));
+    }
+
+    function assertSourceImageSize(file, label) {
+      if (file.size <= MAX_SOURCE_PHOTO_BYTES) return;
+      throw uploadError('fileTooLarge', {
+        label,
+        name: file.name || 'image',
+        size: formatMb(file.size),
+        limit: 20
+      });
+    }
+
+    function loadImageFromFile(file, label) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => {
+          URL.revokeObjectURL(url);
+          resolve(image);
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(uploadError('imageReadFailed', { name: file.name || label || 'image' }));
+        };
+        image.src = url;
+      });
+    }
+
+    function canvasToJpegBlob(canvas, quality, fileName = 'image') {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => {
+          if (blob) resolve(blob);
+          else reject(uploadError('imagePrepareFailed', { name: fileName }));
+        }, 'image/jpeg', quality);
+      });
+    }
+
+    function safePhotoName(name) {
+      const base = (name || 'foto-casal')
+        .replace(/\.[^.]+$/, '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9-]+/gi, '-')
+        .replace(/^-+|-+$/g, '')
+        .toLowerCase();
+      return `${base || 'foto-casal'}.jpg`;
+    }
+
+    async function normalizePhoto(file, label = uploadLabel('couplePhotoLabel')) {
+      assertSourceImageSize(file, label);
+      const image = await loadImageFromFile(file, label);
+      const sourceWidth = image.naturalWidth || image.width;
+      const sourceHeight = image.naturalHeight || image.height;
+      if (!sourceWidth || !sourceHeight) {
+        throw uploadError('imageDimensionsFailed', { name: file.name || 'image' });
+      }
+
+      let scale = Math.min(1, MAX_PHOTO_SIDE / Math.max(sourceWidth, sourceHeight));
+      let width = Math.max(1, Math.round(sourceWidth * scale));
+      let height = Math.max(1, Math.round(sourceHeight * scale));
+      let quality = 0.9;
+      let blob = null;
+
+      for (let attempt = 0; attempt < 12; attempt += 1) {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d', { alpha: false });
+        if (!ctx) {
+          throw uploadError('browserImageFailed', { name: file.name || 'image' });
+        }
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(image, 0, 0, width, height);
+        blob = await canvasToJpegBlob(canvas, quality, file.name || 'image');
+        if (blob.size <= MAX_PHOTO_BYTES) break;
+        if (quality > 0.64) quality = Math.max(0.64, quality - 0.07);
+        else {
+          width = Math.max(1200, Math.round(width * 0.84));
+          height = Math.max(1200, Math.round(height * 0.84));
+        }
+      }
+
+      if (!blob || blob.size > MAX_PHOTO_BYTES) {
+        throw uploadError('compressedStillLarge', {
+          label,
+          name: file.name || 'image'
+        });
+      }
+
+      return new File([blob], safePhotoName(file.name), {
+        type: 'image/jpeg',
+        lastModified: Date.now()
+      });
+    }
+
+    const MAX_WEBSITE_PHOTOS = 5;
+    let websitePhotosProcessing = Promise.resolve();
+    let websitePhotosRevision = 0;
+
+    function renderWebsitePhotos() {
+      const eventUi = window.WeddingI18n.getEventUi(state.eventType);
+      websitePhotosCount.textContent = `${state.websitePhotos.length} / ${MAX_WEBSITE_PHOTOS} ${eventUi.websitePhotosSelected}`;
+      websitePhotosClear.textContent = eventUi.websitePhotosClear;
+      websitePhotosClear.hidden = state.websitePhotos.length === 0;
+      websitePhotosPreview.hidden = state.websitePhotos.length === 0;
+      websitePhotosPreview.replaceChildren(...state.websitePhotos.map((item, index) => {
+        const figure = document.createElement('figure');
+        figure.className = 'website-photo-card';
+
+        const image = document.createElement('img');
+        image.src = item.previewUrl;
+        image.alt = item.file.name;
+
+        const caption = document.createElement('figcaption');
+        caption.textContent = item.file.name;
+
+        const remove = document.createElement('button');
+        remove.className = 'website-photo-remove';
+        remove.type = 'button';
+        remove.dataset.websitePhotoIndex = String(index);
+        remove.setAttribute('aria-label', `${eventUi.websitePhotosRemove}: ${item.file.name}`);
+        remove.textContent = '×';
+
+        figure.append(image, caption, remove);
+        return figure;
+      }));
+      syncWebsitePhotoWarning();
+    }
+
+    function syncWebsitePhotoWarning() {
+      if (!websitePhotoWarning) return;
+      const websiteEnabled = state.packType === 'Full_pack' && Boolean(document.getElementById('websiteEnabled')?.checked);
+      websitePhotoWarning.hidden = !websiteEnabled || state.websitePhotos.length > 0;
+    }
+
+    function clearWebsitePhotos(message = '') {
+      websitePhotosRevision += 1;
+      state.websitePhotos.forEach(item => URL.revokeObjectURL(item.previewUrl));
+      state.websitePhotos = [];
+      websitePhotosInput.value = '';
+      websitePhotosStatus.textContent = message;
+      renderWebsitePhotos();
+    }
+
+    function removeWebsitePhoto(index) {
+      const item = state.websitePhotos[index];
+      if (!item) return;
+      URL.revokeObjectURL(item.previewUrl);
+      state.websitePhotos.splice(index, 1);
+      websitePhotosInput.value = '';
+      websitePhotosStatus.textContent = '';
+      renderWebsitePhotos();
+    }
+
+    async function addWebsitePhotos(fileList) {
+      if (websitePhotosInput.disabled || state.packType !== 'Full_pack') return;
+      const requestRevision = websitePhotosRevision;
+      const eventUi = window.WeddingI18n.getEventUi(state.eventType);
+      const incoming = Array.from(fileList || []);
+      if (!incoming.length) return;
+
+      const validFiles = incoming.filter(file => ['image/jpeg','image/png','image/webp'].includes(file.type));
+      const remaining = Math.max(0, MAX_WEBSITE_PHOTOS - state.websitePhotos.length);
+      const selectedFiles = validFiles.slice(0, remaining);
+      const messages = [];
+      if (validFiles.length !== incoming.length) messages.push(eventUi.websitePhotosInvalid);
+      if (validFiles.length > remaining || remaining === 0) messages.push(eventUi.websitePhotosLimit);
+      websitePhotosStatus.textContent = messages.join(' ');
+
+      if (!selectedFiles.length) {
+        websitePhotosInput.value = '';
+        return;
+      }
+
+      websitePhotosInput.disabled = true;
+      try {
+        for (const file of selectedFiles) {
+          try {
+            const normalizedFile = await normalizePhoto(file, uploadLabel('websitePhotoLabel'));
+            const websiteEnabled = Boolean(document.getElementById('websiteEnabled')?.checked);
+            if (
+              requestRevision !== websitePhotosRevision ||
+              state.packType !== 'Full_pack' ||
+              !websiteEnabled
+            ) continue;
+            state.websitePhotos.push({
+              file: normalizedFile,
+              previewUrl: URL.createObjectURL(normalizedFile)
+            });
+          } catch (error) {
+            messages.push(error.message || eventUi.websitePhotosInvalid);
+          }
+        }
+      } finally {
+        websitePhotosInput.value = '';
+        const websiteEnabled = Boolean(document.getElementById('websiteEnabled')?.checked);
+        websitePhotosInput.disabled = state.packType !== 'Full_pack' || !websiteEnabled;
+        if (requestRevision === websitePhotosRevision) {
+          websitePhotosStatus.textContent = [...new Set(messages)].join(' ');
+          renderWebsitePhotos();
+        }
+      }
+    }
+
+    function queueWebsitePhotos(fileList) {
+      const files = Array.from(fileList || []);
+      websitePhotosProcessing = addWebsitePhotos(files).catch(error => {
+        websitePhotosStatus.textContent = error.message || window.WeddingI18n.getEventUi(state.eventType).websitePhotosInvalid;
+      });
+      return websitePhotosProcessing;
+    }
+
+    async function setPhoto(file) {
+      if (!file) return;
+      if (!['image/jpeg','image/png','image/webp'].includes(file.type)) {
+        alert(window.WeddingI18n.t('invalidImage'));
+        photoInput.value = '';
+        return;
+      }
+      photoTitle.textContent = window.WeddingI18n.format('preparingPhoto', { label: uploadLabel('couplePhotoLabel') });
+      photoSubtitle.textContent = window.WeddingI18n.t('convertingPhoto');
+      try {
+        const normalizedFile = await normalizePhoto(file, uploadLabel('couplePhotoLabel'));
+        state.photoFile = normalizedFile;
+        const reader = new FileReader();
+        reader.onload = () => {
+          state.photoDataUrl = reader.result;
+          photoPreview.src = reader.result;
+          photoPreview.classList.add('visible');
+          photoTitle.textContent = normalizedFile.name;
+          photoSubtitle.textContent = `${Math.max(.1, normalizedFile.size / 1024 / 1024).toFixed(1)} MB · ${window.WeddingI18n.t('jpgReady')}`;
+          previewPhotoState.textContent = window.WeddingI18n.t('added');
+        };
+        reader.readAsDataURL(normalizedFile);
+      } catch (error) {
+        alert(error.message || window.WeddingI18n.t('imagePrepareFailed'));
+        state.photoFile = null;
+        state.photoDataUrl = null;
+        photoInput.value = '';
+        const eventUi = window.WeddingI18n.getEventUi(state.eventType);
+        photoTitle.textContent = eventUi.photoAdd;
+        photoSubtitle.textContent = eventUi.photoHelp;
+        previewPhotoState.textContent = window.WeddingI18n.t('optionalState');
+      }
+    }
+
+    function validateForm() {
+      if (state.redoRequestId && !state.redoReady) {
+        redoBanner.classList.add('visible', 'error');
+        redoBanner.innerHTML = '<strong>Não foi possível carregar este projeto.</strong>Volta ao resultado e tenta abrir novamente a edição com o mesmo código.';
+        redoBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+      }
+      let valid = true;
+      document.querySelectorAll('[data-required-field]').forEach(field => {
+        const input = field.querySelector('input, textarea');
+        const invalid = !input || !input.value.trim();
+        field.classList.toggle('invalid', invalid);
+        if (invalid) valid = false;
+      });
+      if (state.mode === 'custom_import' && !state.customTemplateFile && !state.retainedCustomTemplate) { customTemplateField.classList.add('invalid'); valid = false; } else { customTemplateField.classList.remove('invalid'); }
+      if (!valid) {
+        document.querySelector('.field.invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return valid;
+    }
+
+    function buildPayload() {
+      const data = new FormData(form);
+      return {
+        mode: state.mode,
+        eventType: state.eventType,
+        packType: state.packType,
+        language: state.language,
+        templateId: state.selectedTemplate?.id || null,
+        couple: {
+          person1: data.get('person1'),
+          person2: data.get('person2')
+        },
+        invitation: {
+          date: data.get('date'),
+          time: data.get('time'),
+          location: data.get('location'),
+          message: data.get('message')
+        },
+        links: {
+          mapsUrl: data.get('mapsUrl')
+        },
+        attendance: {
+          enabled: state.packType === 'Full_pack' && Boolean(document.getElementById('websiteEnabled')?.checked),
+          formUrl: ''
+        },
+        website: {
+          enabled: state.packType === 'Full_pack' && Boolean(document.getElementById('websiteEnabled')?.checked),
+          details: state.packType === 'Full_pack' && Boolean(document.getElementById('websiteEnabled')?.checked)
+            ? websiteDetailsFromForm()
+            : {}
+        },
+        hasPhoto: Boolean(state.photoFile || state.retainedPhoto),
+        hasCustomTemplate: Boolean(state.customTemplateFile || state.retainedCustomTemplate),
+        hasMusic: Boolean(state.musicFile || state.retainedMusic),
+        submittedAt: new Date().toISOString()
+      };
+    }
+
+    function buildSubmissionBody(payload) {
+      const body = new FormData();
+      body.append('project', JSON.stringify(payload));
+      if (state.photoFile) body.append('photo', state.photoFile, state.photoFile.name);
+      if (state.customTemplateFile) body.append('customTemplate', state.customTemplateFile, state.customTemplateFile.name);
+      if (state.musicFile) body.append('weddingMusic', state.musicFile, state.musicFile.name);
+      state.websitePhotos.forEach(({ file }) => body.append('websitePhotos', file, file.name));
+      return body;
+    }
+
+    function buildLocalTestBody(payload, imageFile) {
+      const body = buildSubmissionBody(payload);
+      body.delete('photo');
+      body.append('testImage', imageFile, imageFile.name);
+      return body;
+    }
+
+    let progressTimers = [];
+    let activeJob = null;
+    let activePayload = null;
+
+    function clearProgressTimers() {
+      progressTimers.forEach(clearTimeout);
+      progressTimers = [];
+    }
+
+    function updateProgress(ui, value) {
+      const numeric = Number(value);
+      const progress = Number.isFinite(numeric)
+        ? Math.max(0, Math.min(100, Math.round(numeric)))
+        : 0;
+      ui.bar.style.width = `${progress}%`;
+      ui.progressPercent.textContent = `${progress}%`;
+    }
+
+    function setDeliveryPhase(ui, phase, { complete = false } = {}) {
+      const order = ['design', 'approval', 'pdf', 'template'];
+      const current = Math.max(0, order.indexOf(phase));
+      ui.deliverySteps.forEach((step, index) => {
+        step.classList.toggle('done', complete || index < current);
+        step.classList.toggle('active', !complete && index === current);
+      });
+    }
+
+    function customerProgress(job) {
+      const raw = Math.max(0, Math.min(100, Number(job?.progress || 0)));
+      const canvaBusy = isCanvaBusy(job);
+      const hasPdf = Boolean(job?.pdfUrl || job?.pdfDownloadUrl);
+      const hasTemplate = Boolean(resolveCanvaLink(job).url);
+      if (hasTemplate && hasPdf && !canvaBusy) return 100;
+      if (canvaBusy) return Math.min(96, Math.max(hasPdf ? 86 : 72, raw));
+      if (hasPdf && !hasTemplate) return Math.min(92, Math.max(82, raw));
+      if (job?.state === 'image_ready') return Math.min(58, Math.max(48, raw));
+      if (job?.state === 'approved') return Math.min(72, Math.max(62, raw));
+      return Math.min(95, raw);
+    }
+
+    function syncDeliveryPhase(ui, job) {
+      const canvaBusy = isCanvaBusy(job);
+      const hasPdf = Boolean(job?.pdfUrl || job?.pdfDownloadUrl);
+      const hasTemplate = Boolean(resolveCanvaLink(job).url);
+      if (hasPdf && hasTemplate && !canvaBusy) return setDeliveryPhase(ui, 'template', { complete: true });
+      if (hasPdf || canvaBusy || ['artifact_queued', 'artifact_running', 'completed'].includes(job?.state)) {
+        return setDeliveryPhase(ui, hasPdf ? 'template' : 'pdf');
+      }
+      if (job?.imageConfirmed || ['approved', 'artifact_failed'].includes(job?.state)) return setDeliveryPhase(ui, 'pdf');
+      if (job?.state === 'image_ready') return setDeliveryPhase(ui, 'approval');
+      return setDeliveryPhase(ui, 'design');
+    }
+
+    function resetLiveGeneration(ui) {
+      ui.liveGeneration.hidden = true;
+      ui.card.classList.remove('has-live-preview');
+      ui.liveComposite.removeAttribute('src');
+      ui.liveComposite.dataset.source = '';
+      ui.livePreviewNote.textContent = 'A primeira pré-visualização aparece assim que estiver disponível.';
+    }
+
+    function updateLiveGeneration(ui, job) {
+      const generationPreview = job?.generationPreview;
+      const hasPreview = Boolean(generationPreview?.previewUrl);
+      ui.liveGeneration.hidden = !hasPreview;
+      ui.card.classList.toggle('has-live-preview', hasPreview);
+      if (!hasPreview) return;
+
+      if (ui.liveComposite.dataset.source !== generationPreview.previewUrl) {
+        ui.liveComposite.src = generationPreview.previewUrl;
+        ui.liveComposite.dataset.source = generationPreview.previewUrl;
+      }
+      const received = Number(generationPreview.receivedCount || 0);
+      const total = Number(generationPreview.partialCount || 3);
+      ui.livePreviewNote.textContent = `Pré-visualização ${received}/${total}. A qualidade e os detalhes continuam a melhorar até ao resultado final.`;
+    }
+
+    const CANVA_BUSY_STATES = new Set([
+      'mcp_queued',
+      'mcp_connecting',
+      'mcp_uploading_asset',
+      'mcp_generating_candidates',
+      'mcp_creating_design',
+      'design_ready_for_template',
+      'template_link_creating',
+      'publishing_template',
+      'chatgpt_canva_queued',
+      'chatgpt_canva_starting',
+      'chatgpt_canva_uploading',
+      'chatgpt_canva_upload_retrying',
+      'chatgpt_canva_attachment_confirmed',
+      'chatgpt_canva_processing',
+      'chatgpt_canva_resolving_design',
+      'chatgpt_canva_retry_waiting',
+      'chatgpt_canva_login_required',
+      'opening_magic_layers',
+      'uploading_to_magic_layers',
+      'magic_layers_queued',
+      'processing_magic_layers',
+      'saving_magic_layers',
+      'template_publish_retrying',
+      'operator_authorization_required',
+      'mcp_authorization_required',
+      'operator_permission_required',
+      'operator_login_required',
+      'operator_human_verification_required',
+      'uploading_image',
+      'creating_design',
+      'importing_pptx',
+      'in_progress',
+      'pending',
+      'retrying_import_by_url',
+      'pending_regeneration'
+    ]);
+
+    const CANVA_TERMINAL_STATES = new Set([
+      'disabled',
+      'publisher_disabled',
+      'template_ready',
+      'design_ready',
+      'failed',
+      'chatgpt_canva_failed',
+      'mcp_failed',
+      'magic_layers_failed',
+      'template_publish_failed',
+      'magic_layers_queue_full',
+      'not_configured',
+      'mcp_not_configured',
+      'operator_browser_not_configured',
+      'import_empty_result',
+      'chatgpt_canva_handoff_ready'
+    ]);
+
+    const CANVA_STATUS_MESSAGES = {
+      mcp_queued: 'O design Canva entrou na fila.',
+      mcp_connecting: 'A ligar ao Canva.',
+      mcp_uploading_asset: 'A enviar a imagem aprovada para a biblioteca Canva.',
+      mcp_generating_candidates: 'O Canva está a recriar o convite.',
+      mcp_creating_design: 'A criar o design na conta Canva.',
+      design_ready_for_template: 'O design editável foi criado. A preparar o link de template.',
+      template_link_creating: 'A criar e validar o link de template Canva.',
+      publishing_template: 'A criar o link de template para o cliente.',
+      chatgpt_canva_queued: 'O design editável entrou na fila.',
+      chatgpt_canva_starting: 'A iniciar a criação do design editável.',
+      chatgpt_canva_uploading: 'A enviar a imagem aprovada para o Canva.',
+      chatgpt_canva_upload_retrying: 'O anexo ainda não apareceu. A repetir o carregamento.',
+      chatgpt_canva_attachment_confirmed: 'Imagem confirmada. A enviar o pedido ao Canva.',
+      chatgpt_canva_processing: 'O Canva está a separar texto e elementos em camadas editáveis.',
+      chatgpt_canva_resolving_design: 'As camadas estão prontas. A preparar o link editável.',
+      chatgpt_canva_retry_waiting: 'A primeira tentativa demorou mais. O servidor vai repetir automaticamente.',
+      chatgpt_canva_login_required: 'O atelier está a concluir uma configuração interna. Não precisas de fazer nada.',
+      chatgpt_canva_failed: 'Não foi possível criar o design editável no Canva.',
+      operator_authorization_required: 'O design editável já foi criado. Falta autorizar a publicação do link de template.',
+      mcp_authorization_required: 'Falta autorizar a conta Canva do atelier.',
+      operator_permission_required: 'A conta Canva do atelier aguarda autorização para publicar o template.',
+      operator_login_required: 'O atelier está a concluir o acesso à conta Canva.',
+      operator_human_verification_required: 'A conta Canva aguarda uma verificação do atelier.',
+      operator_browser_not_configured: 'A automação Canva ainda não está configurada.',
+      mcp_not_configured: 'A ligação ao Canva ainda não está configurada.',
+      not_configured: 'O Canva ainda não está configurado no servidor.',
+      failed: 'A preparação do template Canva falhou.',
+      mcp_failed: 'A recriação do convite no Canva falhou.',
+      opening_magic_layers: 'A abrir Camadas Mágicas na conta Canva do atelier.',
+      uploading_to_magic_layers: 'A carregar a imagem aprovada em Camadas Mágicas.',
+      magic_layers_queued: 'O design aguarda a sua vez para aplicar Camadas Mágicas.',
+      processing_magic_layers: 'O Canva está a separar o convite em elementos editáveis.',
+      saving_magic_layers: 'A guardar as camadas editáveis.',
+      magic_layers_failed: 'Não foi possível aplicar Camadas Mágicas automaticamente.',
+      template_publish_retrying: 'As camadas estão prontas. A publicação do template será repetida.',
+      template_publish_failed: 'As camadas foram criadas, mas o link de template não foi publicado.',
+      template_link_failed: 'A criação do link de template Canva falhou.',
+      magic_layers_queue_full: 'A fila Canva está cheia. O pedido ficou guardado para nova tentativa.',
+      uploading_image: 'A enviar a imagem aprovada para o Canva.',
+      creating_design: 'A criar o design editável no Canva.',
+      importing_pptx: 'A importar o convite editável no Canva.',
+      in_progress: 'O Canva está a preparar o template.',
+      pending: 'O template Canva aguarda processamento.',
+      retrying_import_by_url: 'A repetir a importação segura do template.',
+      pending_regeneration: 'A preparar novamente os ficheiros Canva.',
+      import_empty_result: 'O Canva não devolveu um design utilizável.',
+      chatgpt_canva_handoff_ready: 'O design aguarda uma nova tentativa do atelier.',
+      template_ready: 'O template Canva editável está pronto.',
+      design_ready: 'O design editável está pronto na conta Canva.',
+      disabled: ''
+    };
+
+    function validExternalUrl(value) {
+      if (!value || value === '#') return '';
+      try {
+        const parsed = new URL(value, window.location.href);
+        return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '';
+      } catch {
+        return '';
+      }
+    }
+
+    function resolveCanvaLink(result) {
+      const canva = result?.canva || {};
+      const templateCandidates = [
+        result?.canvaTemplateUrl,
+        canva.templateUrl,
+        canva.canvaTemplateUrl,
+        canva.templateCreateUrl,
+        canva.createUrl
+      ];
+      for (const candidate of templateCandidates) {
+        const url = validExternalUrl(candidate);
+        if (url) return { url, isTemplate: true };
+      }
+      const editUrl = validExternalUrl(canva.editUrl);
+      if (!editUrl) return { url: '', isTemplate: false };
+      let looksLikeTemplate = canva.state === 'template_ready';
+      try {
+        const parsed = new URL(editUrl);
+        looksLikeTemplate = looksLikeTemplate
+          || parsed.hostname === 'canva.link'
+          || (parsed.pathname.endsWith('/view') && parsed.searchParams.get('mode') === 'preview');
+      } catch {}
+      return { url: editUrl, isTemplate: looksLikeTemplate };
+    }
+
+    const DEFAULT_MAX_ASSET_ATTEMPTS = 7;
+
+    function hasOwn(object, key) {
+      return Boolean(object) && Object.prototype.hasOwnProperty.call(object, key);
+    }
+
+    function firstText(...values) {
+      for (const value of values) {
+        if (typeof value === 'string' && value.trim() && value !== '#') return value.trim();
+      }
+      return '';
+    }
+
+    function firstBoolean(...values) {
+      for (const value of values) {
+        if (typeof value === 'boolean') return value;
+      }
+      return false;
+    }
+
+    function attemptNumber(values, fallback, { minimum = 0 } = {}) {
+      for (const value of values) {
+        if (value === null || value === undefined || value === '') continue;
+        const number = Number(value);
+        if (Number.isFinite(number)) return Math.max(minimum, Math.round(number));
+      }
+      return fallback;
+    }
+
+    function resolveGeneratedAssets(result) {
+      const assets = result?.assets || {};
+      const invitation = assets.invitation || result?.invitation || result?.invite || {};
+      const envelope = assets.envelope || result?.envelope || {};
+      const invitationAttempts = result?.assetAttempts?.invitation || result?.attempts?.invitation || {};
+      const envelopeAttempts = result?.assetAttempts?.envelope || result?.attempts?.envelope || {};
+      const hasEnvelopeContract = Boolean(
+        hasOwn(assets, 'envelope')
+        || hasOwn(result, 'envelope')
+        || hasOwn(result, 'envelopeImageUrl')
+        || hasOwn(result, 'generatedEnvelopeUrl')
+        || hasOwn(result, 'envelopeUrl')
+        || result?.hasEnvelope
+      );
+      const invitationUrl = firstText(
+        invitation.imageUrl,
+        invitation.url,
+        result?.invitationImageUrl,
+        result?.inviteImageUrl,
+        result?.imageUrl
+      );
+      const envelopeUrl = firstText(
+        envelope.imageUrl,
+        envelope.url,
+        result?.envelopeImageUrl,
+        result?.generatedEnvelopeUrl,
+        result?.envelopeUrl
+      );
+      const sharedMax = attemptNumber(
+        hasEnvelopeContract ? [result?.maxAssetAttempts] : [result?.maxImageAttempts],
+        DEFAULT_MAX_ASSET_ATTEMPTS,
+        { minimum: 1 }
+      );
+      const sharedRedoUsed = attemptNumber([result?.redoAttemptsUsed], 0);
+      const invitationUsed = attemptNumber([
+        invitation.attemptsUsed,
+        invitation.attempt,
+        invitationAttempts.attemptsUsed,
+        invitationAttempts.used,
+        result?.invitationAttemptsUsed,
+        result?.inviteAttemptsUsed,
+        result?.attemptsUsed
+      ], 0);
+      const envelopeUsed = attemptNumber([
+        envelope.attemptsUsed,
+        envelope.attempt,
+        envelopeAttempts.attemptsUsed,
+        envelopeAttempts.used,
+        result?.envelopeAttemptsUsed,
+        result?.attemptsUsed
+      ], 0);
+      const invitationMax = attemptNumber([
+        invitation.maxAttempts,
+        invitationAttempts.maxAttempts,
+        invitationAttempts.max,
+        result?.maxInvitationAttempts,
+        result?.maxInviteAttempts
+      ], sharedMax, { minimum: 1 });
+      const envelopeMax = attemptNumber([
+        envelope.maxAttempts,
+        envelopeAttempts.maxAttempts,
+        envelopeAttempts.max,
+        result?.maxEnvelopeAttempts
+      ], sharedMax, { minimum: 1 });
+      const invitationCanRegenerate = firstBoolean(
+        invitation.canRegenerate,
+        invitationAttempts.canRegenerate,
+        result?.canRegenerateInvitation,
+        result?.canRegenerateInvite,
+        result?.canRegenerate
+      ) && invitationUsed < invitationMax;
+      const envelopeCanRegenerate = hasEnvelopeContract && firstBoolean(
+        envelope.canRegenerate,
+        envelopeAttempts.canRegenerate,
+        result?.canRegenerateEnvelope,
+        result?.canRegenerate
+      ) && envelopeUsed < envelopeMax;
+
+      return {
+        hasEnvelopeContract,
+        ready: Boolean(invitationUrl) && (!hasEnvelopeContract || Boolean(envelopeUrl)),
+        invitation: {
+          imageUrl: invitationUrl,
+          downloadUrl: firstText(
+            invitation.downloadUrl,
+            result?.invitationDownloadUrl,
+            result?.inviteDownloadUrl,
+            result?.downloadUrl
+          ),
+          attemptsUsed: sharedRedoUsed,
+          maxAttempts: invitationMax,
+          canRegenerate: invitationCanRegenerate
+        },
+        envelope: {
+          imageUrl: envelopeUrl,
+          downloadUrl: firstText(envelope.downloadUrl, result?.envelopeDownloadUrl),
+          attemptsUsed: sharedRedoUsed,
+          maxAttempts: envelopeMax,
+          canRegenerate: envelopeCanRegenerate
+        }
+      };
+    }
+
+    function canShowCanvaTemplateRetry(result) {
+      const error = result?.canva?.error;
+      const hasExplicitError = typeof error === 'string' ? Boolean(error.trim()) : Boolean(error);
+      return Boolean(
+        !resolveCanvaLink(result).url
+        && hasExplicitError
+        && result?.canva?.canRetryTemplateLink === true
+      );
+    }
+
+    function attemptLabel(asset) {
+      return `Tentativa ${asset.attemptsUsed}/${asset.maxAttempts}`;
+    }
+
+    function closeAssetRevisionModal(ui, { restoreFocus = true } = {}) {
+      ui.assetRevisionOverlay.classList.remove('visible');
+      ui.assetRevisionOverlay.hidden = true;
+      ui.overlay.removeAttribute('aria-hidden');
+      ui.assetRevisionError.textContent = '';
+      ui.confirmAssetRevision.disabled = false;
+      ui.confirmAssetRevision.textContent = 'Gerar novamente';
+      if (restoreFocus && !ui.regenerate.hidden) ui.regenerate.focus({ preventScroll: true });
+    }
+
+    function configureAssetRevisionModal(ui, assets) {
+      const choices = [
+        {
+          target: 'invitation',
+          asset: assets.invitation,
+          input: ui.revisionInvitation,
+          choice: ui.invitationRevisionChoice,
+          attempts: ui.invitationRevisionAttempts
+        },
+        {
+          target: 'envelope',
+          asset: assets.envelope,
+          input: ui.revisionEnvelope,
+          choice: ui.envelopeRevisionChoice,
+          attempts: ui.envelopeRevisionAttempts
+        }
+      ];
+      ui.envelopeRevisionChoice.hidden = !assets.hasEnvelopeContract;
+      for (const item of choices) {
+        const available = item.target !== 'envelope' || assets.hasEnvelopeContract;
+        item.input.checked = false;
+        item.input.disabled = !available || !item.asset.canRegenerate;
+        item.choice.classList.toggle('disabled', item.input.disabled);
+        item.attempts.textContent = item.asset.canRegenerate
+          ? `${attemptLabel(item.asset)} · ainda podes alterar esta peça.`
+          : item.asset.attemptsUsed >= item.asset.maxAttempts
+            ? `${attemptLabel(item.asset)} · limite de tentativas atingido.`
+            : `${attemptLabel(item.asset)} · esta peça não pode ser alterada agora.`;
+      }
+      const firstAvailable = choices.find((item) => !item.input.disabled);
+      if (firstAvailable) firstAvailable.input.checked = true;
+      ui.confirmAssetRevision.disabled = !firstAvailable;
+      ui.revisionContext.value = '';
+      ui.assetRevisionError.textContent = '';
+    }
+
+    function openAssetRevisionModal(ui, assets) {
+      configureAssetRevisionModal(ui, assets);
+      ui.overlay.setAttribute('aria-hidden', 'true');
+      ui.assetRevisionOverlay.hidden = false;
+      ui.assetRevisionOverlay.classList.add('visible');
+      requestAnimationFrame(() => {
+        const selected = ui.assetRevisionForm.querySelector('input[name="revisionTarget"]:checked');
+        (selected || ui.cancelAssetRevision).focus();
+      });
+    }
+
+    function revealPublishedWebsiteOnMobile(ui, websiteUrl) {
+      if (!websiteUrl || ui.firstPublishedWebsiteUrl) return;
+      ui.firstPublishedWebsiteUrl = websiteUrl;
+      if (!window.matchMedia('(max-width: 760px)').matches) return;
+      const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        ui.websitePreviewPanel.scrollIntoView({ behavior, block: 'start' });
+      }));
+    }
+
+    function isCanvaBusy(job) {
+      const stateName = String(job?.canva?.state || '');
+      if (!stateName || stateName === 'pending_confirmation') return false;
+      if (CANVA_TERMINAL_STATES.has(stateName) || stateName.endsWith('_failed')) return false;
+      if (CANVA_BUSY_STATES.has(stateName)) return true;
+      return /(queued|starting|upload|processing|resolving|retry|opening|saving|publishing|creating|generating|connecting|importing|in_progress)/.test(stateName);
+    }
+
+    function updateCanvaResult(ui, result) {
+      const canva = result?.canva || {};
+      const link = resolveCanvaLink(result);
+      ui.card.classList.toggle('has-canva-link', Boolean(link.url));
+      if (link.url) {
+        ui.canva.textContent = link.isTemplate ? 'Usar template no Canva' : 'Abrir design no Canva';
+        ui.canva.setAttribute('href', link.url);
+        ui.canva.hidden = false;
+      } else {
+        ui.canva.hidden = true;
+        ui.canva.removeAttribute('href');
+      }
+
+      const stateMessage = CANVA_STATUS_MESSAGES[canva.state] || (canva.state ? 'A preparar a versão editável do convite.' : '');
+      const readyMessage = link.url
+        ? (link.isTemplate
+          ? 'O link de template está pronto para criares a tua própria cópia no Canva.'
+          : 'O convite editável está pronto no Canva.')
+        : stateMessage;
+      ui.canvaNote.textContent = readyMessage;
+      ui.canvaNote.classList.toggle('visible', Boolean(ui.canvaNote.textContent));
+    }
+
+    function showLoading() {
+      const overlay = document.getElementById('loadingOverlay');
+      const card = document.getElementById('loadingCard');
+      const bar = document.getElementById('progressBar');
+      const progressPercent = document.getElementById('progressPercent');
+      const status = document.getElementById('loadingStatus');
+      const title = document.getElementById('loadingTitle');
+      const message = document.getElementById('loadingMessage');
+      const mark = card.querySelector('.success-mark');
+      const generatedPair = document.getElementById('generatedPair');
+      const generatedImage = document.getElementById('generatedImage');
+      const generatedEnvelope = document.getElementById('generatedEnvelope');
+      const envelopeFrame = document.getElementById('envelopeFrame');
+      const invitationAttemptState = document.getElementById('invitationAttemptState');
+      const envelopeAttemptState = document.getElementById('envelopeAttemptState');
+      const attemptSummary = document.getElementById('attemptSummary');
+      const download = document.getElementById('downloadGenerated');
+      const regenerate = document.getElementById('regenerateImage');
+      const confirm = document.getElementById('confirmImage');
+      const generatePdf = document.getElementById('generatePdf');
+      const openPdf = document.getElementById('openPdf');
+      const canva = document.getElementById('canvaGenerated');
+      const retryCanvaTemplateLink = document.getElementById('retryCanvaTemplateLink');
+      const previewWebsite = document.getElementById('previewWebsite');
+      const openWebsite = document.getElementById('openWebsite');
+      const finalFiles = document.getElementById('finalFiles');
+      const websitePreviewPanel = document.getElementById('websitePreviewPanel');
+      const websitePreviewFrame = document.getElementById('websitePreviewFrame');
+      const canvaNote = document.getElementById('canvaNote');
+      const revisionContextWrap = document.getElementById('revisionContextWrap');
+      const revisionContext = document.getElementById('revisionContext');
+      const assetRevisionOverlay = document.getElementById('assetRevisionOverlay');
+      const assetRevisionForm = document.getElementById('assetRevisionForm');
+      const revisionInvitation = document.getElementById('revisionInvitation');
+      const revisionEnvelope = document.getElementById('revisionEnvelope');
+      const invitationRevisionChoice = document.getElementById('invitationRevisionChoice');
+      const envelopeRevisionChoice = document.getElementById('envelopeRevisionChoice');
+      const invitationRevisionAttempts = document.getElementById('invitationRevisionAttempts');
+      const envelopeRevisionAttempts = document.getElementById('envelopeRevisionAttempts');
+      const assetRevisionError = document.getElementById('assetRevisionError');
+      const cancelAssetRevision = document.getElementById('cancelAssetRevision');
+      const confirmAssetRevision = document.getElementById('confirmAssetRevision');
+      const statusLink = document.getElementById('statusGenerated');
+      const jobLinkWrap = document.getElementById('jobLinkWrap');
+      const jobStatusLink = document.getElementById('jobStatusLink');
+      const liveGeneration = document.getElementById('liveGeneration');
+      const liveComposite = document.getElementById('liveComposite');
+      const livePreviewNote = document.getElementById('livePreviewNote');
+      const deliverySteps = [...document.querySelectorAll('#deliverySteps .delivery-step')];
+
+      clearProgressTimers();
+      card.classList.remove('success', 'error', 'has-image', 'has-live-preview', 'has-canva-link', 'has-asset-pair');
+      mark.textContent = '✓';
+      title.textContent = 'Estamos a criar o teu convite';
+      message.textContent = 'A edição com GPT Image 2 pode demorar alguns minutos. O pedido será processado o mais depressa possível.';
+      status.textContent = 'A enviar e validar as informações…';
+      generatedPair.hidden = true;
+      generatedPair.classList.remove('has-envelope');
+      generatedImage.removeAttribute('src');
+      generatedEnvelope.removeAttribute('src');
+      envelopeFrame.hidden = true;
+      invitationAttemptState.textContent = '';
+      envelopeAttemptState.textContent = '';
+      attemptSummary.textContent = '';
+      attemptSummary.hidden = true;
+      download.href = '#';
+      download.hidden = true;
+      regenerate.hidden = true;
+      regenerate.onclick = null;
+      confirm.hidden = true;
+      confirm.textContent = 'Aprovar';
+      confirm.onclick = null;
+      generatePdf.hidden = true;
+      generatePdf.onclick = null;
+      openPdf.href = '#';
+      openPdf.hidden = true;
+      canva.removeAttribute('href');
+      canva.hidden = true;
+      retryCanvaTemplateLink.hidden = true;
+      retryCanvaTemplateLink.disabled = false;
+      retryCanvaTemplateLink.onclick = null;
+      previewWebsite.removeAttribute('href');
+      previewWebsite.hidden = true;
+      openWebsite.removeAttribute('href');
+      openWebsite.hidden = true;
+      finalFiles.hidden = true;
+      websitePreviewPanel.classList.remove('visible');
+      websitePreviewFrame.removeAttribute('src');
+      canvaNote.textContent = '';
+      canvaNote.classList.remove('visible');
+      revisionContext.value = '';
+      assetRevisionOverlay.classList.remove('visible');
+      assetRevisionOverlay.hidden = true;
+      assetRevisionForm.onsubmit = null;
+      assetRevisionForm.onkeydown = null;
+      assetRevisionOverlay.onclick = null;
+      cancelAssetRevision.onclick = null;
+      assetRevisionError.textContent = '';
+      confirmAssetRevision.disabled = false;
+      confirmAssetRevision.textContent = 'Gerar novamente';
+      statusLink.href = '#';
+      statusLink.hidden = true;
+      jobStatusLink.href = '#';
+      jobLinkWrap.hidden = true;
+      overlay.removeAttribute('aria-hidden');
+      overlay.classList.add('visible');
+      document.body.style.overflow = 'hidden';
+
+      const ui = {
+        overlay, card, bar, progressPercent, status, title, message, mark,
+        generatedPair, generatedImage, generatedEnvelope, envelopeFrame,
+        invitationAttemptState, envelopeAttemptState, attemptSummary,
+        download, regenerate, confirm, generatePdf,
+        openPdf, canva, retryCanvaTemplateLink, previewWebsite, openWebsite,
+        finalFiles, websitePreviewPanel, websitePreviewFrame, canvaNote, revisionContextWrap,
+        revisionContext, assetRevisionOverlay, assetRevisionForm, revisionInvitation,
+        revisionEnvelope, invitationRevisionChoice, envelopeRevisionChoice,
+        invitationRevisionAttempts, envelopeRevisionAttempts, assetRevisionError,
+        cancelAssetRevision, confirmAssetRevision, statusLink, jobLinkWrap,
+        jobStatusLink, liveGeneration, liveComposite, livePreviewNote, deliverySteps,
+        firstPublishedWebsiteUrl: ''
+      };
+      updateProgress(ui, 0);
+      resetLiveGeneration(ui);
+      return ui;
+    }
+
+    function finishLoading(ui, result, payload) {
+      clearProgressTimers();
+      const renderVersion = Number(ui.renderVersion || 0) + 1;
+      ui.renderVersion = renderVersion;
+      activeJob = result;
+      activePayload = payload;
+      updateProgress(ui, customerProgress(result));
+      syncDeliveryPhase(ui, result);
+      resetLiveGeneration(ui);
+      const approvedReady = Boolean(result.imageConfirmed) || ['approved', 'artifact_failed', 'completed'].includes(result.state);
+      const canvaLink = resolveCanvaLink(result);
+      const generatedAssets = resolveGeneratedAssets(result);
+      const canRegenerateAsset = generatedAssets.invitation.canRegenerate || generatedAssets.envelope.canRegenerate;
+      const eventUi = window.WeddingI18n.getEventUi(payload.eventType || state.eventType);
+      ui.status.textContent = canvaLink.isTemplate
+        ? 'Todos os ficheiros estão prontos.'
+        : generatedAssets.hasEnvelopeContract
+          ? 'O convite e o envelope estão prontos para o próximo passo.'
+          : 'A imagem está pronta para o próximo passo.';
+
+      const displayName = `${payload.couple.person1}-${payload.couple.person2}-convite.png`
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9.-]+/g, '-');
+
+      ui.generatedPair.hidden = !generatedAssets.ready;
+      ui.generatedPair.classList.toggle('has-envelope', generatedAssets.hasEnvelopeContract);
+      ui.envelopeFrame.hidden = !generatedAssets.hasEnvelopeContract;
+      ui.card.classList.toggle('has-asset-pair', generatedAssets.ready && generatedAssets.hasEnvelopeContract);
+      if (generatedAssets.ready) {
+        ui.generatedImage.src = generatedAssets.invitation.imageUrl;
+        if (generatedAssets.hasEnvelopeContract) ui.generatedEnvelope.src = generatedAssets.envelope.imageUrl;
+      } else {
+        ui.generatedImage.removeAttribute('src');
+        ui.generatedEnvelope.removeAttribute('src');
+      }
+      ui.generatedImage.alt = `${eventUi.generatedAlt} ${payload.couple.person1} e ${payload.couple.person2}`;
+      ui.generatedEnvelope.alt = `Envelope de casamento gerado para ${payload.couple.person1} e ${payload.couple.person2}`;
+      ui.invitationAttemptState.textContent = attemptLabel(generatedAssets.invitation);
+      ui.envelopeAttemptState.textContent = attemptLabel(generatedAssets.envelope);
+      ui.attemptSummary.textContent = generatedAssets.hasEnvelopeContract
+        ? `Convite ${generatedAssets.invitation.attemptsUsed}/${generatedAssets.invitation.maxAttempts} · Envelope ${generatedAssets.envelope.attemptsUsed}/${generatedAssets.envelope.maxAttempts}`
+        : `Tentativas usadas: ${generatedAssets.invitation.attemptsUsed}/${generatedAssets.invitation.maxAttempts}`;
+      ui.attemptSummary.hidden = !generatedAssets.ready;
+      const invitationDownloadUrl = generatedAssets.invitation.downloadUrl;
+      ui.download.href = invitationDownloadUrl
+        ? `${invitationDownloadUrl}?name=${encodeURIComponent(displayName.replace(/\.png$/i, ''))}`
+        : '#';
+      ui.download.setAttribute('download', result.filename || displayName);
+      ui.statusLink.href = result.resultUrl || result.absoluteResultUrl || '#';
+      ui.download.hidden = !approvedReady || !invitationDownloadUrl;
+      ui.statusLink.hidden = !approvedReady;
+      ui.openPdf.hidden = true;
+      ui.openPdf.href = '#';
+      ui.canva.hidden = true;
+      ui.canva.removeAttribute('href');
+      ui.retryCanvaTemplateLink.hidden = true;
+      ui.retryCanvaTemplateLink.disabled = false;
+      ui.retryCanvaTemplateLink.onclick = null;
+      ui.previewWebsite.hidden = true;
+      ui.previewWebsite.removeAttribute('href');
+      ui.openWebsite.hidden = true;
+      ui.openWebsite.removeAttribute('href');
+      ui.finalFiles.hidden = true;
+      ui.websitePreviewPanel.classList.remove('visible');
+      ui.websitePreviewFrame.removeAttribute('src');
+      ui.canvaNote.textContent = '';
+      ui.canvaNote.classList.remove('visible');
+      ui.regenerate.hidden = !generatedAssets.ready || !canRegenerateAsset;
+      ui.confirm.textContent = generatedAssets.hasEnvelopeContract ? 'Aprovar ambos' : 'Aprovar';
+      ui.confirm.hidden = !generatedAssets.ready || !result.canConfirm;
+      ui.generatePdf.hidden = !result.canGeneratePdf;
+      if (result.site?.publicUrl) {
+        ui.openWebsite.textContent = window.WeddingI18n.t('openWebsite');
+        ui.openWebsite.href = result.site.publicUrl;
+        ui.openWebsite.hidden = false;
+      }
+      const websiteUrl = result.site?.publicUrl || '';
+      if (websiteUrl) {
+        if (ui.websitePreviewFrame.getAttribute('src') !== websiteUrl) ui.websitePreviewFrame.src = websiteUrl;
+        ui.websitePreviewPanel.classList.add('visible');
+      }
+      ui.regenerate.onclick = canRegenerateAsset
+        ? () => openAssetRevisionModal(ui, generatedAssets)
+        : null;
+      ui.cancelAssetRevision.onclick = () => closeAssetRevisionModal(ui);
+      ui.assetRevisionOverlay.onclick = event => {
+        if (event.target === ui.assetRevisionOverlay) closeAssetRevisionModal(ui);
+      };
+      ui.assetRevisionForm.onkeydown = event => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closeAssetRevisionModal(ui);
+          return;
+        }
+        if (event.key !== 'Tab') return;
+        const focusable = [...ui.assetRevisionForm.querySelectorAll('input:not(:disabled), textarea, button:not(:disabled)')]
+          .filter(element => !element.closest('[hidden]'));
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      };
+      ui.assetRevisionForm.onsubmit = async event => {
+        event.preventDefault();
+        const target = ui.assetRevisionForm.querySelector('input[name="revisionTarget"]:checked')?.value || '';
+        const selectedAsset = target === 'envelope' ? generatedAssets.envelope : generatedAssets.invitation;
+        if (!target || !selectedAsset.canRegenerate) {
+          ui.assetRevisionError.textContent = 'Escolhe uma peça com tentativas disponíveis.';
+          return;
+        }
+        ui.confirmAssetRevision.disabled = true;
+        ui.confirmAssetRevision.textContent = 'A iniciar…';
+        ui.assetRevisionError.textContent = '';
+        const nextPayload = buildPayload();
+        const regenerationPayload = {
+          revisionContext: ui.revisionContext.value,
+          templateId: nextPayload.templateId
+        };
+        // Legacy single-image jobs use the old endpoint shape. Paired jobs send
+        // the selected asset so only the invitation or envelope is regenerated.
+        if (generatedAssets.hasEnvelopeContract) regenerationPayload.target = target;
+        let nextJob;
+        try {
+          nextJob = await mutateJob(result.requestId, 'regenerate', regenerationPayload);
+        } catch (error) {
+          ui.confirmAssetRevision.disabled = false;
+          ui.confirmAssetRevision.textContent = 'Gerar novamente';
+          ui.assetRevisionError.textContent = error?.message || 'Não foi possível iniciar esta tentativa.';
+          return;
+        }
+        closeAssetRevisionModal(ui, { restoreFocus: false });
+        activePayload = nextPayload;
+        clearProgressTimers();
+        ui.card.classList.remove('success', 'has-image', 'has-asset-pair', 'error');
+        ui.generatedPair.hidden = true;
+        ui.title.textContent = target === 'envelope'
+          ? 'Estamos a criar outro envelope'
+          : 'Estamos a criar outro convite';
+        ui.message.textContent = generatedAssets.hasEnvelopeContract
+          ? 'A outra peça fica guardada e voltamos a mostrar as duas quando esta tentativa terminar.'
+          : 'Esta tentativa fica guardada no mesmo link do pedido.';
+        ui.status.textContent = 'Pedido em fila de geração…';
+        updateProgress(ui, 0);
+        resetLiveGeneration(ui);
+        ui.regenerate.hidden = true;
+        ui.confirm.hidden = true;
+        try {
+          await trackGeneration(ui, nextJob, nextPayload);
+        } catch (error) {
+          failLoading(ui, error);
+        }
+      };
+      ui.confirm.onclick = generatedAssets.ready && result.canConfirm ? async () => {
+        try {
+          const nextJob = await mutateJob(result.requestId, 'confirm');
+          ui.card.classList.remove('success', 'error');
+          ui.title.textContent = generatedAssets.hasEnvelopeContract ? 'Imagens aprovadas' : 'Imagem aprovada';
+          ui.message.textContent = generatedAssets.hasEnvelopeContract
+            ? 'O convite e o envelope ficaram guardados. Vamos preparar os ficheiros finais e a versão editável.'
+            : 'A tua escolha ficou guardada. Podes avançar para o PDF; a versão editável será preparada em seguida.';
+          ui.status.textContent = 'Aprovação concluída.';
+          setDeliveryPhase(ui, 'pdf');
+          ui.regenerate.hidden = true;
+          ui.confirm.hidden = true;
+          if (nextJob.site?.state === 'queued' || nextJob.site?.state === 'publishing') {
+            await trackSitePublication(ui, nextJob, payload);
+          } else {
+            await trackGeneration(ui, nextJob, payload);
+          }
+        } catch (error) {
+          failLoading(ui, error);
+        }
+      } : null;
+      ui.generatePdf.onclick = result.canGeneratePdf ? async () => {
+        try {
+          const nextJob = await mutateJob(result.requestId, 'generate-pdf');
+          ui.card.classList.remove('success', 'error');
+          ui.title.textContent = 'A gerar o PDF';
+          ui.message.textContent = 'O PDF será disponibilizado primeiro. Depois continuaremos a preparar o link da versão editável.';
+          ui.status.textContent = 'A criar o PDF…';
+          setDeliveryPhase(ui, 'pdf');
+          ui.regenerate.hidden = true;
+          ui.confirm.hidden = true;
+          ui.generatePdf.hidden = true;
+          await trackGeneration(ui, nextJob, payload);
+        } catch (error) {
+          failLoading(ui, error);
+        }
+      } : null;
+      if (result.pdfUrl) {
+        ui.openPdf.href = result.pdfUrl;
+        ui.openPdf.hidden = false;
+      }
+      ui.finalFiles.hidden = !result.pdfUrl && !result.site?.publicUrl;
+      updateCanvaResult(ui, result);
+      if (canShowCanvaTemplateRetry(result)) {
+        ui.retryCanvaTemplateLink.textContent = 'Tentar criar link Canva novamente';
+        ui.retryCanvaTemplateLink.hidden = false;
+        ui.retryCanvaTemplateLink.onclick = async () => {
+          ui.retryCanvaTemplateLink.disabled = true;
+          ui.retryCanvaTemplateLink.textContent = 'A recriar o link Canva…';
+          ui.canvaNote.textContent = 'A abrir o design guardado no Microsoft Edge e a recriar o link de template.';
+          ui.canvaNote.classList.add('visible');
+          try {
+            const nextJob = await mutateJob(result.requestId, 'retry-canva-template-link');
+            finishLoading(ui, nextJob, payload);
+          } catch (error) {
+            ui.retryCanvaTemplateLink.disabled = false;
+            ui.retryCanvaTemplateLink.textContent = 'Tentar criar link Canva novamente';
+            ui.canvaNote.textContent = error?.message || 'Ainda não foi possível criar o link Canva. Podes tentar novamente.';
+            ui.canvaNote.classList.add('visible');
+          }
+        };
+      }
+
+      setTimeout(() => {
+        if (ui.renderVersion !== renderVersion) return;
+        ui.card.classList.add('success');
+        ui.card.classList.toggle('has-image', generatedAssets.ready);
+        revealPublishedWebsiteOnMobile(ui, websiteUrl);
+        if (result.state === 'image_ready') {
+          if (!generatedAssets.ready) {
+            ui.title.textContent = 'A terminar as tuas imagens';
+            ui.message.textContent = 'O convite e o envelope aparecem juntos assim que os dois estiverem prontos.';
+            return;
+          }
+          ui.title.textContent = generatedAssets.hasEnvelopeContract
+            ? 'Gostas do convite e do envelope?'
+            : 'Gostas desta imagem?';
+          ui.message.textContent = generatedAssets.hasEnvelopeContract
+            ? `Aprova os dois ou escolhe “Não aprovar” para refazer apenas uma peça. Convite ${generatedAssets.invitation.attemptsUsed}/${generatedAssets.invitation.maxAttempts} · Envelope ${generatedAssets.envelope.attemptsUsed}/${generatedAssets.envelope.maxAttempts}.`
+            : `Escolhe se queres aprovar esta imagem ou usar outra tentativa. Tentativas usadas: ${generatedAssets.invitation.attemptsUsed}/${generatedAssets.invitation.maxAttempts}.`;
+          return;
+        }
+        if (canvaLink.isTemplate) {
+          ui.title.textContent = 'Template Canva pronto';
+          ui.message.textContent = result.state === 'artifact_failed'
+            ? 'O link de template está pronto. Continua no estado do pedido para escolheres a imagem final.'
+            : 'Abre o link abaixo para criares a tua própria cópia editável no Canva.';
+          return;
+        }
+        if (result.state === 'approved') {
+          ui.title.textContent = generatedAssets.hasEnvelopeContract ? 'Imagens aprovadas' : 'Imagem aprovada';
+          ui.message.textContent = 'Estamos a preparar o template Canva. Quando estiver pronto, vais escolher a imagem final antes do PDF.';
+          return;
+        }
+        if (result.state === 'artifact_failed') {
+          ui.title.textContent = generatedAssets.hasEnvelopeContract ? 'Imagens aprovadas' : 'Imagem aprovada';
+          ui.message.textContent = 'Os ficheiros finais falharam. Volta ao estado do pedido para tentar novamente a finalização.';
+          return;
+        }
+        ui.title.textContent = result.state === 'image_ready'
+          ? (generatedAssets.hasEnvelopeContract ? 'Gostas do convite e do envelope?' : 'Gostas desta imagem?')
+          : result.state === 'artifact_failed'
+            ? (generatedAssets.hasEnvelopeContract ? 'Imagens aprovadas' : 'Imagem aprovada')
+            : 'O teu convite está pronto';
+        ui.message.textContent = result.state === 'image_ready'
+          ? (generatedAssets.hasEnvelopeContract
+            ? `Podes aprovar ambos ou refazer uma peça. Convite ${generatedAssets.invitation.attemptsUsed}/${generatedAssets.invitation.maxAttempts} · Envelope ${generatedAssets.envelope.attemptsUsed}/${generatedAssets.envelope.maxAttempts}.`
+            : `Podes aprovar para gerar o PDF, ou criar outra versão. Tentativas usadas: ${generatedAssets.invitation.attemptsUsed}/${generatedAssets.invitation.maxAttempts}.`)
+          : result.state === 'artifact_failed'
+            ? 'A imagem está aprovada, mas os ficheiros finais falharam. Volta ao estado do pedido para tentar novamente a finalização.'
+            : 'Revê o resultado abaixo. Podes descarregar a PNG e o PDF ou criar a tua cópia editável no Canva.';
+      }, 350);
+    }
+
+    function failLoading(ui, error) {
+      clearProgressTimers();
+      ui.card.classList.add('success', 'error');
+      ui.mark.textContent = '!';
+      ui.title.textContent = 'Não foi possível gerar o convite';
+      ui.message.textContent = error?.message || 'Ocorreu um problema durante a geração. Volta ao editor e tenta novamente.';
+    }
+
+    async function submitProject(payload) {
+      if (CONFIG.demoMode) {
+        throw new Error('O modo de demonstração está desativado. Liga o backend para gerar a imagem.');
+      }
+
+      const body = buildSubmissionBody(payload);
+      const endpoint = state.redoRequestId
+        ? `/api/customer/jobs/${encodeURIComponent(state.redoRequestId)}/restart`
+        : CONFIG.submitEndpoint;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.success) {
+        if (data?.error?.redirectUrl) {
+          window.location.assign(data.error.redirectUrl);
+          await new Promise(() => {});
+        }
+        throw new Error(data?.error?.message || 'Não foi possível gerar o convite.');
+      }
+      return data.data || data;
+    }
+
+    async function submitLocalTest(payload, imageFile) {
+      const response = await fetch('/api/operator/local-test-image', {
+        method: 'POST',
+        body: buildLocalTestBody(payload, imageFile)
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.success) {
+        throw new Error(data?.error?.message || 'Não foi possível iniciar o teste local.');
+      }
+      return data.data || data;
+    }
+
+    async function wait(ms) {
+      await new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function mutateJob(requestId, action, payload = null) {
+      const response = await fetch(`/api/customer/jobs/${encodeURIComponent(requestId)}/${action}`, {
+        method: 'POST',
+        headers: payload ? { 'Content-Type': 'application/json' } : undefined,
+        body: payload ? JSON.stringify(payload) : undefined
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.success) {
+        throw new Error(data?.error?.message || 'Não foi possível atualizar o pedido.');
+      }
+      return data.data;
+    }
+
+    async function trackSitePublication(ui, initialJob, payload) {
+      let job = initialJob;
+      while (job.site?.state === 'queued' || job.site?.state === 'publishing') {
+        ui.status.textContent = window.WeddingI18n.t('websitePublishing');
+        updateProgress(ui, Math.min(96, Math.max(customerProgress(job), Number(job.site?.progress || 0))));
+        syncDeliveryPhase(ui, job);
+        updateCanvaResult(ui, job);
+        await wait(1200);
+        const response = await fetch(`/api/customer/jobs/${encodeURIComponent(job.requestId)}`, { cache: 'no-store' });
+        const body = await response.json().catch(() => null);
+        if (!response.ok || !body?.success) throw new Error(body?.error?.message || 'Website status unavailable.');
+        job = body.data;
+      }
+      if (isCanvaBusy(job)) {
+        await trackGeneration(ui, job, payload);
+        return;
+      }
+      finishLoading(ui, job, payload);
+      ui.status.textContent = job.site?.state === 'failed'
+        ? (job.site.error || 'Não foi possível publicar o website. A imagem continua aprovada.')
+        : window.WeddingI18n.t('websiteReady');
+    }
+
+    async function trackGeneration(ui, initialJob, payload) {
+      let job = initialJob;
+      activeJob = job;
+      activePayload = payload;
+      const statusUrl = job.absoluteResultUrl || job.resultUrl || `/result/${job.requestId}`;
+      ui.jobStatusLink.href = statusUrl;
+      ui.statusLink.href = statusUrl;
+      ui.jobLinkWrap.hidden = false;
+      ui.message.textContent = 'O pedido já tem link guardado. Podes fechar esta página e voltar ao mesmo link para ver a PNG.';
+
+      while (true) {
+        updateProgress(ui, customerProgress(job));
+        syncDeliveryPhase(ui, job);
+        updateLiveGeneration(ui, job);
+        updateCanvaResult(ui, job);
+        const canvaBusy = isCanvaBusy(job);
+        const canvaStatus = CANVA_STATUS_MESSAGES[job.canva?.state] || 'A preparar o template Canva.';
+        if (job.canFinalizeFullPack && resolveCanvaLink(job).isTemplate) {
+          window.location.assign(job.resultUrl || `/result/${encodeURIComponent(job.requestId)}`);
+          return;
+        }
+        if (job.state === 'queued') ui.status.textContent = 'Pedido em fila de geração…';
+        if (job.state === 'running') {
+          if (job.generationPreview?.previewUrl) {
+            const received = Number(job.generationPreview.receivedCount || 0);
+            const total = Number(job.generationPreview.partialCount || 3);
+            ui.status.textContent = `A imagem está a ganhar detalhe: pré-visualização ${received}/${total}...`;
+          } else {
+            ui.status.textContent = 'A aplicar os teus dados e fotografia ao template...';
+          }
+        }
+        if (job.state === 'image_ready') {
+          finishLoading(ui, job, payload);
+          return;
+        }
+        if (job.state === 'approved') {
+          if (!canvaBusy) {
+            finishLoading(ui, job, payload);
+            return;
+          }
+          ui.status.textContent = canvaStatus;
+        }
+        if (job.state === 'artifact_queued' || job.state === 'artifact_running') {
+          const mapsState = job.mapsVerification && job.mapsVerification.state;
+          if (mapsState === 'resolving') {
+            ui.status.textContent = 'A confirmar o local e o link Google Maps...';
+          } else {
+            ui.status.textContent = job.pdfUrl
+              ? 'PDF pronto. A preparar o link da versão editável…'
+              : 'A criar o PDF e a preparar a versão editável…';
+          }
+        }
+        if (job.state === 'artifact_failed') {
+          if (!canvaBusy) {
+            finishLoading(ui, job, payload);
+            return;
+          }
+          ui.status.textContent = canvaStatus;
+        }
+        if (job.state === 'completed') {
+          if (!canvaBusy) {
+            finishLoading(ui, job, payload);
+            return;
+          }
+          ui.status.textContent = canvaStatus;
+        }
+        if (job.state === 'failed') {
+          failLoading(ui, job.error || new Error('O pedido falhou.'));
+          return;
+        }
+
+        await wait(1200);
+        const response = await fetch(`/api/customer/jobs/${encodeURIComponent(job.requestId)}`, { cache: 'no-store' });
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data?.success) {
+          throw new Error(data?.error?.message || 'Não foi possível consultar o estado do pedido.');
+        }
+        job = data.data;
+        activeJob = job;
+      }
+    }
+
+    function syncWebsitePhotosAvailability(clearWhenUnavailable = false) {
+      const websiteEnabled = state.packType === 'Full_pack' && Boolean(document.getElementById('websiteEnabled')?.checked);
+      websitePhotosField.hidden = !websiteEnabled;
+      websitePhotosInput.disabled = !websiteEnabled;
+      if (clearWhenUnavailable && !websiteEnabled) {
+        clearWebsitePhotos();
+      }
+    }
+
+    function syncPackFields(packType) {
+      state.packType = packType === 'template_only_pack' ? 'invite_only_pack' : (
+        ['invite_only_pack','digital_pdf_pack','Full_pack'].includes(packType) ? packType : 'Full_pack'
+      );
+      packTypeSelect.value = state.packType;
+      const fullPack = state.packType === 'Full_pack';
+      const websiteEnabled = document.getElementById('websiteEnabled');
+      if (websiteEnabled) websiteEnabled.closest('.field').hidden = !fullPack;
+      const names = {
+        invite_only_pack: 'Invite Only Pack',
+        digital_pdf_pack: 'Digital Invite + PDF',
+        Full_pack: 'Full Pack'
+      };
+      document.getElementById('purchasedProductName').textContent = names[state.packType];
+      syncPurchasedProductCopy();
+      syncWebsitePhotosAvailability(!fullPack);
+    }
+
+    function syncCreationModeAccess(creationMode) {
+      state.creationModeAccess = ['template','custom_import','both'].includes(creationMode) ? creationMode : 'both';
+      syncPurchasedProductCopy();
+      document.querySelectorAll('.mode-button').forEach(button => {
+        const allowed = state.creationModeAccess === 'both' || button.dataset.mode === state.creationModeAccess;
+        button.hidden = !allowed;
+        button.disabled = !allowed;
+      });
+      if (state.creationModeAccess !== 'both') setMode(state.creationModeAccess);
+    }
+
+    function setFieldValue(id, value) {
+      const element = document.getElementById(id);
+      if (element) element.value = typeof value === 'string' ? value : '';
+    }
+
+    function applyEntitlement(entitlement) {
+      state.entitlement = entitlement && typeof entitlement === 'object' ? entitlement : null;
+      if (state.entitlement?.eventType) {
+        applyEventSelection(state.entitlement.eventType, {
+          historyMode: 'replace',
+          resetDefaultMessage: false
+        });
+      }
+      if (state.entitlement?.packType) {
+        syncPackFields(state.entitlement.packType);
+        packTypeSelect.disabled = true;
+        packTypeSelect.title = 'O pack é definido pelo código recebido na compra.';
+      }
+      syncCreationModeAccess(state.entitlement?.creationMode || 'both');
+    }
+
+    function applyRestartProject(data) {
+      const project = data?.project;
+      if (!project || typeof project !== 'object') throw new Error('Os dados guardados deste projeto não estão disponíveis.');
+      applyEventSelection(project.eventType, {
+        historyMode: 'replace',
+        resetDefaultMessage: false
+      });
+      syncPackFields(data?.entitlement?.packType || project.packType);
+      syncCreationModeAccess(data?.entitlement?.creationMode || 'both');
+      packTypeSelect.disabled = true;
+      packTypeSelect.title = 'O pack é definido pelo código associado a este projeto.';
+      setMode(project.mode === 'custom_import' ? 'custom_import' : 'template');
+      if (project.templateId) selectTemplate(project.templateId);
+
+      setFieldValue('person1', project.couple?.person1);
+      setFieldValue('person2', project.couple?.person2);
+      setFieldValue('date', project.invitation?.date);
+      setFieldValue('time', project.invitation?.time);
+      setFieldValue('location', project.invitation?.location);
+      setFieldValue('message', project.invitation?.message);
+      setFieldValue('mapsUrl', project.links?.mapsInput);
+      const websiteEnabled = document.getElementById('websiteEnabled');
+      if (websiteEnabled) websiteEnabled.checked = project.website?.enabled !== false;
+
+      const websiteDetails = project.website?.details || {};
+      Object.entries(websiteDetailFields).forEach(([id, key]) => setFieldValue(id, websiteDetails[key]));
+      setEnvelopeColour(websiteDetails.envelopeColor || '#5F694F');
+      const savedSections = websiteDetails.sections || {};
+      websiteSectionInputs.forEach(input => { input.checked = savedSections[input.dataset.websiteSection] !== false; });
+      syncWebsiteSectionPreview();
+
+      state.retainedPhoto = Boolean(data.hasPhoto);
+      state.retainedCustomTemplate = Boolean(data.hasCustomTemplate);
+      state.retainedMusic = Boolean(data.hasMusic);
+      if (state.retainedPhoto) {
+        photoTitle.textContent = 'Fotografia atual guardada';
+        photoSubtitle.textContent = 'Carrega outra imagem apenas se a quiseres substituir.';
+        previewPhotoState.textContent = 'Mantida';
+      }
+      if (state.retainedCustomTemplate) {
+        customTemplateTitle.textContent = 'Template personalizado atual guardado';
+        customTemplateSubtitle.textContent = 'Carrega outro ficheiro apenas se o quiseres substituir.';
+      }
+      if (state.retainedMusic && weddingMusicInput) {
+        weddingMusicInput.title = state.language === 'pt'
+          ? 'A música atual está guardada. Escolhe outro MP3 para a substituir.'
+          : 'The current music is saved. Choose another MP3 to replace it.';
+      }
+      updatePreview();
+      syncWebsitePhotosAvailability(false);
+      updatePreview();
+      state.redoReady = true;
+      redoBanner.classList.remove('error');
+      redoBanner.classList.add('visible');
+      redoBanner.innerHTML = '<strong>A editar o teu projeto guardado</strong>Atualiza apenas o que mudou. A fotografia, o template e as imagens do website continuam guardados até escolheres substitutos.';
+      const submitButton = document.querySelector('.submit-button');
+      if (submitButton) submitButton.innerHTML = 'Criar nova versão <span aria-hidden="true">→</span>';
+      document.querySelector('#create')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function loadBootstrap() {
+      try {
+        const response = await fetch('/api/client/bootstrap', { cache: 'no-store' });
+        const body = await response.json();
+        if (body.success) {
+          state.bootstrap = body.data;
+          applyEntitlement(body.data?.entitlement);
+        }
+      } catch {
+        state.bootstrap = null;
+      }
+    }
+
+    async function loadRestartProject() {
+      if (!state.redoRequestId) return;
+      redoBanner.classList.add('visible');
+      redoBanner.innerHTML = '<strong>A abrir o teu projeto…</strong>Estamos a recuperar os dados anteriores para poderes alterar só o necessário.';
+      try {
+        const response = await fetch(
+          `/api/customer/jobs/${encodeURIComponent(state.redoRequestId)}/restart-data`,
+          { cache: 'no-store' }
+        );
+        const body = await response.json().catch(() => null);
+        if (!response.ok || !body?.success) {
+          if (body?.error?.redirectUrl) window.location.assign(body.error.redirectUrl);
+          throw new Error(body?.error?.message || 'Não foi possível abrir o projeto guardado.');
+        }
+        applyRestartProject(body.data);
+      } catch (error) {
+        state.redoReady = false;
+        redoBanner.classList.add('visible', 'error');
+        redoBanner.innerHTML = `<strong>Não foi possível abrir o projeto.</strong>${String(error?.message || 'Volta ao resultado e tenta novamente.').replace(/[<>&]/g, '')}`;
+      }
+    }
+
+    window.WeddingI18n.mount({
+      onChange(locale) {
+        state.language = locale;
+        applyEventSelection(state.eventType);
+        syncWebsiteUiCopy();
+        syncPurchasedProductCopy();
+      }
+    });
+
+    applyEventSelection(initialEventType, {
+      historyMode: 'replace',
+      resetDefaultMessage: initialEventType === 'baby_shower'
+    });
+    syncPackFields(packTypeSelect.value);
+    syncCreationModeAccess('both');
+    syncWebsiteUiCopy();
+    updatePreview();
+    syncWebsiteSectionPreview();
+    void (async () => {
+      await loadBootstrap();
+      await loadRestartProject();
+    })();
+
+    grid.addEventListener('click', event => {
+      const card = event.target.closest('.template-card');
+      if (card) selectTemplate(card.dataset.templateId);
+    });
+
+    document.querySelectorAll('.mode-button').forEach(button => {
+      button.addEventListener('click', () => setMode(button.dataset.mode));
+    });
+
+    ['person1','person2','date','time','location','mapsUrl','message'].forEach(id => {
+      document.getElementById(id).addEventListener('input', event => {
+        event.target.closest('.field')?.classList.remove('invalid');
+        updatePreview();
+      });
+    });
+    websiteSectionInputs.forEach(input => input.addEventListener('change', syncWebsiteSectionPreview));
+
+    photoInput.addEventListener('change', () => setPhoto(photoInput.files?.[0]));
+    ['dragenter','dragover'].forEach(type => dropzone.addEventListener(type, e => { e.preventDefault(); dropzone.classList.add('dragover'); }));
+    ['dragleave','drop'].forEach(type => dropzone.addEventListener(type, e => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
+    dropzone.addEventListener('drop', event => setPhoto(event.dataTransfer.files?.[0]));
+
+    customTemplateInput.addEventListener('change', async () => {
+      const file = customTemplateInput.files?.[0];
+      if (!file) return;
+      try {
+        const normalized = await normalizePhoto(file, uploadLabel('customTemplateLabel'));
+        state.customTemplateFile = normalized;
+        customTemplateTitle.textContent = normalized.name;
+        customTemplateSubtitle.textContent = `${Math.max(.1, normalized.size / 1024 / 1024).toFixed(1)} MB · ${window.WeddingI18n.t('jpgReady')}`;
+        const reader = new FileReader();
+        reader.onload = () => { state.customTemplateDataUrl = reader.result; templatePreview.src = reader.result; };
+        reader.readAsDataURL(normalized);
+      } catch (error) { alert(error.message || window.WeddingI18n.t('imagePrepareFailed')); customTemplateInput.value = ''; }
+    });
+
+    websitePhotosInput.addEventListener('change', () => queueWebsitePhotos(websitePhotosInput.files));
+    ['dragenter','dragover'].forEach(type => websitePhotosDropzone.addEventListener(type, event => {
+      event.preventDefault();
+      if (!websitePhotosInput.disabled) websitePhotosDropzone.classList.add('dragover');
+    }));
+    ['dragleave','drop'].forEach(type => websitePhotosDropzone.addEventListener(type, event => {
+      event.preventDefault();
+      websitePhotosDropzone.classList.remove('dragover');
+    }));
+    websitePhotosDropzone.addEventListener('drop', event => {
+      if (!websitePhotosInput.disabled) queueWebsitePhotos(event.dataTransfer.files);
+    });
+    websitePhotosPreview.addEventListener('click', event => {
+      const remove = event.target.closest('[data-website-photo-index]');
+      if (remove) removeWebsitePhoto(Number(remove.dataset.websitePhotoIndex));
+    });
+    websitePhotosClear.addEventListener('click', () => clearWebsitePhotos());
+
+    window.addEventListener('popstate', () => {
+      const routeEventType = eventTypeFromPath(window.location.pathname);
+      if (routeEventType) {
+        applyEventSelection(routeEventType, { resetDefaultMessage: true });
+      }
+    });
+    packTypeSelect.addEventListener('change', event => syncPackFields(event.target.value));
+    document.getElementById('websiteEnabled').addEventListener('change', () => {
+      syncWebsitePhotosAvailability(true);
+      updatePreview();
+    });
+    window.addEventListener('pagehide', () => {
+      state.websitePhotos.forEach(item => URL.revokeObjectURL(item.previewUrl));
+    });
+
+    async function beginGeneration(payload) {
+      // Photo compression happens in the background. Wait for it so a quick
+      // submit cannot leave the selected website photos out of the project.
+      await websitePhotosProcessing;
+      const ui = showLoading();
+      try {
+        const continuingExistingJob = activeJob?.canRegenerate && !activeJob.imageConfirmed;
+        const job = continuingExistingJob
+          ? await mutateJob(activeJob.requestId, 'regenerate', {
+              revisionContext: '',
+              templateId: payload.templateId
+          })
+          : await submitProject(payload);
+        if (!continuingExistingJob) {
+          window.location.assign(`/results/${encodeURIComponent(job.requestId)}`);
+          return;
+        }
+        activePayload = payload;
+        await trackGeneration(ui, job, payload);
+      } catch (error) {
+        failLoading(ui, error);
+      }
+    }
+
+    function closeWebsiteDetails() {
+      websiteDetailsOverlay.classList.remove('visible');
+      websiteDetailsOverlay.hidden = true;
+      document.body.style.overflow = '';
+    }
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!validateForm()) return;
+      if (state.packType === 'Full_pack' && document.getElementById('websiteEnabled')?.checked) {
+        openWebsiteDetails();
+        return;
+      }
+      await beginGeneration(buildPayload());
+    });
+
+    websiteDetailsForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      closeWebsiteDetails();
+      await beginGeneration(buildPayload());
+    });
+    document.getElementById('skipWebsiteDetails').addEventListener('click', async () => {
+      websiteDetailsForm.reset();
+      state.musicFile = null;
+      state.retainedMusic = false;
+      setEnvelopeColour('#5F694F');
+      syncWebsiteSectionPreview();
+      closeWebsiteDetails();
+      await beginGeneration(buildPayload());
+    });
+    document.getElementById('closeWebsiteDetails').addEventListener('click', closeWebsiteDetails);
+    websiteDetailsOverlay.addEventListener('click', event => {
+      if (event.target === websiteDetailsOverlay) closeWebsiteDetails();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !websiteDetailsOverlay.hidden) closeWebsiteDetails();
+    });
+
+    if (/^(localhost|127\.0\.0\.1|\[::1\])$/i.test(window.location.hostname)) {
+      localTestControls.hidden = false;
+      localTestButton.addEventListener('click', () => localTestImage.click());
+      localTestImage.addEventListener('change', async () => {
+        const imageFile = localTestImage.files?.[0];
+        if (!imageFile) return;
+        await websitePhotosProcessing;
+        if (!validateForm()) return;
+        const payload = buildPayload();
+        const ui = showLoading();
+        try {
+          const job = await submitLocalTest(payload, imageFile);
+          window.location.assign(`/results/${encodeURIComponent(job.requestId)}`);
+          return;
+        } catch (error) {
+          failLoading(ui, error);
+        } finally {
+          localTestImage.value = '';
+        }
+      });
+    }
+
+    document.getElementById('closeSuccess').addEventListener('click', () => {
+      document.getElementById('loadingOverlay').classList.remove('visible');
+      document.body.style.overflow = '';
+    });
+
+    document.getElementById('canvaGenerated').addEventListener('click', event => {
+      const href = event.currentTarget.getAttribute('href');
+      if (!href || href === '#') {
+        event.preventDefault();
+        alert('O template Canva ainda não está pronto. Volta a este pedido dentro de alguns instantes.');
+      }
+    });
+  </script>
+</body>
+</html>

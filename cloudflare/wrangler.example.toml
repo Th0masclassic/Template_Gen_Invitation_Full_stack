@@ -1,0 +1,7 @@
+name = "temgen-invitation-router"
+main = "invitation-router.js"
+compatibility_date = "2026-07-26"
+
+[[r2_buckets]]
+binding = "INVITATION_SITES"
+bucket_name = "my-files"
