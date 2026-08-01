@@ -135,6 +135,13 @@ import {
   YOUFORM_DEFAULT_FORM_URL,
   YOUFORM_WEBHOOK_SECRET,
 } from "./server-config.mjs";
+
+// Local website previews may show the RSVP dashboard without a customer code.
+// The bypass is still restricted to jobs created by the local preview route
+// and requests coming from the same computer.
+const RSVP_ADMIN_LOCAL_BYPASS = ["1", "true", "yes", "on"].includes(
+  String(process.env.RSVP_ADMIN_LOCAL_BYPASS ?? "1").trim().toLowerCase(),
+);
 import {
   SUPPORTED_LOCALES,
   appendYouformParams,
@@ -1426,6 +1433,11 @@ app.post(
 app.get("/operator/access-codes", requireLocalOperator, (_request, response) => {
   response.setHeader("Cache-Control", "no-store");
   response.type("html").send(renderAccessCodeOperatorPage());
+});
+
+app.get("/operator/local-website-test", requireLocalOperator, (_request, response) => {
+  response.setHeader("Cache-Control", "no-store");
+  response.type("html").sendFile(path.join(PUBLIC_DIR, "local-website-test.html"));
 });
 
 app.get("/api/operator/access-codes", requireLocalOperator, async (_request, response, next) => {
@@ -3293,15 +3305,92 @@ function selectedWebsiteEnvelopeColor(job) {
   return /^#[0-9A-Fa-f]{6}$/.test(value) ? value.toUpperCase() : "";
 }
 
-async function recolorWebsiteEnvelopeLayer(sourcePath, outputPath, color) {
-  await sharp(sourcePath, {
+async function recolorWebsiteEnvelopeAsset(sourcePath, outputPath, color) {
+  const image = sharp(sourcePath, {
     failOn: "warning",
     limitInputPixels: MAX_OPENAI_EDIT_IMAGE_PIXELS,
     sequentialRead: true,
   })
-    .tint(color)
-    .webp({ quality: 92, alphaQuality: 100 })
+    .tint(color);
+  if (path.extname(outputPath).toLowerCase() === ".png") {
+    await image.png({ compressionLevel: 9 }).toFile(outputPath);
+    return;
+  }
+  await image.webp({ quality: 92, alphaQuality: 100 }).toFile(outputPath);
+}
+
+async function writeGeneratedWebsiteEnvelopeSeal(sourcePath, outputPath) {
+  // GPT returns the seal on an opaque black canvas, while the mobile website
+  // layer must remain transparent everywhere outside the generated seal.
+  const { data, info } = await sharp(sourcePath, {
+    failOn: "warning",
+    limitInputPixels: MAX_OPENAI_EDIT_IMAGE_PIXELS,
+    sequentialRead: true,
+  })
+    .rotate()
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const pixelCount = info.width * info.height;
+  const background = new Uint8Array(pixelCount);
+  const queue = new Int32Array(pixelCount);
+  let queueHead = 0;
+  let queueTail = 0;
+  const isBlackCanvasPixel = (pixelIndex) => {
+    const offset = pixelIndex * info.channels;
+    return Math.max(data[offset], data[offset + 1], data[offset + 2]) <= 2
+      && data[offset + info.channels - 1] > 0;
+  };
+  const enqueueBackgroundPixel = (pixelIndex) => {
+    if (background[pixelIndex] || !isBlackCanvasPixel(pixelIndex)) return;
+    background[pixelIndex] = 1;
+    queue[queueTail] = pixelIndex;
+    queueTail += 1;
+  };
+
+  for (let y = 0; y < info.height; y += 1) {
+    enqueueBackgroundPixel(y * info.width);
+    enqueueBackgroundPixel((y * info.width) + info.width - 1);
+  }
+  for (let x = 1; x < info.width - 1; x += 1) {
+    enqueueBackgroundPixel(x);
+    enqueueBackgroundPixel(((info.height - 1) * info.width) + x);
+  }
+
+  while (queueHead < queueTail) {
+    const pixelIndex = queue[queueHead];
+    queueHead += 1;
+    const x = pixelIndex % info.width;
+    const y = Math.floor(pixelIndex / info.width);
+    if (x > 0) enqueueBackgroundPixel(pixelIndex - 1);
+    if (x + 1 < info.width) enqueueBackgroundPixel(pixelIndex + 1);
+    if (y > 0) enqueueBackgroundPixel(pixelIndex - info.width);
+    if (y + 1 < info.height) enqueueBackgroundPixel(pixelIndex + info.width);
+  }
+
+  const rgba = Buffer.from(data);
+  for (let pixelIndex = 0; pixelIndex < pixelCount; pixelIndex += 1) {
+    const alphaOffset = (pixelIndex * info.channels) + info.channels - 1;
+    if (background[pixelIndex]) rgba[alphaOffset] = 0;
+  }
+  await sharp(rgba, {
+    raw: {
+      width: info.width,
+      height: info.height,
+      channels: info.channels,
+    },
+  })
+    .png()
     .toFile(outputPath);
+}
+
+async function stageWebsiteEnvelopeSeal(resolvedEnvelope, outputPath) {
+  if (resolvedEnvelope?.source === "generated") {
+    await writeGeneratedWebsiteEnvelopeSeal(resolvedEnvelope.filePath, outputPath);
+    return "generated";
+  }
+  await fs.copyFile(ENVELOPE_SEAL_REFERENCE_PATH, outputPath);
+  return "reference";
 }
 
 function mixEnvelopeRgb(first, second, secondWeight) {
@@ -4483,11 +4572,25 @@ async function createCanvaWebsiteImportHtml(siteDir, publicBaseUrl = "") {
   return importPath;
 }
 
-function renderRsvpAdminWebsite({ requestId, apiUrl = "" } = {}) {
+function renderLegacyRsvpAdminWebsite({ requestId, apiUrl = "" } = {}) {
   const config = safeJsonForHtml({
     apiUrl: apiUrl || `/api/public/rsvp-admin/${encodeURIComponent(String(requestId || ""))}`,
   });
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RSVP Admin</title><style>body{margin:0;background:#f4f6f0;color:#263022;font-family:Inter,system-ui,sans-serif;padding:24px}.page{width:min(1080px,100%);margin:auto}.card{background:#fff;border:1px solid #d8dfd2;border-radius:20px;padding:clamp(20px,4vw,38px);box-shadow:0 18px 50px rgba(45,59,37,.09)}h1,h2{font-family:Georgia,serif;font-weight:500;margin:0 0 8px}.muted{color:#66705f;line-height:1.6}.access{display:flex;gap:10px;margin-top:22px}.access input{min-height:44px;max-width:220px;letter-spacing:.14em;text-align:center;border:1px solid #c8d1c0;border-radius:10px;font:inherit}.button{min-height:44px;border:0;border-radius:999px;padding:0 18px;background:#53634e;color:#fff;font:inherit;font-weight:700;cursor:pointer}.button.secondary{background:#fff;color:#364332;border:1px solid #c8d1c0}.dashboard{display:none;margin-top:28px}.dashboard.visible{display:block}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0}.stat{padding:16px;border-radius:14px;background:#f5f8f2;text-align:center}.stat strong{display:block;font:500 30px Georgia,serif}.actions{display:flex;flex-wrap:wrap;gap:10px}.table-wrap{overflow:auto;margin-top:18px;border:1px solid #dce2d7;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{padding:12px;border-bottom:1px solid #e5e9e1;text-align:left;font-size:14px;vertical-align:top}th{background:#f6f8f4;font-size:12px;text-transform:uppercase;letter-spacing:.06em}.yes{color:#315b39;font-weight:700}.no{color:#9a3b36;font-weight:700}#status{min-height:20px;color:#a13d37}@media(max-width:600px){body{padding:12px}.access{flex-wrap:wrap}.access input{max-width:none;flex:1}.stats{grid-template-columns:1fr}}</style></head><body><main class="page"><section class="card"><p class="muted">InviteLab</p><h1>RSVP Admin</h1><p class="muted">View guest replies and download your RSVP list. Enter the six-digit project access code from your purchase email.</p><form class="access" id="accessForm"><input id="accessCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" required><button class="button" type="submit">Open responses</button></form><p id="status" role="status" aria-live="polite"></p><div class="dashboard" id="dashboard"><div class="stats"><div class="stat"><strong id="total">0</strong><span>Total</span></div><div class="stat"><strong id="yes">0</strong><span>Attending</span></div><div class="stat"><strong id="no">0</strong><span>Not attending</span></div></div><div class="actions"><button class="button secondary" type="button" id="refresh">Refresh</button><a class="button secondary" id="download" download>Download CSV</a></div><div class="table-wrap" id="tableWrap" hidden><table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Contact</th><th>Reply</th><th>Message</th></tr></thead><tbody id="rows"></tbody></table></div></div></section></main><script>const config=${config};const $=id=>document.getElementById(id);const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let code=sessionStorage.getItem('invitelab-rsvp-code')||'';$('accessCode').value=code;async function load(){code=$('accessCode').value.replace(/\\D/g,'').slice(0,6);if(code.length!==6){$('status').textContent='Enter the six-digit access code.';return;}$('status').textContent='Loading responses...';const url=new URL(config.apiUrl,window.location.href);url.searchParams.set('code',code);try{const response=await fetch(url,{cache:'no-store'});const body=await response.json().catch(()=>null);if(!response.ok||!body?.success)throw new Error(body?.error?.message||'Could not load responses.');sessionStorage.setItem('invitelab-rsvp-code',code);const entries=body.data?.entries||[],summary=body.data?.summary||{};$('total').textContent=summary.total??entries.length;$('yes').textContent=summary.attending??0;$('no').textContent=summary.notAttending??0;$('download').href=url.pathname.replace(/\\/?$/,'/csv')+'?code='+encodeURIComponent(code);$('rows').innerHTML=entries.map(e=>'<tr><td>'+esc(e.receivedAt||'—')+'</td><td>'+esc(e.name||'—')+'</td><td>'+esc(e.email||'—')+'</td><td>'+esc(e.contact||'—')+'</td><td class="'+(e.attendance==='yes'?'yes':e.attendance==='no'?'no':'')+'">'+esc(e.attendance||'—')+'</td><td>'+esc(e.message||'—')+'</td></tr>').join('');$('tableWrap').hidden=!entries.length;$('dashboard').classList.add('visible');$('status').textContent=entries.length?'Responses updated.':'There are no responses yet.';}catch(error){$('status').textContent=error.message;}}$('accessForm').addEventListener('submit',event=>{event.preventDefault();load();});$('refresh').addEventListener('click',load);</script></body></html>`;
+}
+
+function renderRsvpAdminWebsite({ requestId, apiUrl = "", localAccess = false } = {}) {
+  const config = safeJsonForHtml({
+    apiUrl: apiUrl || `/api/public/rsvp-admin/${encodeURIComponent(String(requestId || ""))}`,
+    accessRequired: !localAccess,
+  });
+  const accessForm = localAccess
+    ? ""
+    : `<form class="access" id="accessForm"><input id="accessCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" required><button class="button" type="submit">Open responses</button></form>`;
+  const intro = localAccess
+    ? "Local preview mode is active. Responses open automatically for this test website."
+    : "View guest replies and download your RSVP list. Enter the six-digit project access code from your purchase email.";
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>RSVP Admin</title><style>body{margin:0;background:#f4f6f0;color:#263022;font-family:Inter,system-ui,sans-serif;padding:24px}.page{width:min(1080px,100%);margin:auto}.card{background:#fff;border:1px solid #d8dfd2;border-radius:20px;padding:clamp(20px,4vw,38px);box-shadow:0 18px 50px rgba(45,59,37,.09)}h1,h2{font-family:Georgia,serif;font-weight:500;margin:0 0 8px}.muted{color:#66705f;line-height:1.6}.access{display:flex;gap:10px;margin-top:22px}.access input{min-height:44px;max-width:220px;letter-spacing:.14em;text-align:center;border:1px solid #c8d1c0;border-radius:10px;font:inherit}.button{min-height:44px;border:0;border-radius:999px;padding:0 18px;background:#53634e;color:#fff;font:inherit;font-weight:700;cursor:pointer}.button.secondary{background:#fff;color:#364332;border:1px solid #c8d1c0}.dashboard{display:none;margin-top:28px}.dashboard.visible{display:block}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0}.stat{padding:16px;border-radius:14px;background:#f5f8f2;text-align:center}.stat strong{display:block;font:500 30px Georgia,serif}.actions{display:flex;flex-wrap:wrap;gap:10px}.table-wrap{overflow:auto;margin-top:18px;border:1px solid #dce2d7;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{padding:12px;border-bottom:1px solid #e5e9e1;text-align:left;font-size:14px;vertical-align:top}th{background:#f6f8f4;font-size:12px;text-transform:uppercase;letter-spacing:.06em}.yes{color:#315b39;font-weight:700}.no{color:#9a3b36;font-weight:700}#status{min-height:20px;color:#a13d37}@media(max-width:600px){body{padding:12px}.access{flex-wrap:wrap}.access input{max-width:none;flex:1}.stats{grid-template-columns:1fr}}</style></head><body><main class="page"><section class="card"><p class="muted">InviteLab</p><h1>RSVP Admin</h1><p class="muted">${intro}</p>${accessForm}<p id="status" role="status" aria-live="polite"></p><div class="dashboard" id="dashboard"><div class="stats"><div class="stat"><strong id="total">0</strong><span>Total</span></div><div class="stat"><strong id="yes">0</strong><span>Attending</span></div><div class="stat"><strong id="no">0</strong><span>Not attending</span></div></div><div class="actions"><button class="button secondary" type="button" id="refresh">Refresh</button><a class="button secondary" id="download" download>Download CSV</a></div><div class="table-wrap" id="tableWrap" hidden><table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Contact</th><th>Reply</th><th>Message</th></tr></thead><tbody id="rows"></tbody></table></div></div></section></main><script>const config=${config};const $=id=>document.getElementById(id);const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let code=sessionStorage.getItem('invitelab-rsvp-code')||'';const accessCode=$('accessCode');if(accessCode)accessCode.value=code;async function load(){code=accessCode?.value.replace(/\D/g,'').slice(0,6)||'';if(config.accessRequired&&code.length!==6){$('status').textContent='Enter the six-digit access code.';return;}$('status').textContent='Loading responses...';const url=new URL(config.apiUrl,window.location.href);if(config.accessRequired)url.searchParams.set('code',code);try{const response=await fetch(url,{cache:'no-store'});const body=await response.json().catch(()=>null);if(!response.ok||!body?.success)throw new Error(body?.error?.message||'Could not load responses.');if(config.accessRequired)sessionStorage.setItem('invitelab-rsvp-code',code);const entries=body.data?.entries||[],summary=body.data?.summary||{};$('total').textContent=summary.total??entries.length;$('yes').textContent=summary.attending??0;$('no').textContent=summary.notAttending??0;const csvUrl=new URL(url.pathname.replace(/\/?$/,'/csv'),url);if(config.accessRequired)csvUrl.searchParams.set('code',code);$('download').href=csvUrl.toString();$('rows').innerHTML=entries.map(e=>'<tr><td>'+esc(e.receivedAt||'—')+'</td><td>'+esc(e.name||'—')+'</td><td>'+esc(e.email||'—')+'</td><td>'+esc(e.contact||'—')+'</td><td class="'+(e.attendance==='yes'?'yes':e.attendance==='no'?'no':'')+'">'+esc(e.attendance||'—')+'</td><td>'+esc(e.message||'—')+'</td></tr>').join('');$('tableWrap').hidden=!entries.length;$('dashboard').classList.add('visible');$('status').textContent=entries.length?'Responses updated.':'There are no responses yet.';}catch(error){$('status').textContent=error.message;}}if(accessCode)$('accessForm').addEventListener('submit',event=>{event.preventDefault();load();});$('refresh').addEventListener('click',load);if(!config.accessRequired)load();</script></body></html>`;
 }
 
 async function prepareWeddingWebsite(job) {
@@ -4555,9 +4658,10 @@ async function prepareWeddingWebsite(job) {
   const musicCopies = musicFileName
     ? [fs.copyFile(candidateMusicPath, path.join(stagingDir, musicFileName))]
     : [];
+  const websiteEnvelopeSealSource = resolvedEnvelope.source === "generated" ? "generated" : "reference";
   const websiteEnvelopeColor = selectedWebsiteEnvelopeColor(job);
   const recoloredEnvelopeLayerCopies = websiteEnvelopeColor
-    ? ["mobile-envelope-layer-top.webp", "mobile-envelope-layer-bottom.webp"].map((fileName) => ({
+    ? ["mobile-envelope-layer-top.webp", "mobile-envelope-layer-bottom.webp", "green-envelope.png"].map((fileName) => ({
       sourcePath: path.join(WEBSITE_TEMPLATE_DIR, "assets", fileName),
       outputPath: path.join(stagingDir, "assets", fileName),
     }))
@@ -4573,10 +4677,16 @@ async function prepareWeddingWebsite(job) {
     musicFileName,
     theme: resolvedEnvelope.theme,
   });
-  const rsvpAdminApiUrl = normalizePublicBaseUrl(PUBLIC_BASE_URL)
+  const rsvpAdminApiUrl = job.localWebsiteTest
+    ? `/api/public/rsvp-admin/${encodeURIComponent(job.requestId)}`
+    : normalizePublicBaseUrl(PUBLIC_BASE_URL)
     ? new URL(`/api/public/rsvp-admin/${encodeURIComponent(job.requestId)}`, normalizePublicBaseUrl(PUBLIC_BASE_URL)).toString()
     : `/api/public/rsvp-admin/${encodeURIComponent(job.requestId)}`;
-  const rsvpAdminHtml = renderRsvpAdminWebsite({ requestId: job.requestId, apiUrl: rsvpAdminApiUrl });
+  const rsvpAdminHtml = renderRsvpAdminWebsite({
+    requestId: job.requestId,
+    apiUrl: rsvpAdminApiUrl,
+    localAccess: Boolean(job.localWebsiteTest),
+  });
   try {
     const templateAssetCopy = fs.cp(
       path.join(WEBSITE_TEMPLATE_DIR, "assets"),
@@ -4607,8 +4717,8 @@ async function prepareWeddingWebsite(job) {
         .png()
         .toFile(path.join(stagingDir, "envelope.png")),
 
-      fs.copyFile(
-        ENVELOPE_SEAL_REFERENCE_PATH,
+      stageWebsiteEnvelopeSeal(
+        resolvedEnvelope,
         path.join(stagingDir, WEBSITE_ENVELOPE_SEAL_FILENAME),
       ),
 
@@ -4658,6 +4768,7 @@ async function prepareWeddingWebsite(job) {
             fileName: "envelope.png",
             sealFileName: WEBSITE_ENVELOPE_SEAL_FILENAME,
             source: resolvedEnvelope.source,
+            sealSource: websiteEnvelopeSealSource,
             selectedColor: websiteEnvelopeColor || null,
             theme: resolvedEnvelope.theme,
           },
@@ -4667,7 +4778,7 @@ async function prepareWeddingWebsite(job) {
     ]);
     if (recoloredEnvelopeLayerCopies.length) {
       await Promise.all(recoloredEnvelopeLayerCopies.map(({ sourcePath, outputPath }) => (
-        recolorWebsiteEnvelopeLayer(sourcePath, outputPath, websiteEnvelopeColor)
+        recolorWebsiteEnvelopeAsset(sourcePath, outputPath, websiteEnvelopeColor)
       )));
     }
     await replacePreparedSiteDirectory(stagingDir, siteDir);
@@ -4687,6 +4798,7 @@ async function prepareWeddingWebsite(job) {
     websiteImages,
     envelopeFileName: "envelope.png",
     envelopeSealFileName: WEBSITE_ENVELOPE_SEAL_FILENAME,
+    envelopeSealSource: websiteEnvelopeSealSource,
     envelopeColor: websiteEnvelopeColor || null,
     envelopeSource: resolvedEnvelope.source,
     envelopeTheme: resolvedEnvelope.theme,
@@ -5204,7 +5316,10 @@ async function generateEnvelopeImage(
   return response?.data?.[0]?.b64_json || "";
 }
 async function createEnvelopeInitialsMask() {
-  const metadata = await sharp(ENVELOPE_SEAL_REFERENCE_PATH).metadata();
+  // The mask is sent alongside ENVELOPE_REFERENCE_PATH to GPT Image, so its
+  // dimensions must match the actual envelope edit input rather than the
+  // separate mobile seal overlay.
+  const metadata = await sharp(ENVELOPE_REFERENCE_PATH).metadata();
   const width = Number(metadata.width || ENVELOPE_OUTPUT_WIDTH);
   const height = Number(metadata.height || ENVELOPE_OUTPUT_HEIGHT);
 
@@ -5245,7 +5360,7 @@ async function createEnvelopeInitialsMask() {
     .png()
     .toBuffer();
 
-  return toFile(maskBuffer, "seal-initials-mask.png", { type: "image/png" });
+  return toFile(maskBuffer, "envelope-initials-mask.png", { type: "image/png" });
 }
 
 function isImageStreamingCompatibilityError(error) {
@@ -12341,7 +12456,17 @@ app.post(
         }
         return { duplicate: false };
       });
-      response.status(outcome.duplicate ? 200 : 201).json({ success: true, data: { accepted: true, duplicate: outcome.duplicate } });
+      if (outcome.duplicate) {
+        response.status(409).json({
+          success: false,
+          error: {
+            code: "RSVP_EMAIL_ALREADY_REGISTERED",
+            message: "This email has already submitted an RSVP for this wedding.",
+          },
+        });
+        return;
+      }
+      response.status(201).json({ success: true, data: { accepted: true, duplicate: false } });
     } catch (error) { next(error); }
   },
 );
@@ -12359,6 +12484,7 @@ async function loadPublicRsvpAdminJob(request) {
   const job = JOB_ID_RE.test(requestId) ? await loadJob(requestId) : null;
   if (!job || !job.project?.attendance?.enabled || job.project?.website?.enabled === false) return null;
   if (!ACCESS_CODE_REQUIRED) return job;
+  if (RSVP_ADMIN_LOCAL_BYPASS && job.localWebsiteTest && isLocalOperatorRequest(request)) return job;
   const code = normalizeAccessCode(request.query?.code);
   const record = code ? await accessCodeStore.resolve(code) : null;
   if (!record || record.state !== "claimed" || record.requestId !== job.requestId) return false;
@@ -13095,6 +13221,112 @@ app.post(
       await saveJob(job);
       enqueueSitePublish(job);
       response.status(202).json({ success: true, data: publicJobView(job) });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+app.post(
+  "/api/operator/local-test-website",
+  requireLocalOperator,
+  rateLimit({ windowMs: 10 * 60 * 1000, max: 20, keyPrefix: "local-test-website" }),
+  async (request, response, next) => {
+    try {
+      const rawProject = typeof request.body?.project === "string"
+        ? request.body.project
+        : JSON.stringify(request.body?.project || {});
+      const project = parseProject(rawProject);
+      if (project.mode !== "template") {
+        throw validationError("mode", "O teste local usa um template incluido no projeto.");
+      }
+      project.packType = "Full_pack";
+      project.attendance = {
+        enabled: true,
+        formUrl: normalizeAttendanceUrl(project.attendance?.formUrl || YOUFORM_DEFAULT_FORM_URL),
+      };
+      project.website.enabled = true;
+
+      const templateFilename = TEMPLATE_FILES[project.templateId];
+      if (!templateFilename) throw validationError("templateId", "Template desconhecido.");
+      const templatePath = path.join(TEMPLATE_DIR, templateFilename);
+      await fs.access(templatePath);
+
+      const requestId = crypto.randomUUID();
+      const now = new Date().toISOString();
+      const coupleSlug = safeSlug(`${project.couple.person1}-${project.couple.person2}`);
+      const outputFilename = `${coupleSlug}-${requestId}-website-preview.png`;
+      await sharp(templatePath, {
+        failOn: "warning",
+        limitInputPixels: MAX_OPENAI_EDIT_IMAGE_PIXELS,
+        sequentialRead: true,
+      }).png().toFile(path.join(GENERATED_DIR, outputFilename));
+
+      const job = {
+        requestId,
+        state: "completed",
+        progress: 100,
+        createdAt: now,
+        updatedAt: now,
+        expiresAt: new Date(Date.now() + IMAGE_EDIT_WINDOW_MS).toISOString(),
+        attemptsUsed: 0,
+        invitationAttemptsUsed: 0,
+        envelopeAttemptsUsed: 0,
+        redoAttemptsUsed: 0,
+        maxImageAttempts: MAX_IMAGE_ATTEMPTS,
+        imageRevision: 1,
+        envelopeRevision: 1,
+        generationTarget: "both",
+        imageConfirmed: true,
+        confirmedAt: now,
+        project,
+        outputFilename,
+        envelopeFilename: null,
+        pdfFilename: null,
+        customerFilename: outputFilename,
+        customerEnvelopeFilename: null,
+        customerPdfFilename: null,
+        photoPath: null,
+        photoMime: null,
+        websitePhotos: [],
+        customTemplatePath: null,
+        customTemplateMime: null,
+        musicPath: null,
+        musicMime: null,
+        musicOriginalName: null,
+        assetPackageDir: null,
+        assetManifestFile: null,
+        generationPreview: null,
+        imageUrl: `/generated/${encodeURIComponent(outputFilename)}`,
+        downloadUrl: `/generated/${encodeURIComponent(outputFilename)}`,
+        envelopeUrl: "/assets/envelope-reference.webp",
+        envelopeDownloadUrl: "/assets/envelope-reference.webp",
+        envelopeTheme: null,
+        pdfUrl: null,
+        pdfDownloadUrl: null,
+        pptxUrl: null,
+        pptxDownloadUrl: null,
+        canva: { state: "disabled" },
+        site: { state: "preparing", progress: 0, publicUrl: null, error: null },
+        rsvp: { submissionCount: 0, lastSubmissionAt: null },
+        latexUrl: null,
+        pdfSourceError: null,
+        resultUrl: `/site/${requestId}/`,
+        error: null,
+        localWebsiteTest: true,
+      };
+      await saveJob(job);
+      await prepareWeddingWebsite(job);
+      response.status(201).json({
+        success: true,
+        data: {
+          requestId,
+          localUrl: `/site/${encodeURIComponent(requestId)}/`,
+          rsvpAdminUrl: `/site/${encodeURIComponent(requestId)}/RSVP-ADMIN/`,
+          envelopeColor: job.site?.envelopeColor || null,
+          templateId: project.templateId,
+        },
+      });
     } catch (error) {
       next(error);
     }

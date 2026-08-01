@@ -186,6 +186,19 @@ else {
   revealNodes.forEach((node) => revealObserver.observe(node));
 }
 
+const timelineItems = document.querySelectorAll('[data-timeline-item]');
+if (reducedMotion || !('IntersectionObserver' in window)) timelineItems.forEach((item) => item.classList.add('is-visible'));
+else {
+  const timelineObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.28, rootMargin: '0px 0px -10% 0px' });
+  timelineItems.forEach((item) => timelineObserver.observe(item));
+}
+
 document.querySelectorAll('.faq-q').forEach((button) => {
   const item = button.closest('.faq-item');
   button.setAttribute('aria-expanded', item?.classList.contains('open') ? 'true' : 'false');
@@ -256,11 +269,13 @@ rsvpForm?.addEventListener('submit', async (event) => {
       body: JSON.stringify(Object.fromEntries(data.entries())),
     });
     const body = await response.json().catch(() => null);
-    if (!response.ok || !body?.success) throw new Error('RSVP_FAILED');
+    if (!response.ok || !body?.success) {
+      throw new Error(body?.error?.message || 'We could not send your response. Please try again.');
+    }
     rsvpStatus.textContent = (config.labels?.rsvpThanks || 'Thank you') + (name ? `, ${name}` : '') + '.';
-  } catch {
+  } catch (error) {
     submit?.removeAttribute('disabled');
-    rsvpStatus.textContent = config.labels?.rsvpError || 'We could not send your response. Please try again.';
+    rsvpStatus.textContent = error?.message || config.labels?.rsvpError || 'We could not send your response. Please try again.';
   }
 });
 window.addEventListener('hashchange', () => { if (window.location.hash === '#rsvp') openRsvpModal(); });

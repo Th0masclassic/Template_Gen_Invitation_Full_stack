@@ -92,6 +92,8 @@ test("wedding website escapes customer data and embeds the configured Youform", 
   assert.match(html, /id="rsvp"/);
   assert.match(html, /id="venue"/);
   assert.match(html, /id="timeline"/);
+  assert.match(html, /class="timeline-path"/);
+  assert.match(html, /data-timeline-item/);
   assert.match(html, /id="dress-code"/);
   assert.match(html, /id="stay"/);
   assert.match(html, /id="travel"/);
