@@ -25,22 +25,28 @@ test("Canva retry is exposed only for an explicit link-creation failure", async 
   assert.doesNotMatch(source, /if \(result\.canva\?\.canRetryTemplateLink\)/);
 });
 
-test("approval UI keeps invitation and envelope atomic and offers targeted retries", async () => {
+test("approval UI keeps the invitation suite together and offers targeted retries for all assets", async () => {
   const source = await clientSource();
 
   assert.match(source, /id="generatedPair"[^>]+hidden/);
   assert.match(source, /id="generatedImage"/);
   assert.match(source, /id="generatedEnvelope"/);
+  assert.match(source, /id="generatedDetails"/);
   assert.match(source, /id="attemptSummary"/);
   assert.match(source, /id="assetRevisionOverlay"[^>]+hidden/);
   assert.match(source, /name="revisionTarget" value="invitation"/);
   assert.match(source, /name="revisionTarget" value="envelope"/);
-  assert.match(source, /const DEFAULT_MAX_ASSET_ATTEMPTS = 7/);
+  assert.match(source, /name="revisionTarget" value="agenda"/);
+  assert.match(source, /const DEFAULT_MAX_ASSET_ATTEMPTS = 10/);
   assert.match(source, /result\?\.invitationAttemptsUsed/);
   assert.match(source, /result\?\.envelopeAttemptsUsed/);
+  assert.match(source, /result\?\.agendaAttemptsUsed/);
   assert.match(source, /generatedAssets\.ready/);
-  assert.match(source, /if \(generatedAssets\.hasEnvelopeContract\) regenerationPayload\.target = target/);
-  assert.match(source, /A outra peça fica guardada/);
+  assert.match(source, /if \(generatedAssets\.hasEnvelopeContract \|\| generatedAssets\.hasDetailsContract\) regenerationPayload\.target = target/);
+  assert.match(source, /target === 'agenda' \? generatedAssets\.details/);
+  assert.match(source, /Attempt totals are intentionally shown only after the customer opens/);
+  assert.match(source, /ui\.attemptSummary\.hidden = true/);
+  assert.match(source, /As outras peças ficam guardadas/);
 });
 
 test("the first published website is revealed once on mobile", async () => {

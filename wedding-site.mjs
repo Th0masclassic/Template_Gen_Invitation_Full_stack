@@ -1025,6 +1025,7 @@ export function renderWeddingWebsite({
   websiteImages = {},
   musicFileName = "",
   theme = null,
+  rsvpSubmitUrl = "",
 }) {
   if (project?.eventType === "baby_shower") {
     return renderLegacyEventWebsite({ project, requestId, imageFileName, galleryImages });
@@ -1089,7 +1090,10 @@ export function renderWeddingWebsite({
   const introTitle = names;
   const introEyebrow = weddingIntroEyebrow(locale);
   const introScrollHint = weddingIntroScrollHint(locale);
-  const mobileEnvelopeColor = selectedEnvelopeColor || "#5F694F";
+  // Keep the supplied artwork untouched unless the visitor explicitly chooses
+  // an envelope colour. The colour picker is opt-in; its absence must not tint
+  // the white reference envelope.
+  const mobileEnvelopeColor = selectedEnvelopeColor || "transparent";
   const musicUrl = normalizeSiteAudioPath(musicFileName) || safeHttpsUrl(details.musicUrl);
   const musicTitle = String(details.musicTitle || (locale === "pt" ? "A nossa música" : "Our song")).trim();
   const musicArtist = String(details.musicArtist || names).trim();
@@ -1097,13 +1101,6 @@ export function renderWeddingWebsite({
   const mapsUrl = safeHttpsUrl(project?.links?.mapsUrl) || "#";
   const sections = normalizeWebsiteSections(details.sections);
   const attendanceEnabled = Boolean(project?.attendance?.enabled);
-  const attendanceFormUrl = safeYouformUrl(project?.attendance?.formUrl);
-  const formId = attendanceEnabled ? extractYouformFormId(attendanceFormUrl) : "";
-  const embedParams = new URLSearchParams({
-    request_id: String(requestId || "").slice(0, 200),
-    language: locale,
-    couple: names.slice(0, 300),
-  }).toString();
   const target = eventDate ? `${eventDate}T${eventTime}:00` : "";
   const ceremonyTime = normalizeClock(details.ceremonyTime || eventTime);
   const receptionTime = normalizeClock(details.receptionTime || addMinutesToClock(ceremonyTime, 60));
@@ -1127,7 +1124,7 @@ export function renderWeddingWebsite({
   }
   const siteConfig = safeJsonForHtml({
     countdownTarget: target,
-    rsvpSubmitUrl: `/api/public/rsvp/${encodeURIComponent(String(requestId || ""))}`,
+    rsvpSubmitUrl: rsvpSubmitUrl || `/api/public/rsvp/${encodeURIComponent(String(requestId || ""))}`,
     sections,
     music: musicUrl ? { title: musicTitle, artist: musicArtist } : null,
     labels: {
@@ -1140,19 +1137,52 @@ export function renderWeddingWebsite({
     },
   });
   const image = (src, alt, className = "") => `<img${className ? ` class="${className}"` : ""} src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" loading="lazy" decoding="async">`;
-  // Prefer the configured Youform inside the existing wedding modal. Its hidden
-  // request_id value routes the signed webhook response to this wedding only.
-  // Keep the first-party form as a resilient fallback when Youform is unavailable.
-  const youformMarkup = formId
-    ? `<div class="youform-wrap" data-youform-embed data-form="${escapeHtml(formId)}" data-width="100%" data-height="470" data-params="${escapeHtml(embedParams)}"></div>`
-    : `<form id="rsvpForm">
-          <label class="rsvp-field"><span>${escapeHtml(copy.yourName)}</span><input id="guestName" name="guestName" type="text" autocomplete="name" required></label>
-          <label class="rsvp-field"><span>Email</span><input name="email" type="email" autocomplete="email" required></label>
-          <label class="rsvp-field"><span>${escapeHtml(locale === "pt" ? "Contacto" : "Contact")}</span><input name="contact" type="tel" autocomplete="tel"></label>
-          <fieldset class="rsvp-choice"><legend>${escapeHtml(copy.attending)}</legend><label><input type="radio" name="attendance" value="yes" required> <span>${escapeHtml(copy.accepts)}</span></label><label><input type="radio" name="attendance" value="no" required> <span>${escapeHtml(copy.declines)}</span></label></fieldset>
-          <label class="rsvp-field"><span>${escapeHtml(copy.message)}</span><textarea name="message" rows="3"></textarea></label>
-          <button class="rsvp-submit" type="submit">${escapeHtml(copy.sendResponse)}</button><p class="rsvp-status" id="rsvpStatus" role="status" aria-live="polite"></p>
-        </form>`;
+  const youformMarkup = attendanceEnabled
+    ? `<form id="rsvpForm" class="rsvp-form">
+        <div class="rsvp-form-lead">
+          <span class="rsvp-form-kicker">A little note from us</span>
+          <p>Please share your details below so we can prepare for you.</p>
+        </div>
+        <div class="rsvp-fields">
+          <div class="rsvp-field rsvp-field-wide">
+            <label for="guestName">What's your name?</label>
+            <input id="guestName" name="guestName" type="text" autocomplete="name" required>
+          </div>
+          <div class="rsvp-field rsvp-field-wide">
+            <label for="guestEmail">What's your email?</label>
+            <input id="guestEmail" name="email" type="email" autocomplete="email" required>
+          </div>
+          <fieldset class="rsvp-choice rsvp-field-wide">
+            <legend>Are you going?</legend>
+            <div class="rsvp-choice-options">
+              <label class="rsvp-choice-card">
+                <input type="radio" name="attendance" value="yes" required>
+                <span class="rsvp-choice-card-copy"><strong>Yes, I'll be there</strong><small>Can't wait to celebrate together.</small></span>
+                <span class="rsvp-choice-mark" aria-hidden="true">✓</span>
+              </label>
+              <label class="rsvp-choice-card">
+                <input type="radio" name="attendance" value="no" required>
+                <span class="rsvp-choice-card-copy"><strong>No, I can't make it</strong><small>We'll be thinking of you.</small></span>
+                <span class="rsvp-choice-mark" aria-hidden="true">×</span>
+              </label>
+            </div>
+          </fieldset>
+          <div class="rsvp-field rsvp-field-wide">
+            <label for="guestContact">Cellphone number (optional)</label>
+            <input id="guestContact" name="contact" type="tel" autocomplete="tel" inputmode="tel">
+          </div>
+          <div class="rsvp-field rsvp-field-wide">
+            <label for="guestMessage">Message for Couple (optional)</label>
+            <textarea id="guestMessage" name="message" rows="4" maxlength="2000"></textarea>
+          </div>
+        </div>
+        <div class="rsvp-form-actions">
+          <p class="rsvp-form-note">Your details are only used to organise the celebration.</p>
+          <button class="rsvp-submit" type="submit">${escapeHtml(copy.sendResponse)} <span aria-hidden="true">↗</span></button>
+        </div>
+        <p class="rsvp-status" id="rsvpStatus" role="status" aria-live="polite"></p>
+      </form>`
+    : "";
 
   return `<!doctype html>
 <html lang="${locale}">
@@ -1205,10 +1235,10 @@ export function renderWeddingWebsite({
 <body class="invitation-open mobile-intro-pending">
   <div class="mobile-envelope-gate" id="envelopeScreen" role="dialog" aria-modal="true" aria-label="${escapeHtml(copy.openInvitation)}" style="--mobile-envelope-color:${escapeHtml(mobileEnvelopeColor)}">
     <div class="mobile-envelope-layer mobile-envelope-layer-bottom" aria-hidden="true">
-      <img src="assets/mobile-envelope-layer-bottom.webp" alt="">
+      <img src="assets/mobile-envelope-layer-bottom.png" alt="">
     </div>
     <div class="mobile-envelope-layer mobile-envelope-layer-top" aria-hidden="true">
-      <img src="assets/mobile-envelope-layer-top.webp" alt="">
+      <img src="assets/mobile-envelope-layer-top.png" alt="">
     </div>
     <div class="mobile-envelope-layer mobile-envelope-layer-seal" aria-hidden="true">
       <img src="${escapeHtml(envelopeSealFileName)}" alt="">
@@ -1255,7 +1285,6 @@ export function renderWeddingWebsite({
     <span class="music-copy"><strong>${escapeHtml(musicTitle)}</strong><span>${escapeHtml(musicArtist)}</span></span>
     <span class="music-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
   </aside>` : ""}
-  ${attendanceEnabled && formId ? `<script src="https://app.youform.com/embed.js" async></script>` : ""}
   <script>
     (function(){
       function unlock(){

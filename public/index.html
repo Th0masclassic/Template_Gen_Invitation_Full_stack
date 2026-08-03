@@ -315,6 +315,143 @@
     }
     .hero-arrow:hover { transform: translateY(-2px); background: #fff; }
 
+    .sales-proof { padding-top: 42px; }
+    .sales-proof-card {
+      position: relative;
+      isolation: isolate;
+      display: grid;
+      grid-template-columns: 100px minmax(0, 1fr) minmax(205px, .62fr);
+      gap: 28px;
+      align-items: center;
+      overflow: hidden;
+      border: 1px solid rgba(215,177,99,.58);
+      border-radius: 26px;
+      padding: 24px 30px;
+      background: linear-gradient(112deg, #2f3a2d 0%, #465540 58%, #5c6d52 100%);
+      color: #fff;
+      box-shadow: 0 22px 55px rgba(45,54,42,.2);
+    }
+    .sales-proof-card::before {
+      position: absolute;
+      top: -130px;
+      right: 15%;
+      z-index: -1;
+      width: 300px;
+      height: 300px;
+      border: 1px solid rgba(236,205,137,.22);
+      border-radius: 50%;
+      box-shadow: 0 0 0 28px rgba(236,205,137,.06), 0 0 0 56px rgba(236,205,137,.04);
+      content: "";
+    }
+    .sales-proof-card::after {
+      position: absolute;
+      right: -35px;
+      bottom: -80px;
+      z-index: -1;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.055);
+      content: "";
+    }
+    .sales-proof-mark {
+      position: relative;
+      display: grid;
+      width: 96px;
+      height: 96px;
+      place-items: center;
+      border: 1px solid rgba(239,207,136,.75);
+      border-radius: 50%;
+      background: rgba(255,255,255,.065);
+      box-shadow: inset 0 0 0 7px rgba(255,255,255,.045), 0 12px 28px rgba(16,22,16,.17);
+      transform: rotate(-8deg);
+    }
+    .sales-proof-mark::before,
+    .sales-proof-mark::after {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #e8c87e;
+      content: "";
+    }
+    .sales-proof-mark::before { top: 13px; right: 17px; }
+    .sales-proof-mark::after { bottom: 15px; left: 18px; }
+    .sales-proof-mark-number {
+      color: #efd08a;
+      font-family: var(--serif);
+      font-size: 30px;
+      line-height: .8;
+      letter-spacing: -.08em;
+    }
+    .sales-proof-mark-plus {
+      position: absolute;
+      top: 26px;
+      right: 21px;
+      color: #efd08a;
+      font-size: 17px;
+      font-weight: 850;
+    }
+    .sales-proof-mark-word {
+      position: absolute;
+      bottom: 21px;
+      color: rgba(255,255,255,.72);
+      font-size: 8px;
+      font-weight: 850;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+    .sales-proof-copy { min-width: 0; }
+    .sales-proof-card .eyebrow { color: #efd08a; }
+    .sales-proof-copy h2 {
+      max-width: 650px;
+      margin: 11px 0 0;
+      font-family: var(--serif);
+      font-size: clamp(34px, 4.2vw, 58px);
+      font-weight: 400;
+      line-height: .98;
+      letter-spacing: -.045em;
+    }
+    .sales-proof-copy h2 strong {
+      color: #f0cb77;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+    .sales-proof-copy > p:not(.eyebrow) {
+      max-width: 590px;
+      margin: 14px 0 0;
+      color: rgba(255,255,255,.7);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .sales-proof-side {
+      justify-self: end;
+      max-width: 230px;
+      padding-left: 25px;
+      border-left: 1px solid rgba(255,255,255,.2);
+    }
+    .sales-proof-side-label {
+      display: block;
+      color: rgba(255,255,255,.86);
+      font-family: var(--serif);
+      font-size: 22px;
+      line-height: 1.05;
+    }
+    .sales-proof-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 15px; }
+    .sales-proof-tags span {
+      display: inline-flex;
+      min-height: 28px;
+      align-items: center;
+      border: 1px solid rgba(239,208,138,.34);
+      border-radius: 999px;
+      padding: 0 10px;
+      color: #f1d590;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
     .promise-strip {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -384,7 +521,7 @@
       letter-spacing: -.04em;
     }
     .section-head > p { margin: 0 0 5px; color: var(--muted); font-size: 15px; line-height: 1.65; }
-    .occasion-grid { display: grid; grid-template-columns: 1.24fr .76fr; gap: 18px; }
+    .occasion-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
     .occasion-card {
       position: relative;
       display: flex;
@@ -439,7 +576,7 @@
       line-height: 1;
       letter-spacing: -.035em;
     }
-    .occasion-card.secondary-card h3 { font-size: clamp(38px, 4vw, 56px); }
+    .occasion-card.secondary-card h3 { font-size: clamp(40px, 5vw, 68px); }
     .occasion-bottom {
       display: flex;
       align-items: flex-end;
@@ -462,6 +599,78 @@
       transition: transform .2s ease, background .2s ease;
     }
     .occasion-card:hover .round-arrow { transform: translate(3px,-3px); background: rgba(255,255,255,.2); }
+    .occasion-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 20px; }
+    .occasion-action {
+      display: inline-flex;
+      min-height: 42px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: 999px;
+      padding: 0 16px;
+      background: rgba(255,255,255,.15);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-decoration: none;
+      backdrop-filter: blur(8px);
+    }
+    .occasion-action.primary { background: #fff; color: var(--olive-deep); }
+    .occasion-action:hover { transform: translateY(-1px); }
+
+    .pricing-section { padding: 124px 0; background: #f0f1eb; }
+    .purchase-event {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 28px 0 30px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+    .purchase-event select {
+      min-height: 43px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 36px 0 15px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .price-card {
+      display: flex;
+      min-height: 460px;
+      flex-direction: column;
+      border: 1px solid var(--line);
+      border-radius: 25px;
+      padding: 29px;
+      background: #fffef9;
+      box-shadow: 0 18px 48px rgba(40,48,37,.08);
+    }
+    .price-card.featured { border-color: rgba(179,138,67,.55); background: linear-gradient(180deg,#fffdf7,#f8f4e9); }
+    .price-kicker { color: var(--gold); font-size: 10px; font-weight: 850; letter-spacing: .16em; text-transform: uppercase; }
+    .price-card h3 { margin: 17px 0 0; font-family: var(--serif); font-size: 36px; font-weight: 400; line-height: 1; }
+    .price-card > p { min-height: 68px; margin: 17px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .price-features { display: grid; gap: 12px; margin: 23px 0 28px; padding: 21px 0 0; border-top: 1px solid var(--line); list-style: none; }
+    .price-features li { position: relative; padding-left: 21px; color: #535d50; font-size: 12px; line-height: 1.45; }
+    .price-features li::before { position: absolute; left: 0; color: var(--gold); content: "✓"; font-weight: 900; }
+    .price-card .buy-button { width: 100%; margin-top: auto; }
+    .price-note { margin: 14px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; text-align: center; }
+    .checkout-status { min-height: 22px; margin: 17px 0 0; color: #5d6859; font-size: 12px; text-align: center; }
+    .checkout-status.error { color: #9b3434; }
+
+    .feedback-section { padding: 120px 0; }
+    .feedback-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 34px; }
+    .feedback-card { border: 1px solid var(--line); border-radius: 23px; padding: 26px; background: #fffef9; box-shadow: 0 15px 42px rgba(40,48,37,.07); }
+    .feedback-top { display: flex; align-items: center; gap: 13px; }
+    .feedback-avatar { display: grid; width: 47px; height: 47px; flex: 0 0 47px; place-items: center; border-radius: 50%; background: linear-gradient(145deg,#d9dfd2,#f3e3c7); color: var(--olive-deep); font-family: var(--serif); font-size: 18px; }
+    .feedback-name { display: block; font-size: 12px; font-weight: 850; }
+    .feedback-label { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+    .feedback-stars { margin-top: 21px; color: #b38a43; font-size: 16px; letter-spacing: .08em; }
+    .feedback-card blockquote { margin: 14px 0 0; color: #4f594d; font-family: var(--serif); font-size: 21px; line-height: 1.38; }
+    .feedback-disclosure { margin: 17px 0 0; color: var(--muted); font-size: 11px; font-style: italic; line-height: 1.5; }
 
     .studio-section {
       padding: 118px 0 126px;
@@ -605,12 +814,19 @@
       .hero-intro { max-width: 640px; margin-top: 20px; }
       .hero-slide { min-height: 520px; }
       .hero-panel { width: min(520px, 58%); }
+      .sales-proof-card { grid-template-columns: 84px minmax(0, 1fr) minmax(180px, .55fr); gap: 21px; padding-inline: 23px; }
+      .sales-proof-mark { width: 82px; height: 82px; }
+      .sales-proof-mark-number { font-size: 26px; }
+      .sales-proof-mark-plus { top: 23px; right: 17px; }
+      .sales-proof-mark-word { bottom: 18px; }
       .promise-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .promise:nth-child(2) { border-right: 0; }
       .promise:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
       .occasion-grid { grid-template-columns: 1fr 1fr; }
       .occasion-card, .occasion-card.secondary-card { min-height: 540px; }
       .studio-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .pricing-grid, .feedback-grid { grid-template-columns: 1fr; }
+      .price-card { min-height: 0; }
       .journey-card { grid-template-columns: 1fr; }
       .journey-image { min-height: 430px; order: -1; }
       .journey-image img { object-position: center; }
@@ -691,6 +907,17 @@
       .hero-actions { margin-top: 21px; }
       .button { min-height: 47px; padding-inline: 18px; }
       .hero-controls { padding-top: 14px; }
+      .sales-proof { padding-top: 28px; }
+      .sales-proof-card { grid-template-columns: 72px minmax(0, 1fr); gap: 17px; padding: 21px 19px; border-radius: 22px; }
+      .sales-proof-mark { width: 70px; height: 70px; }
+      .sales-proof-mark-number { font-size: 22px; }
+      .sales-proof-mark-plus { top: 19px; right: 14px; font-size: 14px; }
+      .sales-proof-mark-word { bottom: 15px; font-size: 7px; }
+      .sales-proof-copy h2 { font-size: clamp(34px, 10vw, 48px); }
+      .sales-proof-copy > p:not(.eyebrow) { font-size: 12px; }
+      .sales-proof-side { grid-column: 1 / -1; justify-self: stretch; max-width: none; padding: 16px 0 0; border-top: 1px solid rgba(255,255,255,.2); border-left: 0; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+      .sales-proof-side-label { font-size: 18px; }
+      .sales-proof-tags { justify-content: flex-end; margin-top: 0; }
       .promise-strip { margin-top: 30px; }
       .promise { padding: 17px 15px; }
       .promise-icon { width: 36px; height: 36px; }
@@ -705,6 +932,8 @@
       .occasion-card, .occasion-card.secondary-card { min-height: 520px; padding: 26px; }
       .occasion-card h3, .occasion-card.secondary-card h3 { font-size: 46px; }
       .occasion-bottom { gap: 12px; }
+      .occasion-actions { align-items: stretch; flex-direction: column; }
+      .occasion-action { width: 100%; }
       .occasion-card.wedding img,
       .occasion-card.baby img { object-position: center; }
 
@@ -728,6 +957,7 @@
       .journey-copy { padding: 38px 25px 42px; }
       .journey-copy h2 { font-size: 45px; }
       .review-section { padding-bottom: 86px; }
+      .pricing-section, .feedback-section { padding: 86px 0; }
       .review-card { grid-template-columns: 1fr; gap: 28px; padding: 39px 25px; border-radius: 23px; }
       .review-card .button { width: 100%; }
       .footer-inner { grid-template-columns: 1fr 1fr; gap: 35px 20px; padding-top: 50px; }
@@ -742,6 +972,15 @@
       .hero-slide > img { height: 78vw; }
       .hero-panel { min-height: 318px; }
       .hero-panel h2 { font-size: 35px; }
+      .sales-proof-card { grid-template-columns: 62px minmax(0, 1fr); gap: 13px; padding-inline: 15px; }
+      .sales-proof-mark { width: 62px; height: 62px; }
+      .sales-proof-mark-number { font-size: 19px; }
+      .sales-proof-mark-plus { top: 17px; right: 12px; font-size: 12px; }
+      .sales-proof-mark-word { bottom: 13px; font-size: 6px; }
+      .sales-proof-card .eyebrow { font-size: 9px; letter-spacing: .13em; }
+      .sales-proof-copy h2 { margin-top: 8px; font-size: 34px; }
+      .sales-proof-side { align-items: flex-start; flex-direction: column; }
+      .sales-proof-tags { justify-content: flex-start; }
       .hero-actions .button { width: 100%; }
       .promise-strip { grid-template-columns: 1fr; }
       .promise { border-right: 0; border-bottom: 1px solid var(--line); }
@@ -769,6 +1008,7 @@
     <div class="nav-wrap">
       <nav class="site-nav" id="siteNav" aria-label="Main navigation">
         <a href="#occasions" data-i18n="navOccasions">Occasions</a>
+        <a href="#pricing" data-i18n="navPricing">Packs</a>
         <a href="#studio" data-i18n="navStudio">The studio</a>
         <a href="#process" data-i18n="navProcess">How it works</a>
         <a href="#reviews" data-i18n="navReviews">Reviews</a>
@@ -851,6 +1091,28 @@
         </div>
       </div>
 
+      <section class="sales-proof" aria-labelledby="salesProofTitle">
+        <div class="sales-proof-card">
+          <div class="sales-proof-mark" aria-hidden="true">
+            <span class="sales-proof-mark-number">2K</span>
+            <span class="sales-proof-mark-plus">+</span>
+            <span class="sales-proof-mark-word" data-i18n="salesMarkWord">orders</span>
+          </div>
+          <div class="sales-proof-copy">
+            <p class="eyebrow" data-i18n="salesEyebrow">A growing community of celebrations</p>
+            <h2 id="salesProofTitle"><strong data-i18n="salesNumber">2,000+</strong> <span data-i18n="salesTrail">invitations sold</span></h2>
+            <p data-i18n="salesCopy">From wedding suites to baby showers, each one is made to feel personal, polished and entirely yours.</p>
+          </div>
+          <div class="sales-proof-side">
+            <span class="sales-proof-side-label" data-i18n="salesSideLabel">Made for your moment.</span>
+            <div class="sales-proof-tags">
+              <span data-i18n="salesWeddingTag">Weddings</span>
+              <span data-i18n="salesBabyTag">Baby showers</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div class="promise-strip" aria-label="InviteLab products">
         <div class="promise">
           <span class="promise-icon" aria-hidden="true">✎</span>
@@ -887,7 +1149,7 @@
       </div>
 
       <div class="occasion-grid">
-        <a class="occasion-card wedding event-link" data-event-path="/wedding" href="/wedding">
+        <article class="occasion-card wedding">
           <img src="/assets/home/showcase-wedding-journey.png" alt="">
           <div class="occasion-content">
             <span class="occasion-index" data-i18n="weddingIndex">01 · Wedding</span>
@@ -896,10 +1158,14 @@
               <p data-i18n="weddingCopy">Design the invitation, prepare the website and bring every important detail into one elegant experience.</p>
               <span class="round-arrow" aria-hidden="true">↗</span>
             </div>
+            <div class="occasion-actions">
+              <a class="occasion-action primary event-link" data-event-path="/wedding" href="/wedding" data-i18n="weddingCreate">Create wedding invitation</a>
+              <a class="occasion-action new-code-link" href="/wedding?new=1" data-i18n="weddingNewCode">Use a new code</a>
+            </div>
           </div>
-        </a>
+        </article>
 
-        <a class="occasion-card secondary-card baby event-link" data-event-path="/babyshower" href="/babyshower">
+        <article class="occasion-card secondary-card baby">
           <img src="/assets/home/showcase-baby-suite.png" alt="">
           <div class="occasion-content">
             <span class="occasion-index" data-i18n="babyIndex">02 · Baby shower</span>
@@ -908,8 +1174,72 @@
               <p data-i18n="babyCopy">Create a warm invitation suite to welcome the little person everyone already loves.</p>
               <span class="round-arrow" aria-hidden="true">↗</span>
             </div>
+            <div class="occasion-actions">
+              <a class="occasion-action primary event-link" data-event-path="/babyshower" href="/babyshower" data-i18n="babyCreate">Create baby-shower invitation</a>
+            </div>
           </div>
-        </a>
+        </article>
+      </div>
+    </section>
+
+    <section class="pricing-section" id="pricing" aria-labelledby="pricingTitle">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow" data-i18n="pricingEyebrow">Choose your pack</p>
+            <h2 id="pricingTitle" data-i18n="pricingTitle">From two coordinated images to the complete event experience.</h2>
+          </div>
+          <p data-i18n="pricingIntro">Choose the celebration and pack. After payment, your purchased creation page opens automatically; a backup access code is also emailed to you.</p>
+        </div>
+        <label class="purchase-event" for="purchaseEventType">
+          <span data-i18n="purchaseEventLabel">Celebration</span>
+          <select id="purchaseEventType">
+            <option value="wedding" data-i18n="purchaseWedding">Wedding</option>
+            <option value="baby_shower" data-i18n="purchaseBaby">Baby shower</option>
+          </select>
+        </label>
+        <div class="pricing-grid">
+          <article class="price-card">
+            <span class="price-kicker" data-i18n="packOneKicker">Artwork essentials</span>
+            <h3>Template Generator Only</h3>
+            <p data-i18n="packOneDescription">A coordinated main invitation and Agenda image from an InviteLab template.</p>
+            <ul class="price-features">
+              <li data-i18n="packInviteAgenda">Main invitation + localised Agenda</li>
+              <li data-i18n="packCanva">Editable Canva invitation</li>
+              <li data-i18n="packLayeredPreview">Layered envelope preview with a gold seal</li>
+              <li data-i18n="packNoPdfWebsite">No PDF or website</li>
+            </ul>
+            <button class="button buy-button" type="button" data-buy-pack="invite_only_pack" data-i18n="buySecurely">Buy securely</button>
+            <p class="price-note" data-i18n="checkoutPriceNote">The configured price and currency appear in Stripe Checkout.</p>
+          </article>
+          <article class="price-card featured">
+            <span class="price-kicker" data-i18n="packTwoKicker">Easy to share</span>
+            <h3>Template + Digital Invite</h3>
+            <p data-i18n="packTwoDescription">Everything in the template pack plus an interactive digital PDF.</p>
+            <ul class="price-features">
+              <li data-i18n="packInviteAgenda">Main invitation + localised Agenda</li>
+              <li data-i18n="packCanva">Editable Canva invitation</li>
+              <li data-i18n="packPdfLinks">PDF with calendar and location links</li>
+              <li data-i18n="packNoWebsite">No event website</li>
+            </ul>
+            <button class="button buy-button" type="button" data-buy-pack="digital_pdf_pack" data-i18n="buySecurely">Buy securely</button>
+            <p class="price-note" data-i18n="checkoutPriceNote">The configured price and currency appear in Stripe Checkout.</p>
+          </article>
+          <article class="price-card">
+            <span class="price-kicker" data-i18n="packThreeKicker">The complete experience</span>
+            <h3>Full Pack</h3>
+            <p data-i18n="packThreeDescription">Template or custom artwork, PDF, RSVP and a fully coordinated event website.</p>
+            <ul class="price-features">
+              <li data-i18n="packCustom">InviteLab template or custom artwork</li>
+              <li data-i18n="packInviteAgenda">Main invitation + localised Agenda</li>
+              <li data-i18n="packPdfLinks">PDF with calendar and location links</li>
+              <li data-i18n="packWebsite">Website with music, calendar, location and RSVP</li>
+            </ul>
+            <button class="button buy-button" type="button" data-buy-pack="Full_pack" data-i18n="buySecurely">Buy securely</button>
+            <p class="price-note" data-i18n="checkoutPriceNote">The configured price and currency appear in Stripe Checkout.</p>
+          </article>
+        </div>
+        <p class="checkout-status" id="checkoutStatus" role="status" aria-live="polite"></p>
       </div>
     </section>
 
@@ -967,6 +1297,33 @@
         <div class="journey-image">
           <img src="/assets/home/showcase-wedding-suite.png" alt="A complete coordinated wedding invitation suite">
         </div>
+      </div>
+    </section>
+
+    <section class="feedback-section shell" aria-labelledby="feedbackTitle">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow" data-i18n="feedbackEyebrow">What customers value</p>
+          <h2 id="feedbackTitle" data-i18n="feedbackTitle">Made to feel personal, without making the process difficult.</h2>
+        </div>
+      </div>
+      <p class="feedback-disclosure" data-i18n="feedbackDisclosure">Sample feedback for layout preview. Replace with verified customer reviews before launch.</p>
+      <div class="feedback-grid">
+        <article class="feedback-card">
+          <div class="feedback-top"><span class="feedback-avatar" aria-hidden="true">M</span><div><span class="feedback-name">Micheal</span></div></div>
+          <div class="feedback-stars" aria-label="5 out of 5 stars">★★★★★</div>
+          <blockquote data-i18n="feedbackOne">“I loved that our invitation was generated for us and still felt completely unique to our celebration.”</blockquote>
+        </article>
+        <article class="feedback-card">
+          <div class="feedback-top"><span class="feedback-avatar" aria-hidden="true">A</span><div><span class="feedback-name">Andrea</span></div></div>
+          <div class="feedback-stars" aria-label="4.5 out of 5 stars">★★★★½</div>
+          <blockquote data-i18n="feedbackTwo">“Having the invitation, Agenda and website in the same style made everything feel thoughtful and polished.”</blockquote>
+        </article>
+        <article class="feedback-card">
+          <div class="feedback-top"><span class="feedback-avatar" aria-hidden="true">C</span><div><span class="feedback-name">Kristen</span></div></div>
+          <div class="feedback-stars" aria-label="4 out of 5 stars">★★★★☆</div>
+          <blockquote data-i18n="feedbackThree">“The process was simple, and the generated design looked like something made especially for us.”</blockquote>
+        </article>
       </div>
     </section>
 
@@ -1217,6 +1574,83 @@
       }
     };
 
+    const commerceTranslations = {
+      en: {
+        navPricing: "Packs", weddingCreate: "Create wedding invitation", weddingNewCode: "Use a new code", babyCreate: "Create baby-shower invitation",
+        pricingEyebrow: "Choose your pack", pricingTitle: "From two coordinated images to the complete event experience.", pricingIntro: "Choose the celebration and pack. After payment, your purchased creation page opens automatically; a backup access code is also emailed to you.",
+        purchaseEventLabel: "Celebration", purchaseWedding: "Wedding", purchaseBaby: "Baby shower",
+        packOneKicker: "Artwork essentials", packOneDescription: "A coordinated main invitation and Agenda image from an InviteLab template.",
+        packTwoKicker: "Easy to share", packTwoDescription: "Everything in the template pack plus an interactive digital PDF.",
+        packThreeKicker: "The complete experience", packThreeDescription: "Template or custom artwork, PDF, RSVP and a fully coordinated event website.",
+        packInviteAgenda: "Main invitation + localised Agenda", packCanva: "Editable Canva invitation", packLayeredPreview: "Layered envelope preview with a gold seal", packNoPdfWebsite: "No PDF or website", packPdfLinks: "PDF with calendar and location links", packNoWebsite: "No event website", packCustom: "InviteLab template or custom artwork", packWebsite: "Website with music, calendar, location and RSVP", buySecurely: "Buy securely", checkoutPriceNote: "The configured price and currency appear in Stripe Checkout.",
+        feedbackEyebrow: "What customers value", feedbackTitle: "Made to feel personal, without making the process difficult.",  feedbackOne: "“I loved that our invitation was generated for us and still felt completely unique to our celebration.”", feedbackTwo: "“Having the invitation, Agenda and website in the same style made everything feel thoughtful and polished.”", feedbackThree: "“The process was simple, and the generated design looked like something made especially for us.”",
+        checkoutUnavailable: "Online checkout is not configured yet.", checkoutStarting: "Opening secure Stripe Checkout…", checkoutFailed: "We could not start checkout. Please try again.", checkoutSuccess: "Payment confirmed. Opening your purchased creation page…", checkoutPending: "Your payment is still being confirmed. We will email your access as soon as it succeeds.", checkoutAccessEmail: "We could not open the creation page automatically. If payment succeeded, use the backup access code sent to your email.", checkoutCancelled: "Checkout was cancelled; nothing was charged."
+      },
+      pt: {
+        navPricing: "Packs", weddingCreate: "Criar convite de casamento", weddingNewCode: "Usar um código novo", babyCreate: "Criar convite de baby shower",
+        pricingEyebrow: "Escolhe o teu pack", pricingTitle: "De duas imagens coordenadas à experiência completa do evento.", pricingIntro: "Escolhe a celebração e o pack. Depois do pagamento, a página de criação do pack abre automaticamente; também recebes um código de acesso de segurança por email.",
+        purchaseEventLabel: "Celebração", purchaseWedding: "Casamento", purchaseBaby: "Baby shower",
+        packOneKicker: "Imagens essenciais", packOneDescription: "Um convite principal e uma Agenda coordenada a partir de um template InviteLab.",
+        packTwoKicker: "Fácil de partilhar", packTwoDescription: "Tudo do pack de templates, mais um PDF digital interativo.",
+        packThreeKicker: "A experiência completa", packThreeDescription: "Template ou imagem personalizada, PDF, RSVP e um website totalmente coordenado.",
+        packInviteAgenda: "Convite principal + Agenda localizada", packCanva: "Convite editável no Canva", packLayeredPreview: "Envelope em camadas com selo dourado", packNoPdfWebsite: "Sem PDF nem website", packPdfLinks: "PDF com calendário e localização", packNoWebsite: "Sem website do evento", packCustom: "Template InviteLab ou imagem personalizada", packWebsite: "Website com música, calendário, localização e RSVP", buySecurely: "Comprar em segurança", checkoutPriceNote: "O preço e a moeda configurados aparecem no Checkout Stripe.",
+        feedbackEyebrow: "O que os clientes valorizam", feedbackTitle: "Pessoal e único, sem tornar o processo difícil.", feedbackOne: "“Adorei que o nosso convite fosse gerado para nós e continuasse a parecer totalmente único para a nossa celebração.”", feedbackTwo: "“Ter o convite, a Agenda e o website no mesmo estilo deixou tudo cuidado e elegante.”", feedbackThree: "“O processo foi simples e o design gerado parecia ter sido feito especialmente para nós.”",
+        checkoutUnavailable: "Os pagamentos online ainda não estão configurados.", checkoutStarting: "A abrir o Checkout seguro da Stripe…", checkoutFailed: "Não foi possível iniciar o pagamento. Tenta novamente.", checkoutSuccess: "Pagamento confirmado. A abrir a página de criação do teu pack…", checkoutPending: "O pagamento ainda está a ser confirmado. Enviaremos o acesso por email assim que for concluído.", checkoutAccessEmail: "Não foi possível abrir a página automaticamente. Se o pagamento foi concluído, usa o código de segurança enviado por email.", checkoutCancelled: "O pagamento foi cancelado e nada foi cobrado."
+      },
+      es: {
+        navPricing: "Packs", weddingCreate: "Crear invitación de boda", weddingNewCode: "Usar un código nuevo", babyCreate: "Crear invitación de baby shower",
+        pricingEyebrow: "Elige tu pack", pricingTitle: "De dos imágenes coordinadas a la experiencia completa del evento.", pricingIntro: "Elige la celebración y el pack. Después del pago, la página de creación se abre automáticamente; también enviamos un código de respaldo por email.",
+        purchaseEventLabel: "Celebración", purchaseWedding: "Boda", purchaseBaby: "Baby shower",
+        packOneKicker: "Imágenes esenciales", packOneDescription: "Una invitación principal y una Agenda coordinada desde una plantilla InviteLab.",
+        packTwoKicker: "Fácil de compartir", packTwoDescription: "Todo el pack de plantillas más un PDF digital interactivo.",
+        packThreeKicker: "La experiencia completa", packThreeDescription: "Plantilla o imagen personalizada, PDF, RSVP y web del evento.",
+        packInviteAgenda: "Invitación principal + Agenda localizada", packCanva: "Invitación editable en Canva", packLayeredPreview: "Sobre por capas con sello dorado", packNoPdfWebsite: "Sin PDF ni web", packPdfLinks: "PDF con calendario y ubicación", packNoWebsite: "Sin web del evento", packCustom: "Plantilla InviteLab o imagen personalizada", packWebsite: "Web con música, calendario, ubicación y RSVP", buySecurely: "Comprar de forma segura", checkoutPriceNote: "El precio y la moneda configurados aparecen en Stripe Checkout.",
+        feedbackEyebrow: "Lo que valoran los clientes", feedbackTitle: "Personal y único, sin complicar el proceso.", feedbackOne: "“Me encantó que la invitación se generara para nosotros y siguiera sintiéndose totalmente única.”", feedbackTwo: "“Tener la invitación, la Agenda y la web con el mismo estilo hizo que todo quedara muy cuidado.”", feedbackThree: "“El proceso fue sencillo y el diseño parecía creado especialmente para nosotros.”",
+        checkoutUnavailable: "El pago online aún no está configurado.", checkoutStarting: "Abriendo el pago seguro de Stripe…", checkoutFailed: "No pudimos iniciar el pago. Inténtalo de nuevo.", checkoutSuccess: "Pago confirmado. Abriendo la página de creación de tu pack…", checkoutPending: "El pago todavía se está confirmando. Enviaremos el acceso por email cuando termine.", checkoutAccessEmail: "No pudimos abrir la página automáticamente. Si el pago se completó, usa el código de respaldo enviado por email.", checkoutCancelled: "El pago se canceló y no se realizó ningún cargo."
+      },
+      fr: {
+        navPricing: "Packs", weddingCreate: "Créer une invitation de mariage", weddingNewCode: "Utiliser un nouveau code", babyCreate: "Créer une invitation de baby shower",
+        pricingEyebrow: "Choisissez votre pack", pricingTitle: "De deux images coordonnées à l’expérience complète de l’événement.", pricingIntro: "Choisissez la célébration et le pack. Après paiement, la page de création s’ouvre automatiquement ; un code de secours est aussi envoyé par e-mail.",
+        purchaseEventLabel: "Célébration", purchaseWedding: "Mariage", purchaseBaby: "Baby shower",
+        packOneKicker: "Images essentielles", packOneDescription: "Une invitation principale et un programme coordonné à partir d’un modèle InviteLab.",
+        packTwoKicker: "Facile à partager", packTwoDescription: "Tout le pack de modèles, plus un PDF numérique interactif.",
+        packThreeKicker: "L’expérience complète", packThreeDescription: "Modèle ou création personnalisée, PDF, RSVP et site événementiel coordonné.",
+        packInviteAgenda: "Invitation principale + programme localisé", packCanva: "Invitation modifiable dans Canva", packLayeredPreview: "Enveloppe en calques avec sceau doré", packNoPdfWebsite: "Sans PDF ni site", packPdfLinks: "PDF avec calendrier et localisation", packNoWebsite: "Sans site événementiel", packCustom: "Modèle InviteLab ou création personnalisée", packWebsite: "Site avec musique, calendrier, localisation et RSVP", buySecurely: "Acheter en sécurité", checkoutPriceNote: "Le prix et la devise configurés apparaissent dans Stripe Checkout.",
+        feedbackEyebrow: "Ce que les clients apprécient", feedbackTitle: "Personnel et unique, sans compliquer le processus.", feedbackOne: "« J’ai adoré que notre invitation soit générée pour nous tout en restant vraiment unique. »", feedbackTwo: "« L’invitation, le programme et le site dans le même style ont rendu l’ensemble très soigné. »", feedbackThree: "« Le processus était simple et le design semblait créé spécialement pour nous. »",
+        checkoutUnavailable: "Le paiement en ligne n’est pas encore configuré.", checkoutStarting: "Ouverture du paiement Stripe sécurisé…", checkoutFailed: "Impossible de démarrer le paiement. Réessayez.", checkoutSuccess: "Paiement confirmé. Ouverture de la page de création de votre pack…", checkoutPending: "Le paiement est encore en cours de confirmation. L’accès sera envoyé par e-mail dès sa validation.", checkoutAccessEmail: "Impossible d’ouvrir la page automatiquement. Si le paiement a réussi, utilisez le code de secours envoyé par e-mail.", checkoutCancelled: "Le paiement a été annulé et rien n’a été débité."
+      },
+      de: {
+        navPricing: "Pakete", weddingCreate: "Hochzeitseinladung erstellen", weddingNewCode: "Neuen Code verwenden", babyCreate: "Babyshower-Einladung erstellen",
+        pricingEyebrow: "Wählt euer Paket", pricingTitle: "Von zwei abgestimmten Bildern bis zum vollständigen Event-Erlebnis.", pricingIntro: "Wählt Anlass und Paket. Nach der Zahlung öffnet sich die passende Erstellungsseite automatisch; zusätzlich erhaltet ihr einen Zugangscode per E-Mail.",
+        purchaseEventLabel: "Anlass", purchaseWedding: "Hochzeit", purchaseBaby: "Babyshower",
+        packOneKicker: "Die wichtigsten Motive", packOneDescription: "Haupteinladung und abgestimmter Tagesablauf aus einer InviteLab-Vorlage.",
+        packTwoKicker: "Einfach zu teilen", packTwoDescription: "Alles aus dem Vorlagenpaket plus interaktives digitales PDF.",
+        packThreeKicker: "Das komplette Erlebnis", packThreeDescription: "Vorlage oder eigenes Motiv, PDF, RSVP und abgestimmte Event-Website.",
+        packInviteAgenda: "Haupteinladung + lokalisierter Tagesablauf", packCanva: "Bearbeitbare Canva-Einladung", packLayeredPreview: "Umschlag in Ebenen mit goldenem Siegel", packNoPdfWebsite: "Ohne PDF oder Website", packPdfLinks: "PDF mit Kalender- und Ortslinks", packNoWebsite: "Ohne Event-Website", packCustom: "InviteLab-Vorlage oder eigenes Motiv", packWebsite: "Website mit Musik, Kalender, Ort und RSVP", buySecurely: "Sicher kaufen", checkoutPriceNote: "Konfigurierter Preis und Währung erscheinen im Stripe Checkout.",
+        feedbackEyebrow: "Was Kunden schätzen", feedbackTitle: "Persönlich und einzigartig, ohne komplizierten Ablauf.", feedbackDisclosure: "Anonymisierte Beispielbewertungen zur Layout-Vorschau. Vor Veröffentlichung durch verifizierte Bewertungen ersetzen.", feedbackOne: "„Unsere Einladung wurde für uns generiert und fühlte sich trotzdem vollkommen einzigartig an.“", feedbackTwo: "„Einladung, Tagesablauf und Website im gleichen Stil ließen alles besonders stimmig wirken.“", feedbackThree: "„Der Ablauf war einfach und das Design sah aus, als wäre es nur für uns gemacht.“",
+        checkoutUnavailable: "Online-Zahlungen sind noch nicht eingerichtet.", checkoutStarting: "Sicherer Stripe Checkout wird geöffnet…", checkoutFailed: "Checkout konnte nicht gestartet werden. Bitte erneut versuchen.", checkoutSuccess: "Zahlung bestätigt. Eure gekaufte Erstellungsseite wird geöffnet…", checkoutPending: "Die Zahlung wird noch bestätigt. Der Zugang wird nach Abschluss per E-Mail gesendet.", checkoutAccessEmail: "Die Seite konnte nicht automatisch geöffnet werden. Falls die Zahlung abgeschlossen wurde, nutzt den per E-Mail gesendeten Zugangscode.", checkoutCancelled: "Checkout wurde abgebrochen; es wurde nichts berechnet."
+      }
+    };
+    const salesTranslations = {
+      en: {
+        salesEyebrow: "A growing community of celebrations", salesNumber: "2,000+", salesTrail: "invitations sold", salesCopy: "From wedding suites to baby showers, each one is made to feel personal, polished and entirely yours.", salesSideLabel: "Made for your moment.", salesWeddingTag: "Weddings", salesBabyTag: "Baby showers", salesMarkWord: "orders", feedbackDisclosure: "Sample feedback for layout preview. Replace with verified customer reviews before launch."
+      },
+      pt: {
+        salesEyebrow: "Uma comunidade de celebra\u00e7\u00f5es", salesNumber: "2.000+", salesTrail: "convites vendidos", salesCopy: "De conjuntos de casamento a baby showers, cada convite \u00e9 criado para ser pessoal, elegante e totalmente vosso.", salesSideLabel: "Feito para o vosso momento.", salesWeddingTag: "Casamentos", salesBabyTag: "Baby showers", salesMarkWord: "pedidos", feedbackDisclosure: "Exemplos de avalia\u00e7\u00f5es para a pr\u00e9-visualiza\u00e7\u00e3o. Substitua-os por avalia\u00e7\u00f5es verificadas antes do lan\u00e7amento."
+      },
+      es: {
+        salesEyebrow: "Una comunidad de celebraciones", salesNumber: "2.000+", salesTrail: "invitaciones vendidas", salesCopy: "Desde conjuntos de boda hasta baby showers, cada invitaci\u00f3n est\u00e1 hecha para sentirse personal, elegante y completamente vuestra.", salesSideLabel: "Hecho para vuestro momento.", salesWeddingTag: "Bodas", salesBabyTag: "Baby showers", salesMarkWord: "pedidos", feedbackDisclosure: "Ejemplos de rese\u00f1as para la vista previa. Sustit\u00fayelos por rese\u00f1as verificadas antes del lanzamiento."
+      },
+      fr: {
+        salesEyebrow: "Une communaut\u00e9 de c\u00e9l\u00e9brations", salesNumber: "2 000+", salesTrail: "invitations vendues", salesCopy: "Des suites de mariage aux baby showers, chaque invitation est pens\u00e9e pour \u00eatre personnelle, \u00e9l\u00e9gante et unique.", salesSideLabel: "Cr\u00e9\u00e9 pour votre moment.", salesWeddingTag: "Mariages", salesBabyTag: "Baby showers", salesMarkWord: "commandes", feedbackDisclosure: "Exemples d\u2019avis pour l\u2019aper\u00e7u. Remplacez-les par des avis v\u00e9rifi\u00e9s avant le lancement."
+      },
+      de: {
+        salesEyebrow: "Eine wachsende Gemeinschaft", salesNumber: "2.000+", salesTrail: "verkaufte Einladungen", salesCopy: "Von Hochzeitssets bis zu Babyshowers: Jede Einladung wird pers\u00f6nlich, stilvoll und ganz nach euch gestaltet.", salesSideLabel: "F\u00fcr euren besonderen Moment.", salesWeddingTag: "Hochzeiten", salesBabyTag: "Babyshowers", salesMarkWord: "bestellungen", feedbackDisclosure: "Beispielbewertungen f\u00fcr die Layout-Vorschau. Vor dem Start durch verifizierte Bewertungen ersetzen."
+      }
+    };
+    for (const [language, values] of Object.entries(commerceTranslations)) Object.assign(translations[language], values);
+    for (const [language, values] of Object.entries(salesTranslations)) Object.assign(translations[language], values);
+
     const languageSelect = document.getElementById("languageSelect");
     const languageWrap = document.getElementById("languageWrap");
     const navToggle = document.getElementById("navToggle");
@@ -1255,6 +1689,8 @@
         const path = element.dataset.eventPath;
         element.href = `${path}?lang=${encodeURIComponent(lang)}`;
       }
+      const newCodeLink = document.querySelector(".new-code-link");
+      if (newCodeLink) newCodeLink.href = `/wedding?new=1&lang=${encodeURIComponent(lang)}`;
 
       if (pushState) {
         const url = new URL(window.location.href);
@@ -1280,6 +1716,86 @@
         carouselTimer = window.setInterval(() => goToSlide(currentSlide + 1), 6500);
       }
     }
+
+    function checkoutMessage(key) {
+      const lang = normaliseLanguage(languageSelect.value);
+      return translations[lang]?.[key] || translations.en[key] || "";
+    }
+
+    function secureUuid() {
+      if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+      const bytes = crypto.getRandomValues(new Uint8Array(16));
+      bytes[6] = (bytes[6] & 0x0f) | 0x40;
+      bytes[8] = (bytes[8] & 0x3f) | 0x80;
+      const hex = [...bytes].map(value => value.toString(16).padStart(2, "0"));
+      return `${hex.slice(0,4).join("")}-${hex.slice(4,6).join("")}-${hex.slice(6,8).join("")}-${hex.slice(8,10).join("")}-${hex.slice(10).join("")}`;
+    }
+
+    function checkoutTokenKey(packType, eventType) {
+      return `invitelab-checkout/${packType}/${eventType}`;
+    }
+
+    function checkoutToken(packType, eventType) {
+      const key = checkoutTokenKey(packType, eventType);
+      try {
+        const existing = sessionStorage.getItem(key);
+        if (/^[0-9a-f-]{36}$/i.test(existing || "")) return existing;
+        const created = secureUuid();
+        sessionStorage.setItem(key, created);
+        return created;
+      } catch {
+        return secureUuid();
+      }
+    }
+
+    const checkoutStatus = document.getElementById("checkoutStatus");
+    const buyButtons = [...document.querySelectorAll("[data-buy-pack]")];
+    function setCheckoutStatus(message, error = false) {
+      checkoutStatus.textContent = message;
+      checkoutStatus.classList.toggle("error", error);
+    }
+    function restoreCheckoutButtons() {
+      buyButtons.forEach(button => { button.disabled = button.dataset.available !== "true"; });
+    }
+    async function loadCheckoutProducts() {
+      try {
+        const response = await fetch("/api/public/products", { cache: "no-store" });
+        const body = await response.json();
+        if (!response.ok || !body?.success) throw new Error("PRODUCTS_UNAVAILABLE");
+        const available = new Map((body.data?.products || []).map(product => [product.packType, Boolean(product.available)]));
+        buyButtons.forEach(button => {
+          button.dataset.available = String(available.get(button.dataset.buyPack) === true);
+        });
+        restoreCheckoutButtons();
+        if (!body.data?.checkoutAvailable) setCheckoutStatus(checkoutMessage("checkoutUnavailable"), true);
+      } catch {
+        buyButtons.forEach(button => { button.dataset.available = "false"; button.disabled = true; });
+        setCheckoutStatus(checkoutMessage("checkoutUnavailable"), true);
+      }
+    }
+    buyButtons.forEach(button => button.addEventListener("click", async () => {
+      if (button.dataset.available !== "true") return;
+      buyButtons.forEach(item => { item.disabled = true; });
+      setCheckoutStatus(checkoutMessage("checkoutStarting"));
+      const packType = button.dataset.buyPack;
+      const eventType = document.getElementById("purchaseEventType").value === "baby_shower" ? "baby_shower" : "wedding";
+      try {
+        const response = await fetch("/api/public/stripe/checkout-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ packType, eventType, checkoutToken: checkoutToken(packType, eventType) })
+        });
+        const body = await response.json().catch(() => null);
+        if (!response.ok || !body?.success || !/^https:\/\//.test(body.data?.checkoutUrl || "")) {
+          throw new Error(body?.error?.message || checkoutMessage("checkoutFailed"));
+        }
+        try { sessionStorage.removeItem(checkoutTokenKey(packType, eventType)); } catch {}
+        window.location.assign(body.data.checkoutUrl);
+      } catch (error) {
+        setCheckoutStatus(error.message || checkoutMessage("checkoutFailed"), true);
+        restoreCheckoutButtons();
+      }
+    }));
 
     languageSelect.addEventListener("change", event => setLanguage(event.target.value));
     navToggle.addEventListener("click", () => {
@@ -1322,6 +1838,12 @@
 
     const requestedLanguage = new URL(window.location.href).searchParams.get("lang") || navigator.language;
     setLanguage(requestedLanguage, false);
+    const checkoutState = new URL(window.location.href).searchParams.get("checkout");
+    if (checkoutState === "success") setCheckoutStatus(checkoutMessage("checkoutSuccess"));
+    else if (checkoutState === "pending") setCheckoutStatus(checkoutMessage("checkoutPending"));
+    else if (checkoutState === "access-email") setCheckoutStatus(checkoutMessage("checkoutAccessEmail"), true);
+    else if (checkoutState === "cancelled") setCheckoutStatus(checkoutMessage("checkoutCancelled"));
+    loadCheckoutProducts();
     goToSlide(0);
     restartCarousel();
     document.getElementById("year").textContent = new Date().getFullYear();

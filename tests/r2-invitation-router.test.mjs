@@ -46,6 +46,16 @@ test("R2 invitation router serves uploaded MP3 files with a bounded response", a
   assert.equal(await response.text(), audio);
 });
 
+test("R2 invitation router allows the RSVP Admin API origin in the page CSP", async () => {
+  const html = "<!doctype html><script>fetch('https://invitelab.art/api/public/rsvp-admin/request-123')</script>";
+  const response = await worker.fetch(
+    new Request("https://invites.example.com/sites/request-123/RSVP-ADMIN/"),
+    environment(new Map([["sites/request-123/RSVP-ADMIN/index.html", html]])),
+  );
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-security-policy"), /connect-src[^;]*https:\/\/invitelab\.art/);
+});
+
 test("R2 invitation router rejects paths outside the site namespace", async () => {
   const response = await worker.fetch(
     new Request("https://invites.example.com/private/secret"),

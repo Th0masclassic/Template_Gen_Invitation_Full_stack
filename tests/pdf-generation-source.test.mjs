@@ -14,6 +14,11 @@ test("customer PDF generation uses approved GPT artwork and GPT vision without L
   assert.match(serverSource, /visibleControlsAdded:\s*false/);
   assert.match(serverSource, /attendancePageAdded:\s*false/);
   assert.doesNotMatch(serverSource, /drawAttendancePage|drawChoiceCircle|attendanceTitle:\s*"Will you attend\?"/);
+  assert.match(
+    serverSource,
+    /buildLayeredEnvelopeBuffer\(job,\s*\{\s*coverTopEdge:\s*true\s*\}\)/,
+    "the first PDF page must request full-bleed top-flap artwork",
+  );
 });
 
 test("PDF hotspots target maps, calendar download, and the published website only", () => {

@@ -50,7 +50,7 @@ function cleanEventType(value) {
 
 function cleanSource(value) {
   const source = String(value || "").trim().toLowerCase();
-  return ["manual", "etsy"].includes(source) ? source : "manual";
+  return ["manual", "etsy", "stripe"].includes(source) ? source : "manual";
 }
 
 function cleanExternalOrderId(value) {

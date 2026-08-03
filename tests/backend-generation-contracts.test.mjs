@@ -91,6 +91,7 @@ function weddingProject({
 function persistedJob(requestId, overrides = {}) {
   const project = overrides.project || weddingProject();
   const outputFilename = `ana-luis-${requestId}-v1.png`;
+  const detailsFilename = `ana-luis-${requestId}-details-v1.png`;
   const envelopeFilename = `ana-luis-${requestId}-envelope-v1.png`;
   const now = new Date().toISOString();
   return {
@@ -103,8 +104,10 @@ function persistedJob(requestId, overrides = {}) {
     attemptsUsed: 1,
     invitationAttemptsUsed: 1,
     envelopeAttemptsUsed: 1,
-    maxImageAttempts: 5,
+    agendaAttemptsUsed: 1,
+    maxImageAttempts: 10,
     imageRevision: 1,
+    detailsRevision: 1,
     envelopeRevision: 1,
     generationTarget: null,
     currentGenerationTarget: null,
@@ -112,13 +115,17 @@ function persistedJob(requestId, overrides = {}) {
     confirmedAt: null,
     project,
     outputFilename,
+    detailsFilename,
     envelopeFilename,
     pdfFilename: `ana-luis-${requestId}.pdf`,
     customerFilename: "ana-luis-convite.png",
+    customerDetailsFilename: "ana-luis-agenda.png",
     customerEnvelopeFilename: "ana-luis-envelope.png",
     customerPdfFilename: "ana-luis-convite-digital.pdf",
     imageUrl: `/generated/${encodeURIComponent(outputFilename)}`,
     downloadUrl: `/api/customer/download/${encodeURIComponent(outputFilename)}`,
+    detailsUrl: `/generated/${encodeURIComponent(detailsFilename)}`,
+    detailsDownloadUrl: `/api/customer/download/${encodeURIComponent(detailsFilename)}`,
     envelopeUrl: `/generated/${encodeURIComponent(envelopeFilename)}`,
     envelopeDownloadUrl: `/api/customer/download/${encodeURIComponent(envelopeFilename)}`,
     envelopeTheme: null,
@@ -208,12 +215,12 @@ test("server syntax and the masked gpt-image-2 envelope request match the instal
   const envelopeEdit = sourceSection(source, "async function generateEnvelopeImage", "async function createEnvelopeInitialsMask");
   const maskFactory = sourceSection(source, "async function createEnvelopeInitialsMask", "function isImageStreamingCompatibilityError");
 
-  assert.match(source, /const MAX_IMAGE_ATTEMPTS = 7;/);
+  assert.match(source, /const MAX_IMAGE_ATTEMPTS = 10;/);
   assert.match(
     source,
     /const OPENAI_ENVELOPE_IMAGE_MODEL\s*=\s*String\(process\.env\.OPENAI_ENVELOPE_IMAGE_MODEL\s*\|\|\s*"gpt-image-2"\)/,
   );
-  assert.match(runImageJob, /await createEnvelopeInitialsMask\(\)/);
+  assert.match(runImageJob, /await createEnvelopeInitialsMask\(sealReferencePath\)/);
   assert.match(runImageJob, /envelopeRevisionNeedsFullVisualEdit/);
   assert.match(runImageJob, /ENVELOPE_REFERENCE_PATH[\s\S]+envelope-480\.webp/);
   assert.match(envelopeEdit, /client\.images\.edit\(\{/);
@@ -225,7 +232,13 @@ test("server syntax and the masked gpt-image-2 envelope request match the instal
     "gpt-image-2 rejects input_fidelity on envelope edits",
   );
   assert.match(envelopeEdit, /output_format:\s*"png"/);
-  assert.match(maskFactory, /sharp\(ENVELOPE_REFERENCE_PATH\)\.metadata\(\)/);
+  assert.match(maskFactory, /referencePath\s*=\s*ENVELOPE_SEAL_REFERENCE_PATH/);
+  assert.match(maskFactory, /sharp\(referencePath\)\.metadata\(\)/);
+  assert.doesNotMatch(
+    maskFactory,
+    /sharp\(ENVELOPE_REFERENCE_PATH\)\.metadata\(\)/,
+    "the envelope mask must use the same seal image that is uploaded to the edit request",
+  );
   assert.match(maskFactory, /raw\[\(\(y \* width \+ x\) \* 4\) \+ 3\] = 0/);
   assert.match(maskFactory, /toFile\(maskBuffer,\s*"envelope-initials-mask\.png"/);
 
@@ -242,6 +255,7 @@ test("envelope regeneration feedback reaches the envelope edit prompt", async ()
   const source = await fs.readFile(SERVER_PATH, "utf8");
   const runImageJob = sourceSection(source, "async function runImageGenerationJob", "function invitationImageEditParams");
   const promptBuilder = sourceSection(source, "function buildEnvelopeEditPrompt", "async function generateEnvelopeImage");
+  const promptFunction = sourceSection(source, "function buildEnvelopeEditPrompt", "function envelopeRevisionNeedsFullVisualEdit");
   const promptReadsFeedback = /revisionContext/.test(promptBuilder);
   const callPassesFeedback = /buildEnvelopeEditPrompt\([\s\S]{0,240}revisionContext/.test(runImageJob);
 
@@ -249,88 +263,136 @@ test("envelope regeneration feedback reaches the envelope edit prompt", async ()
     promptReadsFeedback || callPassesFeedback,
     "target=envelope accepts revisionContext, but the model prompt currently discards that customer feedback",
   );
-  assert.match(promptBuilder, /colour or material change/);
-  assert.match(promptBuilder, /bounded visual revision request/);
+  assert.match(promptFunction, /seal must remain metallic wedding gold/);
+  assert.match(promptFunction, /gold reference is authoritative/);
+  assert.doesNotMatch(promptFunction, /burgundy-red|dark burgundy|\bred wax\b/);
 });
 
-test("invitation and envelope share a combined seven-redo budget", async (context) => {
-  const invitationExhaustedId = crypto.randomUUID();
+test("invitation, Agenda and envelope share a combined ten-revision budget", async (context) => {
+  const invitationAvailableId = crypto.randomUUID();
+  const envelopeAvailableId = crypto.randomUUID();
+  const agendaAvailableId = crypto.randomUUID();
   const envelopeExhaustedId = crypto.randomUUID();
-  const invitationOwner = await claimAccessForJob(invitationExhaustedId);
-  const envelopeOwner = await claimAccessForJob(envelopeExhaustedId);
-  const invitationExhausted = persistedJob(invitationExhaustedId, {
-    attemptsUsed: 4,
-    invitationAttemptsUsed: 4,
-    envelopeAttemptsUsed: 3,
+  const invitationOwner = await claimAccessForJob(invitationAvailableId);
+  const envelopeOwner = await claimAccessForJob(envelopeAvailableId);
+  const agendaOwner = await claimAccessForJob(agendaAvailableId);
+  const exhaustedOwner = await claimAccessForJob(envelopeExhaustedId);
+  const invitationAvailable = persistedJob(invitationAvailableId, {
+    attemptsUsed: 9,
+    invitationAttemptsUsed: 9,
+    envelopeAttemptsUsed: 2,
+    agendaAttemptsUsed: 1,
     accessCode: accessCodeSnapshot(invitationOwner),
   });
-  const envelopeExhausted = persistedJob(envelopeExhaustedId, {
-    attemptsUsed: 4,
-    invitationAttemptsUsed: 4,
-    envelopeAttemptsUsed: 5,
+  const envelopeAvailable = persistedJob(envelopeAvailableId, {
+    attemptsUsed: 3,
+    invitationAttemptsUsed: 3,
+    envelopeAttemptsUsed: 2,
     accessCode: accessCodeSnapshot(envelopeOwner),
   });
-  await writeJob(invitationExhausted);
+  const agendaAvailable = persistedJob(agendaAvailableId, {
+    accessCode: accessCodeSnapshot(agendaOwner),
+  });
+  const envelopeExhausted = persistedJob(envelopeExhaustedId, {
+    attemptsUsed: 3,
+    invitationAttemptsUsed: 3,
+    envelopeAttemptsUsed: 2,
+    agendaAttemptsUsed: 2,
+    redoAttemptsUsed: 10,
+    accessCode: accessCodeSnapshot(exhaustedOwner),
+  });
+  await writeJob(invitationAvailable);
+  await writeJob(envelopeAvailable);
+  await writeJob(agendaAvailable);
   await writeJob(envelopeExhausted);
   context.after(async () => {
-    await Promise.all([removeJob(invitationExhaustedId), removeJob(envelopeExhaustedId)]);
+    await Promise.all([removeJob(invitationAvailableId), removeJob(envelopeAvailableId), removeJob(agendaAvailableId), removeJob(envelopeExhaustedId)]);
   });
 
-  const invitationCookie = await redeemAccessCode(BASE_URL, invitationOwner.code, `/results/${invitationExhaustedId}`);
-  const envelopeCookie = await redeemAccessCode(BASE_URL, envelopeOwner.code, `/results/${envelopeExhaustedId}`);
+  const invitationCookie = await redeemAccessCode(BASE_URL, invitationOwner.code, `/results/${invitationAvailableId}`);
+  const envelopeCookie = await redeemAccessCode(BASE_URL, envelopeOwner.code, `/results/${envelopeAvailableId}`);
+  const agendaCookie = await redeemAccessCode(BASE_URL, agendaOwner.code, `/results/${agendaAvailableId}`);
+  const exhaustedCookie = await redeemAccessCode(BASE_URL, exhaustedOwner.code, `/results/${envelopeExhaustedId}`);
 
   const invalidTarget = await postJson(
-    `${BASE_URL}/api/customer/jobs/${invitationExhaustedId}/regenerate`,
+    `${BASE_URL}/api/customer/jobs/${invitationAvailableId}/regenerate`,
     { target: "both" },
     { Cookie: invitationCookie },
   );
   assert.equal(invalidTarget.status, 400);
 
-  const blockedInvitation = await postJson(
-    `${BASE_URL}/api/customer/jobs/${invitationExhaustedId}/regenerate`,
-    { target: "invitation" },
+  const acceptedInvitation = await postJson(
+    `${BASE_URL}/api/customer/jobs/${invitationAvailableId}/regenerate`,
+    { target: "invitation", revisionContext: "Aumentar os nomes." },
     { Cookie: invitationCookie },
   );
-  assert.equal(blockedInvitation.status, 202, await blockedInvitation.clone().text());
+  assert.equal(acceptedInvitation.status, 202, await acceptedInvitation.clone().text());
+  const acceptedInvitationBody = await acceptedInvitation.json();
+  assert.equal(acceptedInvitationBody.data.redoAttemptsUsed, 10);
+  assert.equal(acceptedInvitationBody.data.remainingImageAttempts, 0);
 
   const acceptedEnvelope = await postJson(
-    `${BASE_URL}/api/customer/jobs/${invitationExhaustedId}/regenerate`,
+    `${BASE_URL}/api/customer/jobs/${envelopeAvailableId}/regenerate`,
     { target: "envelope", revisionContext: "Tornar as iniciais mais legiveis." },
-    { Cookie: invitationCookie },
+    { Cookie: envelopeCookie },
   );
   assert.equal(acceptedEnvelope.status, 202, await acceptedEnvelope.clone().text());
   const acceptedEnvelopeBody = await acceptedEnvelope.json();
-  assert.equal(acceptedEnvelopeBody.data.redoAttemptsUsed, 7);
-  assert.equal(acceptedEnvelopeBody.data.remainingImageAttempts, 0);
-  assert.equal(acceptedEnvelopeBody.data.remainingEnvelopeAttempts, 0);
+  assert.equal(acceptedEnvelopeBody.data.redoAttemptsUsed, 4);
+  assert.equal(acceptedEnvelopeBody.data.remainingEnvelopeAttempts, 6);
+
+  const acceptedAgenda = await postJson(
+    `${BASE_URL}/api/customer/jobs/${agendaAvailableId}/regenerate`,
+    { target: "agenda", revisionContext: "Usar uma composição mais arejada." },
+    { Cookie: agendaCookie },
+  );
+  assert.equal(acceptedAgenda.status, 202, await acceptedAgenda.clone().text());
+  const acceptedAgendaBody = await acceptedAgenda.json();
+  assert.equal(acceptedAgendaBody.data.redoAttemptsUsed, 1);
+  assert.equal(acceptedAgendaBody.data.remainingAgendaAttempts, 9);
 
   const blockedEnvelope = await postJson(
     `${BASE_URL}/api/customer/jobs/${envelopeExhaustedId}/regenerate`,
     { target: "envelope" },
-    { Cookie: envelopeCookie },
+    { Cookie: exhaustedCookie },
   );
   assert.equal(blockedEnvelope.status, 429);
   assert.equal((await blockedEnvelope.json()).error.code, "REDO_ATTEMPT_LIMIT_REACHED");
 
-  const acceptedInvitation = await postJson(
+  const blockedInvitation = await postJson(
     `${BASE_URL}/api/customer/jobs/${envelopeExhaustedId}/regenerate`,
-    { target: "invitation", revisionContext: "Aumentar os nomes." },
-    { Cookie: envelopeCookie },
+    { target: "invitation" },
+    { Cookie: exhaustedCookie },
   );
-  assert.equal(acceptedInvitation.status, 429);
-  assert.equal((await acceptedInvitation.json()).error.code, "REDO_ATTEMPT_LIMIT_REACHED");
+  assert.equal(blockedInvitation.status, 429);
+  assert.equal((await blockedInvitation.json()).error.code, "REDO_ATTEMPT_LIMIT_REACHED");
 
-  const savedEnvelope = await readJob(invitationExhaustedId);
+  const blockedAgenda = await postJson(
+    `${BASE_URL}/api/customer/jobs/${envelopeExhaustedId}/regenerate`,
+    { target: "agenda" },
+    { Cookie: exhaustedCookie },
+  );
+  assert.equal(blockedAgenda.status, 429);
+  assert.equal((await blockedAgenda.json()).error.code, "REDO_ATTEMPT_LIMIT_REACHED");
+
+  const savedEnvelope = await readJob(envelopeAvailableId);
   assert.equal(savedEnvelope.generationTarget, "envelope");
-  assert.equal(savedEnvelope.outputFilename, invitationExhausted.outputFilename);
-  assert.notEqual(savedEnvelope.envelopeFilename, invitationExhausted.envelopeFilename);
-  assert.equal(savedEnvelope.redoAttemptsUsed, 6);
+  assert.equal(savedEnvelope.outputFilename, envelopeAvailable.outputFilename);
+  assert.notEqual(savedEnvelope.envelopeFilename, envelopeAvailable.envelopeFilename);
+  assert.equal(savedEnvelope.redoAttemptsUsed, 4);
 
-  const savedInvitation = await readJob(envelopeExhaustedId);
+  const savedInvitation = await readJob(invitationAvailableId);
   assert.equal(savedInvitation.generationTarget, "invitation");
-  assert.notEqual(savedInvitation.outputFilename, envelopeExhausted.outputFilename);
-  assert.equal(savedInvitation.envelopeFilename, envelopeExhausted.envelopeFilename);
-  assert.equal(savedInvitation.redoAttemptsUsed, 6);
+  assert.notEqual(savedInvitation.outputFilename, invitationAvailable.outputFilename);
+  assert.equal(savedInvitation.envelopeFilename, invitationAvailable.envelopeFilename);
+  assert.equal(savedInvitation.redoAttemptsUsed, 10);
+
+  const savedAgenda = await readJob(agendaAvailableId);
+  assert.equal(savedAgenda.generationTarget, "agenda");
+  assert.equal(savedAgenda.outputFilename, agendaAvailable.outputFilename);
+  assert.equal(savedAgenda.envelopeFilename, agendaAvailable.envelopeFilename);
+  assert.notEqual(savedAgenda.detailsFilename, agendaAvailable.detailsFilename);
+  assert.equal(savedAgenda.redoAttemptsUsed, 1);
 });
 
 test("a claimed code can reopen its own project editor through the redo URL", async (context) => {
@@ -499,41 +561,22 @@ test("whole-project restart keeps the claim but clears stale inputs and artifact
   assert.deepEqual(staleState, [], "restart retained stale model/artifact inputs");
 });
 
-test("finalEnvelope upload becomes the authoritative normalized envelope", async (context) => {
+test("customer finalization rejects full-envelope uploads so the generated seal remains authoritative", async (context) => {
   const requestId = crypto.randomUUID();
   const owner = await claimAccessForJob(requestId);
-  const staleEnvelopePath = path.join(GENERATED_DIR, `stale-final-${requestId}-envelope.png`);
   const job = persistedJob(requestId, {
     project: weddingProject({ packType: "Full_pack", websiteEnabled: true }),
     state: "approved",
     imageConfirmed: true,
     confirmedAt: new Date().toISOString(),
-    envelopeUploadPath: staleEnvelopePath,
     accessCode: accessCodeSnapshot(owner),
     canva: {
       state: "template_ready",
       canvaTemplateUrl: "https://www.canva.com/design/final-envelope-contract/view",
     },
   });
-  const staleBuffer = await sharp({
-    create: {
-      width: 480,
-      height: 853,
-      channels: 4,
-      background: { r: 120, g: 20, b: 25, alpha: 1 },
-    },
-  }).png().toBuffer();
-  await fs.writeFile(staleEnvelopePath, staleBuffer);
   await writeJob(job);
-
-  let uploadedEnvelopePath = "";
-  context.after(async () => {
-    await Promise.all([
-      removeJob(requestId),
-      fs.rm(staleEnvelopePath, { force: true }),
-      uploadedEnvelopePath ? fs.rm(uploadedEnvelopePath, { force: true }) : Promise.resolve(),
-    ]);
-  });
+  context.after(() => removeJob(requestId));
 
   const cookie = await redeemAccessCode(BASE_URL, owner.code, `/results/${requestId}`);
 
@@ -553,39 +596,10 @@ test("finalEnvelope upload becomes the authoritative normalized envelope", async
     headers: { Cookie: cookie },
     body: form,
   });
-  assert.equal(response.status, 202, await response.clone().text());
-  const body = await response.json();
-  assert.equal(body.data.finalEnvelopeUpdated, true);
-  assert.match(body.data.envelopeUrl, /-envelope-final-v2\.png$/);
-  assert.ok(body.data.envelopeTheme?.primary);
+  assert.equal(response.status, 400, await response.clone().text());
 
   const saved = await readJob(requestId);
-  assert.match(saved.envelopeFilename, /-envelope-final-v2\.png$/);
-  uploadedEnvelopePath = path.join(GENERATED_DIR, saved.envelopeFilename);
-  const metadata = await sharp(uploadedEnvelopePath).metadata();
-  assert.equal(metadata.format, "png");
-  assert.equal(metadata.width, 480);
-  assert.equal(metadata.height, 853);
-  assert.equal(saved.state, "artifact_queued");
-  assert.equal(saved.finalEnvelopeUpdated, true);
-
-  const authorityProblems = [];
-  if (saved.envelopeSource !== "uploaded") {
-    authorityProblems.push("envelopeSource does not record that the final envelope was uploaded");
-  }
-  const overrideValues = [
-    saved.envelopeUploadPath,
-    saved.uploadedEnvelopePath,
-    saved.envelopePath,
-    saved.envelope?.path,
-  ].filter((value) => typeof value === "string" && value.trim());
-  for (const overrideValue of overrideValues) {
-    const resolved = path.resolve(path.isAbsolute(overrideValue)
-      ? overrideValue
-      : path.join(GENERATED_DIR, overrideValue));
-    if (resolved !== path.resolve(uploadedEnvelopePath)) {
-      authorityProblems.push(`older override still outranks finalEnvelope: ${path.basename(resolved)}`);
-    }
-  }
-  assert.deepEqual(authorityProblems, [], "finalEnvelope was saved but is not authoritative for downstream artifacts");
+  assert.equal(saved.envelopeFilename, job.envelopeFilename);
+  assert.equal(saved.state, "approved");
+  assert.notEqual(saved.envelopeSource, "uploaded");
 });

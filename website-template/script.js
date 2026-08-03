@@ -104,6 +104,10 @@ window.addEventListener('pagehide', () => {
 });
 
 let mobileIntroStarted = false;
+function setMobileIntroPending(pending) {
+  body.classList.toggle('mobile-intro-pending', pending);
+  document.documentElement.classList.toggle('mobile-intro-pending', pending);
+}
 function openEnvelope() {
   if (!mobileIntroQuery.matches || mobileIntroStarted) return;
   mobileIntroStarted = true;
@@ -118,7 +122,8 @@ function openEnvelope() {
   window.setTimeout(() => {
     envelope?.classList.add('hidden');
     envelope?.setAttribute('aria-hidden', 'true');
-    body.classList.remove('mobile-intro-pending', 'locked');
+    setMobileIntroPending(false);
+    body.classList.remove('locked');
     body.classList.add('invitation-open');
     revealVisibleSections();
     try { hero?.focus({ preventScroll: true }); } catch { hero?.focus(); }
@@ -138,19 +143,20 @@ replayButton?.addEventListener('click', (event) => {
   envelope?.removeAttribute('aria-hidden');
   envelope?.classList.remove('hidden', 'is-opening');
   openButton?.removeAttribute('aria-disabled');
-  body.classList.add('mobile-intro-pending');
+  setMobileIntroPending(true);
   void envelope?.offsetWidth;
   window.setTimeout(() => openButton?.focus(), 100);
 });
 
 if (mobileIntroQuery.matches && envelope && openButton) {
   envelope.setAttribute('aria-hidden', 'false');
-  body.classList.add('mobile-intro-pending');
+  setMobileIntroPending(true);
   window.setTimeout(() => openButton.focus(), 120);
 } else {
   envelope?.classList.add('hidden');
   envelope?.setAttribute('aria-hidden', 'true');
-  body.classList.remove('mobile-intro-pending', 'locked');
+  setMobileIntroPending(false);
+  body.classList.remove('locked');
   body.classList.add('invitation-open');
   hero?.classList.add('is-active');
 }

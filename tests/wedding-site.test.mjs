@@ -69,17 +69,20 @@ test("Youform signature verification uses the raw body", () => {
   assert.equal(verifyYouformSignature(Buffer.from("{}"), secret, signature), false);
 });
 
-test("wedding website escapes customer data and embeds the configured Youform", () => {
+test("wedding website escapes customer data and always renders the native RSVP form", () => {
   const html = renderWeddingWebsite({
     project,
     requestId: "75f7570d-fefd-4e0e-b551-e9bd7bfc635b",
+    rsvpSubmitUrl: "https://invitelab.art/api/public/rsvp/75f7570d-fefd-4e0e-b551-e9bd7bfc635b",
   });
-  assert.match(html, /rsvpSubmitUrl":"\/api\/public\/rsvp\/75f7570d-fefd-4e0e-b551-e9bd7bfc635b/);
-  assert.match(html, /data-youform-embed/);
-  assert.match(html, /data-form="wedding-rsvp"/);
-  assert.match(html, /request_id=75f7570d-fefd-4e0e-b551-e9bd7bfc635b/);
-  assert.match(html, /app\.youform\.com\/embed\.js/);
-  assert.doesNotMatch(html, /id="rsvpForm"/);
+  assert.match(html, /rsvpSubmitUrl":"https:\/\/invitelab\.art\/api\/public\/rsvp\/75f7570d-fefd-4e0e-b551-e9bd7bfc635b/);
+  assert.match(html, /id="rsvpForm"/);
+  assert.match(html, /What's your name\?/);
+  assert.match(html, /What's your email\?/);
+  assert.match(html, /Are you going\?/);
+  assert.match(html, /Cellphone number \(optional\)/);
+  assert.match(html, /Message for Couple \(optional\)/);
+  assert.doesNotMatch(html, /data-youform-embed|app\.youform\.com\/embed\.js/);
   assert.doesNotMatch(html, /<\\\/script>/);
   assert.doesNotMatch(html, /Tomás <script>/);
   assert.match(html, /Tomás &lt;script&gt;/);
@@ -108,7 +111,7 @@ test("wedding website escapes customer data and embeds the configured Youform", 
   assert.doesNotMatch(html, /id="gift"/);
 });
 
-test("wedding website keeps the native RSVP form as a fallback", () => {
+test("wedding website keeps the native RSVP form when no legacy form URL exists", () => {
   const html = renderWeddingWebsite({
     project: {
       ...project,
@@ -138,8 +141,8 @@ test("mobile opening uses the selected envelope colour and renders uploaded musi
   assert.match(html, /class="mobile-envelope-gate"/);
   assert.match(html, /style="--mobile-envelope-color:#743442"/);
   assert.match(html, /class="mobile-wax-seal" id="sealTrigger"/);
-  assert.match(html, /assets\/mobile-envelope-layer-top\.webp/);
-  assert.match(html, /assets\/mobile-envelope-layer-bottom\.webp/);
+  assert.match(html, /assets\/mobile-envelope-layer-top\.png/);
+  assert.match(html, /assets\/mobile-envelope-layer-bottom\.png/);
   assert.match(html, /assets\/mobile-envelope-layer-seal\.webp/);
   assert.match(html, /id="weddingAudio" src="wedding-music\.mp3"/);
   assert.match(html, /preload="auto" playsinline loop/);
@@ -163,7 +166,7 @@ test("mobile opening falls back safely when colour or music URL is unsafe", () =
     requestId: "mobile-opening-safe-fallback",
   });
 
-  assert.match(html, /style="--mobile-envelope-color:#5F694F"/);
+  assert.match(html, /style="--mobile-envelope-color:transparent"/);
   assert.doesNotMatch(html, /id="weddingAudio"|id="musicPlayer"|javascript:/);
 });
 

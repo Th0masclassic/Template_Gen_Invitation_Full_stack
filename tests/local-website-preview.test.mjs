@@ -49,14 +49,23 @@ test("local website preview renders the selected color and protects duplicate RS
     const siteHtml = await siteResponse.text();
     assert.equal(siteResponse.status, 200);
     assert.match(siteHtml, /--olive:#743442/);
-    assert.match(siteHtml, /assets\/mobile-envelope-layer-top\.webp/);
-    assert.match(siteHtml, /assets\/mobile-envelope-layer-bottom\.webp/);
+    assert.match(siteHtml, /assets\/mobile-envelope-layer-top\.png/);
+    assert.match(siteHtml, /assets\/mobile-envelope-layer-bottom\.png/);
     assert.match(siteHtml, /assets\/green-envelope\.png/);
+    assert.match(siteHtml, /id="rsvpForm"/);
+    assert.match(siteHtml, /What's your name\?/);
+    assert.match(siteHtml, /What's your email\?/);
+    assert.match(siteHtml, /Are you going\?/);
+    assert.match(siteHtml, /Cellphone number \(optional\)/);
+    assert.match(siteHtml, /Message for Couple \(optional\)/);
+    assert.match(siteHtml, /rsvpSubmitUrl":"\/api\/public\/rsvp\//);
+    assert.doesNotMatch(siteHtml, /data-youform-embed|app\.youform\.com\/embed\.js/);
     const generatedStyles = await fetch(`${server.baseUrl}/site/${body.data.requestId}/styles.css`);
     const generatedStylesText = await generatedStyles.text();
     assert.equal(generatedStyles.status, 200);
     assert.match(generatedStylesText, /\.timeline-path path\{[^}]*stroke:var\(--gold\)/);
     assert.match(generatedStylesText, /#timeline,#invitation,#venue,#dress-code,#stay,#faq\{background:#fff\}/);
+    assert.match(generatedStylesText, /\.mobile-envelope-instruction\{[^}]*color:#b89254/);
     const generatedGreenEnvelope = await fetch(`${server.baseUrl}/site/${body.data.requestId}/assets/green-envelope.png`);
     assert.equal(generatedGreenEnvelope.status, 200);
     assert.notDeepEqual(

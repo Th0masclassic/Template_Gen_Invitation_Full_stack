@@ -1,6 +1,11 @@
 name = "temgen-invitation-router"
 main = "invitation-router.js"
 compatibility_date = "2026-07-26"
+workers_dev = false
+
+routes = [
+  { pattern = "invites.invitelab.art/*", zone_name = "invitelab.art" }
+]
 
 [[r2_buckets]]
 binding = "INVITATION_SITES"

@@ -83,16 +83,18 @@ function normalizeCreationMode(value) {
 }
 
 function normalizeListingProduct(value) {
+  const product = (packType, creationMode) => Object.freeze({
+    packType,
+    creationMode: packType === "Full_pack" ? creationMode : "template",
+  });
   if (typeof value === "string") {
-    return Object.freeze({ packType: normalizePackType(value), creationMode: "both" });
+    return product(normalizePackType(value), "both");
   }
   if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return Object.freeze({ packType: normalizePackType(value), creationMode: "both" });
+    return product(normalizePackType(value), "both");
   }
-  return Object.freeze({
-    packType: normalizePackType(value.packType ?? value.pack),
-    creationMode: normalizeCreationMode(value.creationMode ?? value.mode ?? "both"),
-  });
+  const packType = normalizePackType(value.packType ?? value.pack);
+  return product(packType, normalizeCreationMode(value.creationMode ?? value.mode ?? "both"));
 }
 
 export function parseEtsyListingPackMap(value) {

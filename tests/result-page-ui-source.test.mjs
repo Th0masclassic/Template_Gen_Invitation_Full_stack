@@ -16,20 +16,26 @@ async function resultPageSource() {
   return source.slice(start, end);
 }
 
-test("customer result page reveals invitation and envelope as one approval pair", async () => {
+test("customer result page reveals the invitation suite and offers all three redo targets", async () => {
   const source = await resultPageSource();
 
   assert.match(source, /id="resultPreview" hidden/);
   assert.match(source, /id="resultImage"/);
   assert.match(source, /id="resultEnvelope"/);
+  assert.match(source, /id="resultDetails"/);
   assert.match(source, /function pairIsReady\(job\)/);
   assert.match(source, /resultPreview\.hidden=!pairReady/);
   assert.match(source, /invitationAttemptsUsed/);
   assert.match(source, /envelopeAttemptsUsed/);
+  assert.match(source, /agendaAttemptsUsed/);
   assert.match(source, /id="revisionOverlay" hidden/);
   assert.match(source, /\[hidden\]\{display:none!important\}/);
   assert.match(source, /name="revisionTarget" value="invitation"/);
   assert.match(source, /name="revisionTarget" value="envelope"/);
+  assert.match(source, /name="revisionTarget" value="agenda"/);
+  assert.match(source, /const max=Math\.max\(1,safeCount\(currentJob\.maxImageAttempts,10\)\)/);
+  assert.match(source, /invitationAttempts\.textContent='';/);
+  assert.match(source, /revisionDetailsAttempts\.textContent/);
   assert.match(source, /JSON\.stringify\(\{target,revisionContext:revisionContext\.value\}\)/);
 });
 
@@ -54,12 +60,13 @@ test("result page exposes the private RSVP panel at the RSVP-FORM anchor", async
   assert.match(source, /\/api\/customer\/jobs\/'\+encodeURIComponent\(requestId\)\+'\/rsvp/);
 });
 
-test("result page supports final envelope upload, restart, and one-shot mobile reveal", async () => {
+test("result page keeps the generated layered envelope, restart, and one-shot mobile reveal", async () => {
   const source = await resultPageSource();
 
-  assert.match(source, /name="envelopeSource"/);
-  assert.match(source, /id="finalEnvelope"/);
-  assert.match(source, /data\.append\('finalEnvelope',finalEnvelope\.files\[0\]\)/);
+  assert.doesNotMatch(source, /name="envelopeSource"/);
+  assert.doesNotMatch(source, /id="finalEnvelope"/);
+  assert.match(source, /resultEnvelope\.src=job\.envelopeUrl/);
+  assert.match(source, /downloadEnvelope\.href=job\.envelopeDownloadUrl\|\|job\.envelopeUrl/);
   assert.match(source, /id="restartProject">Editar dados e criar nova versão</);
   assert.match(source, /id="newPurchase" href="\$\{newProjectPath\}">Usar outro código</);
   assert.match(source, /job\.restartUrl/);
@@ -76,7 +83,7 @@ test("result page supports final envelope upload, restart, and one-shot mobile r
 test("a failed image or envelope generation remains retryable from the result page", async () => {
   const source = await resultPageSource();
   assert.match(source, /retryableGenerationFailure=job\.state==='failed'/);
-  assert.match(source, /retryableGenerationFailure\?'Tentar novamente':'Não aprovar'/);
+  assert.match(source, /retryableGenerationFailure\?t\('retry','Tentar novamente'\):t\('doNotApprove','Não aprovar'\)/);
 });
 
 test("result and local site policies allow the published website preview frame", async () => {
@@ -99,6 +106,7 @@ test("embedded result-page browser script parses", async () => {
     .replace(/const detailFields=.*?;/, "const detailFields=[];")
     .replace(/const resultLocale=.*?;/, 'const resultLocale="en";')
     .replace(/const resultStaticTranslations=.*?;/, "const resultStaticTranslations={};")
+    .replace(/const finalizationProgressMessage=.*?;/, 'const finalizationProgressMessage="Working";')
     .replace(/const websiteImageFields=.*?;/, "const websiteImageFields=[];");
 
   assert.doesNotThrow(() => new vm.Script(browserScript, { filename: "renderResultPage.inline.js" }));

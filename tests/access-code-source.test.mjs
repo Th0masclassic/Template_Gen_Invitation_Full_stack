@@ -24,7 +24,7 @@ test("server and client wire the access code gate into one-time generation", asy
   assert.match(server, /ACCESS_CODE_ALREADY_USED/);
   assert.match(server, /`\/results\/\$\{encodeURIComponent\(record\.requestId\)\}`/);
   assert.match(server, /\/operator\/access-codes/);
-  assert.match(server, /localHost && loopbackClient/);
+  assert.match(server, /isLoopbackHostname\(host\) && isLoopbackAddress\(remoteAddress\)/);
   assert.match(client, /data\?\.error\?\.redirectUrl/);
   assert.match(client, /window\.location\.assign\(data\.error\.redirectUrl\)/);
 

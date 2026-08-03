@@ -30,6 +30,11 @@ test("business homepage keeps both product routes, five languages, four examples
   assert.match(html, /\/assets\/home\/invitelab-logo\.png/);
   assert.match(html, /https:\/\/www\.etsy\.com\/your\/purchases/);
   assert.match(html, /id="carouselTrack"/);
+  assert.match(html, /class="sales-proof-card"/);
+  assert.match(html, /data-i18n="salesNumber"/);
+  assert.match(html, /data-i18n="salesMarkWord"/);
+  assert.match(html, /salesNumber: "2,000\+"/);
+  assert.match(html, /salesNumber: "2\.000\+"/);
   assert.match(html, /pointerdown/);
   assert.match(html, /overflow-x:\s*clip/);
 });

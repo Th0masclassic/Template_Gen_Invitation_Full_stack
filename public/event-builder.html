@@ -533,12 +533,62 @@
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(111,124,104,.13), 0 18px 38px rgba(57,44,34,.13);
     }
-    .template-card img {
+    .template-visual {
+      display: block;
+      background: #ece7df;
+    }
+    .template-visual.has-details {
+      --stack-offset: 35%;
+      --stack-overlap: 135%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      padding: 0 var(--stack-offset) 14px 0;
+    }
+    .template-visual .template-invite,
+    .template-visual .template-details {
+      display: block;
       width: 100%;
-      aspect-ratio: 9 / 14;
-      object-fit: cover;
+      height: auto;
+      aspect-ratio: auto;
+      object-fit: contain;
       object-position: top center;
       background: #ece7df;
+    }
+    .template-visual.has-details .template-invite {
+      position: relative;
+      z-index: 2;
+    }
+    .template-visual .template-details {
+      height: auto;
+      aspect-ratio: auto;
+      object-fit: contain;
+      box-shadow: 0 12px 22px rgba(57,44,34,.12);
+    }
+    .template-visual.has-details .template-details {
+      position: relative;
+      z-index: 1;
+      align-self: flex-start;
+      width: 100%;
+      margin-top: calc(var(--stack-overlap) * -1);
+      margin-left: var(--stack-offset);
+    }
+    .template-card[data-template-id="ivory_silk"] .template-visual.has-details,
+    .template-card[data-template-id="blush_floral"] .template-visual.has-details,
+    .template-card[data-template-id="aquarela_paris"] .template-visual.has-details,
+    .template-card[data-template-id="terracotta_boho"] .template-visual.has-details {
+      --stack-overlap: 180%;
+    }
+    .template-visual.has-details .template-invite {
+      box-shadow: 0 14px 26px rgba(57,44,34,.16);
+    }
+    .template-visual:not(.has-details) .template-invite {
+      box-shadow: none;
+    }
+    .template-visual + .template-info {
+      position: relative;
+      z-index: 3;
+      background: white;
     }
     .template-info {
       padding: 12px;
@@ -551,6 +601,7 @@
     .template-info span { font-size: 11px; color: var(--muted); }
     .selected-check {
       position: absolute;
+      z-index: 4;
       top: 10px;
       right: 10px;
       width: 28px;
@@ -858,6 +909,10 @@
     .website-details-card > p { color: var(--muted); margin: 10px 0 26px; }
     .website-details-card .form-grid { gap: 16px; }
     .website-details-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 26px; }
+    .website-details-error { min-height: 20px; margin: 14px 0 0; color: #9b3131; font-size: 13px; font-weight: 750; }
+    .website-details-overlay.agenda-only .website-detail-group[data-website-detail-for]:not([data-website-detail-for~="programme"]) { display: none; }
+    .website-details-overlay.agenda-only [data-full-pack-only] { display: none; }
+    .website-details-overlay.agenda-only .website-details-summary-fields { display: none; }
     .website-details-close { position: absolute; top: 16px; right: 16px; width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--ink); font-size: 24px; line-height: 1; cursor: pointer; }
     .website-details-card { position: relative; }
     .website-detail-groups { display: grid; gap: 12px; }
@@ -881,6 +936,20 @@
       box-shadow: 0 0 0 1px rgba(34,41,32,.2);
       cursor: pointer;
       transition: transform .18s ease,box-shadow .18s ease;
+    }
+    .envelope-colour-swatch--default {
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, transparent 46%, #aaa39a 47%, #aaa39a 53%, transparent 54%),
+        repeating-conic-gradient(#f4f0e9 0 25%, #fff 0 50%) 50%/12px 12px;
+    }
+    .envelope-colour-swatch--default::after {
+      content: "";
+      position: absolute;
+      inset: 9px;
+      border: 1px dashed rgba(92,85,76,.48);
+      border-radius: 50%;
     }
     .envelope-colour-swatch:hover { transform: translateY(-2px); }
     .envelope-colour-swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px #53634e,0 7px 18px rgba(45,55,42,.18); }
@@ -1135,6 +1204,12 @@
     .generated-pair.has-envelope {
       grid-template-columns: repeat(2, minmax(0, 390px));
     }
+    .generated-pair.has-agenda {
+      grid-template-columns: repeat(2, minmax(0, 390px));
+    }
+    .generated-pair.has-envelope.has-agenda {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
     .generated-frame {
       width: 100%;
       margin: 0;
@@ -1338,13 +1413,20 @@
       .panel-header, .section-body { padding: 22px 18px; }
       .mode-switch { padding: 14px 18px; grid-template-columns: 1fr; }
       .template-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .template-visual.has-details {
+        --stack-offset: 35%;
+        --stack-overlap: 135%;
+        padding-bottom: 10px;
+      }
       .website-photo-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
       .form-grid { grid-template-columns: 1fr; }
       .field.full { grid-column: auto; }
       .submit-row { align-items: stretch; flex-direction: column; }
       .submit-button { width: 100%; }
       .loading-card { padding: 34px 22px; }
-      .generated-pair.has-envelope { grid-template-columns: minmax(0, 390px); }
+      .generated-pair.has-envelope,
+      .generated-pair.has-agenda,
+      .generated-pair.has-envelope.has-agenda { grid-template-columns: minmax(0, 390px); }
       .asset-revision-overlay { padding: 12px; }
       .asset-revision-modal { border-radius: 22px; }
       .asset-choice-grid { grid-template-columns: 1fr; }
@@ -1356,7 +1438,7 @@
       .phone-screen, .phone-screen img.template-preview { min-height: 550px; height: 550px; }
     }
   </style>
-  <script src="/app-i18n.js?v=3"></script>
+  <script src="/app-i18n.js?v=4"></script>
 </head>
 <body>
   <main class="app-shell">
@@ -1599,6 +1681,10 @@
             <figcaption>Envelope <span id="envelopeAttemptState"></span></figcaption>
             <img id="generatedEnvelope" alt="Envelope de casamento gerado" />
           </figure>
+          <figure class="generated-frame" id="detailsFrame" hidden>
+            <figcaption>Agenda <span id="detailsAttemptState"></span></figcaption>
+            <img id="generatedDetails" alt="Agenda do evento gerada" />
+          </figure>
         </div>
         <p class="attempt-summary" id="attemptSummary" hidden></p>
         <div class="result-actions">
@@ -1642,6 +1728,10 @@
           <input id="revisionEnvelope" type="radio" name="revisionTarget" value="envelope" />
           <span><strong>Envelope</strong><small id="envelopeRevisionAttempts">Escolhe esta opção para refazer o envelope.</small></span>
         </label>
+        <label class="asset-choice" id="detailsRevisionChoice">
+          <input id="revisionDetails" type="radio" name="revisionTarget" value="agenda" />
+          <span><strong>Agenda</strong><small id="detailsRevisionAttempts">Escolhe esta opção para refazer a agenda.</small></span>
+        </label>
       </div>
       <div class="revision-context" id="revisionContextWrap">
         <label for="revisionContext">O que queres alterar? <small>(opcional)</small></label>
@@ -1673,22 +1763,17 @@
       <div class="website-section-preview" aria-live="polite"><span id="websiteSectionSummary">8 secções incluídas</span><div class="website-preview-bars" aria-hidden="true"><i data-preview-section="story"></i><i data-preview-section="rsvp"></i><i data-preview-section="venueParking"></i><i data-preview-section="programme"></i><i data-preview-section="menu"></i><i data-preview-section="dressCode"></i><i data-preview-section="stayTravel"></i><i data-preview-section="faq"></i></div></div>
       <p data-website-copy="modalDescription">Estes detalhes aparecem nas secções do site. São opcionais — se ficares sem preencher, usamos o texto e horários elegantes predefinidos.</p>
       <p class="website-photo-warning" id="websitePhotoWarning" role="status" data-website-copy="noWebsitePhotosWarning" hidden>No website photos have been added. We will use the invitation artwork instead.</p>
-      <div class="form-grid">
+      <div class="form-grid website-details-summary-fields">
         <div class="field full"><label for="websiteStory"><span data-website-copy="storyLabel">A vossa história ou mensagem para os convidados</span> <small data-website-copy="optional">(opcional)</small></label><textarea id="websiteStory" maxlength="900" data-website-copy-placeholder="storyPlaceholder" placeholder="Ex.: Conhecemo-nos há 8 anos e mal podemos esperar por celebrar este dia convosco."></textarea></div>
-        <div class="field"><label for="ceremonyTime"><span data-website-copy="ceremonyTimeLabel">Hora da cerimónia</span> <small data-website-copy="optional">(opcional)</small></label><input id="ceremonyTime" type="time" /></div>
-        <div class="field"><label for="receptionTime"><span data-website-copy="receptionTimeLabel">Hora da receção / cocktail</span> <small data-website-copy="optional">(opcional)</small></label><input id="receptionTime" type="time" /></div>
-        <div class="field full"><label for="ceremonyDescription"><span data-website-copy="ceremonyDescriptionLabel">Descrição da cerimónia</span> <small data-website-copy="optional">(opcional)</small></label><input id="ceremonyDescription" maxlength="300" data-website-copy-placeholder="ceremonyDescriptionPlaceholder" placeholder="Ex.: Troca de votos na capela da quinta." /></div>
-        <div class="field full"><label for="receptionDescription"><span data-website-copy="receptionDescriptionLabel">Descrição da receção</span> <small data-website-copy="optional">(opcional)</small></label><input id="receptionDescription" maxlength="300" data-website-copy-placeholder="receptionDescriptionPlaceholder" placeholder="Ex.: Cocktail no jardim, seguido de jantar e festa." /></div>
-        <div class="field"><label for="arrivalTime"><span data-website-copy="arrivalTimeLabel">Chegada dos convidados</span> <small data-website-copy="optional">(opcional)</small></label><input id="arrivalTime" type="time" /></div>
-        <div class="field"><label for="partyTime"><span data-website-copy="partyTimeLabel">Jantar, brindes e dança</span> <small data-website-copy="optional">(opcional)</small></label><input id="partyTime" type="time" /></div>
       </div>
       <div class="website-detail-groups">
-        <details class="website-detail-group" open><summary data-website-copy="groupExperience">Envelope e música</summary><div class="form-grid">
+        <details class="website-detail-group" open><summary id="experienceGroupTitle" data-website-copy="groupExperience">Envelope e música</summary><div class="form-grid">
           <div class="field full envelope-colour-field">
             <label><span data-website-copy="envelopeColourLabel">Cor do envelope no telemóvel</span></label>
-            <input id="envelopeColor" type="hidden" value="#5F694F" />
+            <input id="envelopeColor" type="hidden" value="" />
             <div class="envelope-colour-palette" id="envelopeColourPalette" role="group" aria-label="Escolher cor do envelope">
-              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#5F694F" style="--swatch:#5F694F" aria-label="Oliveira" aria-pressed="true"></button>
+              <button class="envelope-colour-swatch envelope-colour-swatch--default" type="button" data-envelope-colour="" data-website-copy-aria="defaultEnvelopeColour" title="Usar a cor predefinida do template" aria-label="Predefinido (sem cor escolhida)" aria-pressed="true"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#5F694F" style="--swatch:#5F694F" aria-label="Oliveira" aria-pressed="false"></button>
               <button class="envelope-colour-swatch" type="button" data-envelope-colour="#89947B" style="--swatch:#89947B" aria-label="Sálvia" aria-pressed="false"></button>
               <button class="envelope-colour-swatch" type="button" data-envelope-colour="#9B6A59" style="--swatch:#9B6A59" aria-label="Terracota" aria-pressed="false"></button>
               <button class="envelope-colour-swatch" type="button" data-envelope-colour="#743442" style="--swatch:#743442" aria-label="Bordô" aria-pressed="false"></button>
@@ -1702,13 +1787,19 @@
               <button class="envelope-colour-swatch" type="button" data-envelope-colour="#9C2F2F" style="--swatch:#9C2F2F" aria-label="Rubi" aria-pressed="false"></button>
               <button class="envelope-colour-swatch" type="button" data-envelope-colour="#5A3E36" style="--swatch:#5A3E36" aria-label="Castanho" aria-pressed="false"></button>
               <button class="envelope-colour-swatch" type="button" data-envelope-colour="#D8D2C4" style="--swatch:#D8D2C4" aria-label="Marfim" aria-pressed="false"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#E8B7B7" style="--swatch:#E8B7B7" aria-label="Rosa pastel" aria-pressed="false"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#B8D7E8" style="--swatch:#B8D7E8" aria-label="Azul pastel" aria-pressed="false"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#C9B6E4" style="--swatch:#C9B6E4" aria-label="Lavanda pastel" aria-pressed="false"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#F4C6A6" style="--swatch:#F4C6A6" aria-label="Pêssego pastel" aria-pressed="false"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#F3E3A0" style="--swatch:#F3E3A0" aria-label="Amarelo pastel" aria-pressed="false"></button>
+              <button class="envelope-colour-swatch" type="button" data-envelope-colour="#BFDCCB" style="--swatch:#BFDCCB" aria-label="Menta pastel" aria-pressed="false"></button>
             </div>
             <label class="envelope-custom-colour" for="envelopeColourCustom"><input id="envelopeColourCustom" type="color" value="#5F694F" /><span data-website-copy="customEnvelopeColour">Ou escolhe uma cor personalizada</span></label>
           </div>
-          <div class="field full"><label for="weddingMusic"><span data-website-copy="musicFileLabel">Ficheiro MP3 da música</span> <small data-website-copy="optional">(opcional)</small></label><input id="weddingMusic" name="weddingMusic" type="file" accept=".mp3,audio/mpeg" /></div>
-          <div class="field"><label for="musicTitle"><span data-website-copy="musicTitleLabel">Nome da música</span> <small data-website-copy="optional">(opcional)</small></label><input id="musicTitle" maxlength="160" /></div>
-          <div class="field"><label for="musicArtist"><span data-website-copy="musicArtistLabel">Artista</span> <small data-website-copy="optional">(opcional)</small></label><input id="musicArtist" maxlength="160" /></div>
-          <p class="field full music-rights-note" data-website-copy="musicRightsNote">Carrega um ficheiro MP3 que tenhas autorização para utilizar, até 20 MB. Se não carregares nenhum ficheiro, o website não terá música.</p>
+          <div class="field full" data-full-pack-only><label for="weddingMusic"><span data-website-copy="musicFileLabel">Ficheiro MP3 da música</span> <small data-website-copy="optional">(opcional)</small></label><input id="weddingMusic" name="weddingMusic" type="file" accept=".mp3,audio/mpeg" /></div>
+          <div class="field" data-full-pack-only><label for="musicTitle"><span data-website-copy="musicTitleLabel">Nome da música</span> <small data-website-copy="optional">(opcional)</small></label><input id="musicTitle" maxlength="160" /></div>
+          <div class="field" data-full-pack-only><label for="musicArtist"><span data-website-copy="musicArtistLabel">Artista</span> <small data-website-copy="optional">(opcional)</small></label><input id="musicArtist" maxlength="160" /></div>
+          <p class="field full music-rights-note" data-full-pack-only data-website-copy="musicRightsNote">Carrega um ficheiro MP3 que tenhas autorização para utilizar, até 20 MB. Se não carregares nenhum ficheiro, o website não terá música.</p>
         </div></details>
         <details class="website-detail-group" data-website-detail-for="story"><summary data-website-copy="groupStory">Story details</summary><div class="form-grid">
           <div class="field full"><label for="storyIntro"><span data-website-copy="storyIntroLabel">Story introduction</span> <small data-website-copy="optional">(optional)</small></label><textarea id="storyIntro" maxlength="700" data-website-copy-placeholder="storyIntroPlaceholder"></textarea></div>
@@ -1723,9 +1814,18 @@
           <div class="field full"><label for="parkingInfo"><span data-website-copy="parkingInfoLabel">Parking and arrival</span> <small data-website-copy="optional">(optional)</small></label><textarea id="parkingInfo" maxlength="240"></textarea></div>
         </div></details>
         <details class="website-detail-group" data-website-detail-for="programme menu" open><summary data-website-copy="groupSchedule">Schedule and menu details</summary><div class="form-grid">
+          <div class="field"><label for="arrivalTime"><span data-website-copy="arrivalTimeLabel">Arrival time</span></label><input id="arrivalTime" type="time" /></div>
+          <div class="field"><label for="ceremonyTime"><span data-website-copy="ceremonyTimeLabel">Ceremony time</span></label><input id="ceremonyTime" type="time" /></div>
+          <div class="field"><label for="receptionTime"><span data-website-copy="receptionTimeLabel">Reception time</span></label><input id="receptionTime" type="time" /></div>
+          <div class="field"><label for="mealTime"><span data-website-copy="mealTimeLabel">Dinner time</span></label><input id="mealTime" type="time" /></div>
+          <div class="field"><label for="cakeTime"><span data-website-copy="cakeTimeLabel">Cake cutting time</span></label><input id="cakeTime" type="time" /></div>
+          <div class="field"><label for="partyTime"><span data-website-copy="partyTimeLabel">Party time</span></label><input id="partyTime" type="time" /></div>
           <div class="field full"><label for="arrivalDescription"><span data-website-copy="arrivalDescriptionLabel">Arrival description</span> <small data-website-copy="optional">(optional)</small></label><input id="arrivalDescription" maxlength="300" /></div>
-          <div class="field"><label for="mealTime"><span data-website-copy="mealTimeLabel">Dinner time</span> <small data-website-copy="optional">(optional)</small></label><input id="mealTime" type="time" /></div><div class="field"><label for="cakeTime"><span data-website-copy="cakeTimeLabel">Cake cutting time</span> <small data-website-copy="optional">(optional)</small></label><input id="cakeTime" type="time" /></div>
-          <div class="field full"><label for="mealDescription"><span data-website-copy="mealDescriptionLabel">Dinner and speeches description</span> <small data-website-copy="optional">(optional)</small></label><input id="mealDescription" maxlength="300" /></div><div class="field full"><label for="cakeDescription"><span data-website-copy="cakeDescriptionLabel">Cake cutting description</span> <small data-website-copy="optional">(optional)</small></label><input id="cakeDescription" maxlength="300" /></div><div class="field full"><label for="partyDescription"><span data-website-copy="partyDescriptionLabel">Party description</span> <small data-website-copy="optional">(optional)</small></label><input id="partyDescription" maxlength="300" /></div>
+          <div class="field full"><label for="ceremonyDescription"><span data-website-copy="ceremonyDescriptionLabel">Ceremony description</span> <small data-website-copy="optional">(optional)</small></label><input id="ceremonyDescription" maxlength="300" /></div>
+          <div class="field full"><label for="receptionDescription"><span data-website-copy="receptionDescriptionLabel">Reception description</span> <small data-website-copy="optional">(optional)</small></label><input id="receptionDescription" maxlength="300" /></div>
+          <div class="field full"><label for="mealDescription"><span data-website-copy="mealDescriptionLabel">Dinner and speeches description</span> <small data-website-copy="optional">(optional)</small></label><input id="mealDescription" maxlength="300" /></div>
+          <div class="field full"><label for="cakeDescription"><span data-website-copy="cakeDescriptionLabel">Cake cutting description</span> <small data-website-copy="optional">(optional)</small></label><input id="cakeDescription" maxlength="300" /></div>
+          <div class="field full"><label for="partyDescription"><span data-website-copy="partyDescriptionLabel">Party description</span> <small data-website-copy="optional">(optional)</small></label><input id="partyDescription" maxlength="300" /></div>
         </div></details>
         <details class="website-detail-group" data-website-detail-for="dressCode"><summary data-website-copy="groupDressCode">Dress code details</summary><div class="form-grid">
           <div class="field full"><label for="dressCodeTitle"><span data-website-copy="dressCodeTitleLabel">Dress code heading</span> <small data-website-copy="optional">(optional)</small></label><input id="dressCodeTitle" maxlength="160" /></div><div class="field full"><label for="dressCodeIntro"><span data-website-copy="dressCodeIntroLabel">Short introduction</span> <small data-website-copy="optional">(optional)</small></label><textarea id="dressCodeIntro" maxlength="400"></textarea></div>
@@ -1740,6 +1840,7 @@
         </div></details>
         <details class="website-detail-group" data-website-detail-for="faq"><summary data-website-copy="groupFaq">FAQ and closing message</summary><div class="form-grid"><div class="field full"><label for="faqPlusOne"><span data-website-copy="faqPlusOneLabel">Plus-one policy</span> <small data-website-copy="optional">(optional)</small></label><textarea id="faqPlusOne" maxlength="400"></textarea></div><div class="field full"><label for="footerMessage"><span data-website-copy="footerMessageLabel">Closing message</span> <small data-website-copy="optional">(optional)</small></label><textarea id="footerMessage" maxlength="400"></textarea></div></div></details>
       </div>
+      <p class="website-details-error" id="agendaDetailsError" role="alert" aria-live="polite"></p>
       <div class="website-details-actions"><button class="button secondary" type="button" id="skipWebsiteDetails" data-website-copy="useDefaults">Usar predefinições</button><button class="button primary" type="submit"><span data-website-copy="continueGeneration">Continuar para gerar</span> <span aria-hidden="true">→</span></button></div>
     </form>
   </div>
@@ -1750,6 +1851,7 @@
       submitEndpoint: '/api/customer/generate'
     };
     const requestedRedoId = new URL(window.location.href).searchParams.get('redo') || '';
+    const checkoutReturnState = new URL(window.location.href).searchParams.get('checkout') || '';
     const redoRequestId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestedRedoId)
       ? requestedRedoId
       : '';
@@ -1829,6 +1931,7 @@
     const websitePhotoWarning = document.getElementById('websitePhotoWarning');
     const websiteDetailsOverlay = document.getElementById('websiteDetailsOverlay');
     const websiteDetailsForm = document.getElementById('websiteDetailsForm');
+    const agendaDetailsError = document.getElementById('agendaDetailsError');
     const weddingMusicInput = document.getElementById('weddingMusic');
     const websiteSectionInputs = [...document.querySelectorAll('[data-website-section]')];
     const customizeWebsite = document.getElementById('customizeWebsite');
@@ -1848,9 +1951,9 @@
         modalTitle: 'Personaliza o website do casamento', sectionStory: 'A nossa história', sectionStoryHint: 'O vosso percurso e fotografias.', sectionRsvpHint: 'Confirmação dos convidados.', sectionVenue: 'Local e estacionamento', sectionVenueHint: 'Detalhes de chegada.', sectionProgramme: 'O programa', sectionProgrammeHint: 'Horários do dia.', sectionMenu: 'O menu', sectionMenuHint: 'Refeição e discursos.', sectionDressCode: 'Dress code', sectionDressCodeHint: 'Estilo e cores.', sectionStayTravel: 'Alojamento e viagem', sectionStayTravelHint: 'Onde ficar e como chegar.', sectionFaqHint: 'Perguntas úteis.',
         modalDescription: 'Estes detalhes aparecem nas secções do site. São opcionais — se ficares sem preencher, usamos o texto e horários elegantes predefinidos.', storyLabel: 'A vossa história ou mensagem para os convidados', storyPlaceholder: 'Ex.: Conhecemo-nos há 8 anos e mal podemos esperar por celebrar este dia convosco.', ceremonyTimeLabel: 'Hora da cerimónia', receptionTimeLabel: 'Hora da receção / cocktail', ceremonyDescriptionLabel: 'Descrição da cerimónia', ceremonyDescriptionPlaceholder: 'Ex.: Troca de votos na capela da quinta.', receptionDescriptionLabel: 'Descrição da receção', receptionDescriptionPlaceholder: 'Ex.: Cocktail no jardim, seguido de jantar e festa.', arrivalTimeLabel: 'Chegada dos convidados', partyTimeLabel: 'Jantar, brindes e dança', useDefaults: 'Usar predefinições', continueGeneration: 'Continuar para gerar',
         product: {
-          invite_only_pack: { description: 'Para criar e editar as imagens do convite e do envelope.', features: ['Convite em imagem', 'Envelope personalizado', 'Template Canva editável'] },
-          digital_pdf_pack: { description: 'Inclui as imagens editáveis e o convite digital em PDF.', features: ['Convite e envelope em imagem', 'Template Canva editável', 'PDF digital interativo'] },
-          Full_pack: { description: 'A experiência digital completa para o teu evento.', features: ['Convite e envelope em imagem', 'Template Canva editável', 'PDF digital interativo', 'Website publicado'] }
+          invite_only_pack: { description: 'Cria o convite principal e uma imagem Agenda coordenada a partir de um template InviteLab.', features: ['Convite principal + Agenda', 'Template Canva do convite', 'Pré-visualização do envelope em camadas', 'Sem PDF nem website'] },
+          digital_pdf_pack: { description: 'Inclui o template, o convite digital e um PDF interativo pronto a partilhar.', features: ['Convite principal + Agenda', 'Template Canva do convite', 'PDF com calendário e localização', 'Sem website'] },
+          Full_pack: { description: 'A experiência digital completa para casamento ou baby shower.', features: ['Template InviteLab ou imagem personalizada', 'Convite principal + Agenda', 'PDF digital interativo', 'Website com música, calendário, localização e RSVP'] }
         },
         creation: { both: 'Criação incluída: template InviteLab ou imagem própria', template: 'Criação incluída: escolher um template InviteLab', custom_import: 'Criação incluída: carregar a tua própria imagem' }
       },
@@ -1861,9 +1964,9 @@
         modalTitle: 'Personalise the wedding website', sectionStory: 'Our story', sectionStoryHint: 'Your journey and photos.', sectionRsvpHint: 'Guest confirmations.', sectionVenue: 'Venue and parking', sectionVenueHint: 'Arrival details.', sectionProgramme: 'The schedule', sectionProgrammeHint: 'Timings for the day.', sectionMenu: 'The menu', sectionMenuHint: 'Meal and speeches.', sectionDressCode: 'Dress code', sectionDressCodeHint: 'Style and colours.', sectionStayTravel: 'Stay and travel', sectionStayTravelHint: 'Where to stay and how to get there.', sectionFaqHint: 'Useful questions.',
         modalDescription: 'These details appear in the website sections. They are optional — if left blank, we use elegant default copy and timings.', storyLabel: 'Your story or message to guests', storyPlaceholder: 'E.g. We met eight years ago and cannot wait to celebrate this day with you.', ceremonyTimeLabel: 'Ceremony time', receptionTimeLabel: 'Reception / cocktail time', ceremonyDescriptionLabel: 'Ceremony description', ceremonyDescriptionPlaceholder: 'E.g. Exchange of vows in the venue chapel.', receptionDescriptionLabel: 'Reception description', receptionDescriptionPlaceholder: 'E.g. Garden cocktail followed by dinner and dancing.', arrivalTimeLabel: 'Guest arrival', partyTimeLabel: 'Dinner, toasts and dancing', useDefaults: 'Use defaults', continueGeneration: 'Continue to generation',
         product: {
-          invite_only_pack: { description: 'Create and edit your invitation and envelope artwork.', features: ['Invitation artwork', 'Personalised envelope', 'Editable Canva template'] },
-          digital_pdf_pack: { description: 'Includes editable artwork and the digital PDF invitation.', features: ['Invitation and envelope artwork', 'Editable Canva template', 'Interactive digital PDF'] },
-          Full_pack: { description: 'The complete digital experience for your event.', features: ['Invitation and envelope artwork', 'Editable Canva template', 'Interactive digital PDF', 'Published wedding website'] }
+          invite_only_pack: { description: 'Create the main invitation and a matching Agenda image from an InviteLab template.', features: ['Main invitation + Agenda', 'Editable Canva invitation', 'Layered envelope preview', 'No PDF or website'] },
+          digital_pdf_pack: { description: 'Includes the template, digital invitation and a share-ready interactive PDF.', features: ['Main invitation + Agenda', 'Editable Canva invitation', 'PDF with calendar and location', 'No website'] },
+          Full_pack: { description: 'The complete digital experience for a wedding or baby shower.', features: ['InviteLab template or custom artwork', 'Main invitation + Agenda', 'Interactive digital PDF', 'Website with music, calendar, location and RSVP'] }
         },
         creation: { both: 'Included: InviteLab template or your own image', template: 'Included: choose an InviteLab template', custom_import: 'Included: upload your own image' }
       }
@@ -1889,6 +1992,8 @@
       groupStayTravel: 'Stay and travel details', accommodationIntroLabel: 'Accommodation introduction', hotel1NameLabel: 'Accommodation 1', hotel1DescriptionLabel: 'Accommodation 1 details', hotel2NameLabel: 'Accommodation 2', hotel2DescriptionLabel: 'Accommodation 2 details', hotel3NameLabel: 'Accommodation 3', hotel3DescriptionLabel: 'Accommodation 3 details', travelIntroLabel: 'Travel introduction', travelAirportLabel: 'Airport information', travelTransfersLabel: 'Transfer information', travelParkingLabel: 'Parking information',
       groupFaq: 'FAQ and closing message', faqPlusOneLabel: 'Plus-one policy', footerMessageLabel: 'Closing message', noWebsitePhotosWarning: 'No website photos have been added. We will use the invitation artwork instead.'
     });
+    websiteUiCopy.pt.defaultEnvelopeColour = 'Predefinido (sem cor escolhida)';
+    websiteUiCopy.en.defaultEnvelopeColour = 'Default (no colour selected)';
 
     function currentWebsiteUi() {
       return websiteUiCopy[state.language === 'pt' ? 'pt' : 'en'];
@@ -1937,11 +2042,11 @@
     });
 
     function setEnvelopeColour(value) {
-      const normalized = /^#[0-9A-Fa-f]{6}$/.test(String(value || '')) ? String(value).toUpperCase() : '#5F694F';
+      const normalized = /^#[0-9A-Fa-f]{6}$/.test(String(value || '')) ? String(value).toUpperCase() : '';
       const hidden = document.getElementById('envelopeColor');
       const custom = document.getElementById('envelopeColourCustom');
       if (hidden) hidden.value = normalized;
-      if (custom) custom.value = normalized;
+      if (custom) custom.value = normalized || '#5F694F';
       document.querySelectorAll('[data-envelope-colour]').forEach(button => {
         button.setAttribute('aria-pressed', String(button.dataset.envelopeColour.toUpperCase() === normalized));
       });
@@ -1996,14 +2101,55 @@
         group.hidden = sectionKeys.length > 0 && !sectionKeys.some(key => websiteSectionInputs.some(input => input.dataset.websiteSection === key && input.checked));
       });
     }
+    const agendaUiCopy = Object.freeze({
+      pt: { title: 'Preenche a Agenda', group: 'Cor do envelope', required: 'Indica pelo menos um horário para criar a imagem da Agenda.' },
+      en: { title: 'Complete the Agenda', group: 'Envelope colour', required: 'Add at least one time so we can create the Agenda image.' },
+      es: { title: 'Completa la Agenda', group: 'Color del sobre', required: 'Añade al menos un horario para crear la imagen de la Agenda.' },
+      fr: { title: 'Complétez le programme', group: 'Couleur de l’enveloppe', required: 'Ajoutez au moins un horaire pour créer l’image du programme.' },
+      de: { title: 'Tagesablauf ausfüllen', group: 'Umschlagfarbe', required: 'Fügt mindestens eine Uhrzeit hinzu, damit der Tagesablauf erstellt werden kann.' }
+    });
+    const agendaTimeIds = ['arrivalTime','ceremonyTime','receptionTime','mealTime','cakeTime','partyTime'];
+    function shiftAgendaTime(value, minutes) {
+      const match = String(value || '').match(/^(\d{2}):(\d{2})$/);
+      if (!match) return '';
+      const total = ((Number(match[1]) * 60) + Number(match[2]) + minutes + 1440) % 1440;
+      return `${String(Math.floor(total / 60)).padStart(2,'0')}:${String(total % 60).padStart(2,'0')}`;
+    }
+    function applyAgendaDefaults(force = false) {
+      const ceremony = document.getElementById('time')?.value || '15:00';
+      const values = [shiftAgendaTime(ceremony,-30),ceremony,shiftAgendaTime(ceremony,60),shiftAgendaTime(ceremony,150),shiftAgendaTime(ceremony,300),shiftAgendaTime(ceremony,360)];
+      agendaTimeIds.forEach((id,index) => {
+        const input = document.getElementById(id);
+        if (input && (force || !input.value)) input.value = values[index];
+      });
+    }
+    function agendaHasTimes() {
+      return agendaTimeIds.some(id => /^\d{2}:\d{2}$/.test(document.getElementById(id)?.value || ''));
+    }
     function openWebsiteDetails() {
-      if (state.packType !== 'Full_pack' || !document.getElementById('websiteEnabled')?.checked) return;
-      syncWebsiteSectionPreview();
-      syncWebsitePhotoWarning();
+      const fullWebsite = state.packType === 'Full_pack' && Boolean(document.getElementById('websiteEnabled')?.checked);
+      if (fullWebsite) {
+        syncWebsiteSectionPreview();
+        syncWebsitePhotoWarning();
+      }
+      const agendaOnly = !fullWebsite;
+      const agendaCopy = agendaUiCopy[state.language] || agendaUiCopy.en;
+      websiteDetailsOverlay.classList.toggle('agenda-only', agendaOnly);
+      const modalTitle = document.getElementById('websiteDetailsTitle');
+      const experienceTitle = document.getElementById('experienceGroupTitle');
+      if (agendaOnly && modalTitle) modalTitle.textContent = agendaCopy.title;
+      else if (modalTitle) modalTitle.textContent = currentWebsiteUi().modalTitle;
+      if (agendaOnly && experienceTitle) experienceTitle.textContent = agendaCopy.group;
+      else if (experienceTitle) experienceTitle.textContent = currentWebsiteUi().groupExperience;
+      const scheduleGroup = document.querySelector('[data-website-detail-for~="programme"]');
+      if (scheduleGroup) { scheduleGroup.hidden = false; scheduleGroup.open = true; }
+      weddingMusicInput.disabled = agendaOnly;
+      agendaDetailsError.textContent = '';
+      applyAgendaDefaults(false);
       websiteDetailsOverlay.hidden = false;
       websiteDetailsOverlay.classList.add('visible');
       document.body.style.overflow = 'hidden';
-      window.setTimeout(() => websiteSectionInputs[0]?.focus(), 50);
+      window.setTimeout(() => (agendaOnly ? document.getElementById('arrivalTime') : websiteSectionInputs[0])?.focus(), 50);
     }
     eventTypeInput.value = initialEventType;
 
@@ -2011,7 +2157,10 @@
       grid.innerHTML = templates.map((template, index) => `
         <button type="button" class="template-card" data-template-id="${template.id}" aria-pressed="${template.id === state.selectedTemplate?.id || (!state.selectedTemplate && index === 0)}">
           <span class="selected-check" aria-hidden="true">✓</span>
-          <img src="${template.image}" alt="Template ${template.name}" loading="lazy" />
+          <span class="template-visual${template.detailsImage ? ' has-details' : ''}">
+            <img class="template-invite" src="${template.image}" alt="Template ${template.name}" loading="lazy" />
+            ${template.detailsImage ? `<img class="template-details" src="${template.detailsImage}" alt="Details card for ${template.name}" loading="lazy" />` : ''}
+          </span>
           <span class="template-info">
             <span><strong>${template.name}</strong><br /><span>${template.mood}</span></span>
           </span>
@@ -2373,6 +2522,11 @@
 
     function buildPayload() {
       const data = new FormData(form);
+      const allDetails = websiteDetailsFromForm();
+      const agenda = Object.fromEntries([
+        'arrivalTime','ceremonyTime','receptionTime','mealTime','cakeTime','partyTime',
+        'arrivalDescription','ceremonyDescription','receptionDescription','mealDescription','cakeDescription','partyDescription'
+      ].map(key => [key, allDetails[key] || '']));
       return {
         mode: state.mode,
         eventType: state.eventType,
@@ -2389,6 +2543,8 @@
           location: data.get('location'),
           message: data.get('message')
         },
+        agenda,
+        envelopeColor: allDetails.envelopeColor || '',
         links: {
           mapsUrl: data.get('mapsUrl')
         },
@@ -2399,7 +2555,7 @@
         website: {
           enabled: state.packType === 'Full_pack' && Boolean(document.getElementById('websiteEnabled')?.checked),
           details: state.packType === 'Full_pack' && Boolean(document.getElementById('websiteEnabled')?.checked)
-            ? websiteDetailsFromForm()
+            ? allDetails
             : {}
         },
         hasPhoto: Boolean(state.photoFile || state.retainedPhoto),
@@ -2647,7 +2803,7 @@
       return { url: editUrl, isTemplate: looksLikeTemplate };
     }
 
-    const DEFAULT_MAX_ASSET_ATTEMPTS = 7;
+    const DEFAULT_MAX_ASSET_ATTEMPTS = 10;
 
     function hasOwn(object, key) {
       return Boolean(object) && Object.prototype.hasOwnProperty.call(object, key);
@@ -2680,8 +2836,10 @@
       const assets = result?.assets || {};
       const invitation = assets.invitation || result?.invitation || result?.invite || {};
       const envelope = assets.envelope || result?.envelope || {};
+      const details = assets.details || result?.details || result?.agenda || {};
       const invitationAttempts = result?.assetAttempts?.invitation || result?.attempts?.invitation || {};
       const envelopeAttempts = result?.assetAttempts?.envelope || result?.attempts?.envelope || {};
+      const detailsAttempts = result?.assetAttempts?.details || result?.assetAttempts?.agenda || result?.attempts?.details || result?.attempts?.agenda || {};
       const hasEnvelopeContract = Boolean(
         hasOwn(assets, 'envelope')
         || hasOwn(result, 'envelope')
@@ -2704,8 +2862,17 @@
         result?.generatedEnvelopeUrl,
         result?.envelopeUrl
       );
+      const detailsUrl = firstText(
+        details.imageUrl,
+        details.url,
+        result?.detailsImageUrl,
+        result?.agendaImageUrl,
+        result?.detailsUrl,
+        result?.agendaUrl
+      );
+      const hasDetailsContract = Boolean(detailsUrl);
       const sharedMax = attemptNumber(
-        hasEnvelopeContract ? [result?.maxAssetAttempts] : [result?.maxImageAttempts],
+        [result?.maxAssetAttempts, result?.maxImageAttempts],
         DEFAULT_MAX_ASSET_ATTEMPTS,
         { minimum: 1 }
       );
@@ -2727,6 +2894,15 @@
         result?.envelopeAttemptsUsed,
         result?.attemptsUsed
       ], 0);
+      const detailsUsed = attemptNumber([
+        details.attemptsUsed,
+        details.attempt,
+        detailsAttempts.attemptsUsed,
+        detailsAttempts.used,
+        result?.agendaAttemptsUsed,
+        result?.detailsAttemptsUsed,
+        result?.attemptsUsed
+      ], 0);
       const invitationMax = attemptNumber([
         invitation.maxAttempts,
         invitationAttempts.maxAttempts,
@@ -2739,6 +2915,13 @@
         envelopeAttempts.maxAttempts,
         envelopeAttempts.max,
         result?.maxEnvelopeAttempts
+      ], sharedMax, { minimum: 1 });
+      const detailsMax = attemptNumber([
+        details.maxAttempts,
+        detailsAttempts.maxAttempts,
+        detailsAttempts.max,
+        result?.maxAgendaAttempts,
+        result?.maxDetailsAttempts
       ], sharedMax, { minimum: 1 });
       const invitationCanRegenerate = firstBoolean(
         invitation.canRegenerate,
@@ -2753,9 +2936,17 @@
         result?.canRegenerateEnvelope,
         result?.canRegenerate
       ) && envelopeUsed < envelopeMax;
+      const detailsCanRegenerate = hasDetailsContract && firstBoolean(
+        details.canRegenerate,
+        detailsAttempts.canRegenerate,
+        result?.canRegenerateAgenda,
+        result?.canRegenerateDetails,
+        result?.canRegenerate
+      ) && detailsUsed < detailsMax;
 
       return {
         hasEnvelopeContract,
+        hasDetailsContract,
         ready: Boolean(invitationUrl) && (!hasEnvelopeContract || Boolean(envelopeUrl)),
         invitation: {
           imageUrl: invitationUrl,
@@ -2775,6 +2966,13 @@
           attemptsUsed: sharedRedoUsed,
           maxAttempts: envelopeMax,
           canRegenerate: envelopeCanRegenerate
+        },
+        details: {
+          imageUrl: detailsUrl,
+          downloadUrl: firstText(details.downloadUrl, result?.detailsDownloadUrl, result?.agendaDownloadUrl),
+          attemptsUsed: sharedRedoUsed,
+          maxAttempts: detailsMax,
+          canRegenerate: detailsCanRegenerate
         }
       };
     }
@@ -2818,11 +3016,23 @@
           input: ui.revisionEnvelope,
           choice: ui.envelopeRevisionChoice,
           attempts: ui.envelopeRevisionAttempts
+        },
+        {
+          target: 'agenda',
+          asset: assets.details,
+          input: ui.revisionDetails,
+          choice: ui.detailsRevisionChoice,
+          attempts: ui.detailsRevisionAttempts
         }
       ];
       ui.envelopeRevisionChoice.hidden = !assets.hasEnvelopeContract;
+      ui.detailsRevisionChoice.hidden = !assets.hasDetailsContract;
       for (const item of choices) {
-        const available = item.target !== 'envelope' || assets.hasEnvelopeContract;
+        const available = item.target === 'envelope'
+          ? assets.hasEnvelopeContract
+          : item.target === 'agenda'
+            ? assets.hasDetailsContract
+            : true;
         item.input.checked = false;
         item.input.disabled = !available || !item.asset.canRegenerate;
         item.choice.classList.toggle('disabled', item.input.disabled);
@@ -2903,9 +3113,12 @@
       const generatedPair = document.getElementById('generatedPair');
       const generatedImage = document.getElementById('generatedImage');
       const generatedEnvelope = document.getElementById('generatedEnvelope');
+      const generatedDetails = document.getElementById('generatedDetails');
       const envelopeFrame = document.getElementById('envelopeFrame');
+      const detailsFrame = document.getElementById('detailsFrame');
       const invitationAttemptState = document.getElementById('invitationAttemptState');
       const envelopeAttemptState = document.getElementById('envelopeAttemptState');
+      const detailsAttemptState = document.getElementById('detailsAttemptState');
       const attemptSummary = document.getElementById('attemptSummary');
       const download = document.getElementById('downloadGenerated');
       const regenerate = document.getElementById('regenerateImage');
@@ -2926,10 +3139,13 @@
       const assetRevisionForm = document.getElementById('assetRevisionForm');
       const revisionInvitation = document.getElementById('revisionInvitation');
       const revisionEnvelope = document.getElementById('revisionEnvelope');
+      const revisionDetails = document.getElementById('revisionDetails');
       const invitationRevisionChoice = document.getElementById('invitationRevisionChoice');
       const envelopeRevisionChoice = document.getElementById('envelopeRevisionChoice');
+      const detailsRevisionChoice = document.getElementById('detailsRevisionChoice');
       const invitationRevisionAttempts = document.getElementById('invitationRevisionAttempts');
       const envelopeRevisionAttempts = document.getElementById('envelopeRevisionAttempts');
+      const detailsRevisionAttempts = document.getElementById('detailsRevisionAttempts');
       const assetRevisionError = document.getElementById('assetRevisionError');
       const cancelAssetRevision = document.getElementById('cancelAssetRevision');
       const confirmAssetRevision = document.getElementById('confirmAssetRevision');
@@ -2949,11 +3165,15 @@
       status.textContent = 'A enviar e validar as informações…';
       generatedPair.hidden = true;
       generatedPair.classList.remove('has-envelope');
+      generatedPair.classList.remove('has-agenda');
       generatedImage.removeAttribute('src');
       generatedEnvelope.removeAttribute('src');
+      generatedDetails.removeAttribute('src');
       envelopeFrame.hidden = true;
+      detailsFrame.hidden = true;
       invitationAttemptState.textContent = '';
       envelopeAttemptState.textContent = '';
+      detailsAttemptState.textContent = '';
       attemptSummary.textContent = '';
       attemptSummary.hidden = true;
       download.href = '#';
@@ -3001,14 +3221,14 @@
 
       const ui = {
         overlay, card, bar, progressPercent, status, title, message, mark,
-        generatedPair, generatedImage, generatedEnvelope, envelopeFrame,
-        invitationAttemptState, envelopeAttemptState, attemptSummary,
+        generatedPair, generatedImage, generatedEnvelope, generatedDetails, envelopeFrame, detailsFrame,
+        invitationAttemptState, envelopeAttemptState, detailsAttemptState, attemptSummary,
         download, regenerate, confirm, generatePdf,
         openPdf, canva, retryCanvaTemplateLink, previewWebsite, openWebsite,
         finalFiles, websitePreviewPanel, websitePreviewFrame, canvaNote, revisionContextWrap,
         revisionContext, assetRevisionOverlay, assetRevisionForm, revisionInvitation,
-        revisionEnvelope, invitationRevisionChoice, envelopeRevisionChoice,
-        invitationRevisionAttempts, envelopeRevisionAttempts, assetRevisionError,
+        revisionEnvelope, revisionDetails, invitationRevisionChoice, envelopeRevisionChoice, detailsRevisionChoice,
+        invitationRevisionAttempts, envelopeRevisionAttempts, detailsRevisionAttempts, assetRevisionError,
         cancelAssetRevision, confirmAssetRevision, statusLink, jobLinkWrap,
         jobStatusLink, liveGeneration, liveComposite, livePreviewNote, deliverySteps,
         firstPublishedWebsiteUrl: ''
@@ -3030,7 +3250,9 @@
       const approvedReady = Boolean(result.imageConfirmed) || ['approved', 'artifact_failed', 'completed'].includes(result.state);
       const canvaLink = resolveCanvaLink(result);
       const generatedAssets = resolveGeneratedAssets(result);
-      const canRegenerateAsset = generatedAssets.invitation.canRegenerate || generatedAssets.envelope.canRegenerate;
+      const canRegenerateAsset = generatedAssets.invitation.canRegenerate
+        || generatedAssets.envelope.canRegenerate
+        || generatedAssets.details.canRegenerate;
       const eventUi = window.WeddingI18n.getEventUi(payload.eventType || state.eventType);
       ui.status.textContent = canvaLink.isTemplate
         ? 'Todos os ficheiros estão prontos.'
@@ -3046,23 +3268,29 @@
 
       ui.generatedPair.hidden = !generatedAssets.ready;
       ui.generatedPair.classList.toggle('has-envelope', generatedAssets.hasEnvelopeContract);
+      ui.generatedPair.classList.toggle('has-agenda', generatedAssets.hasDetailsContract);
       ui.envelopeFrame.hidden = !generatedAssets.hasEnvelopeContract;
-      ui.card.classList.toggle('has-asset-pair', generatedAssets.ready && generatedAssets.hasEnvelopeContract);
+      ui.detailsFrame.hidden = !generatedAssets.hasDetailsContract;
+      ui.card.classList.toggle('has-asset-pair', generatedAssets.ready && (generatedAssets.hasEnvelopeContract || generatedAssets.hasDetailsContract));
       if (generatedAssets.ready) {
         ui.generatedImage.src = generatedAssets.invitation.imageUrl;
         if (generatedAssets.hasEnvelopeContract) ui.generatedEnvelope.src = generatedAssets.envelope.imageUrl;
+        if (generatedAssets.hasDetailsContract) ui.generatedDetails.src = generatedAssets.details.imageUrl;
       } else {
         ui.generatedImage.removeAttribute('src');
         ui.generatedEnvelope.removeAttribute('src');
+        ui.generatedDetails.removeAttribute('src');
       }
       ui.generatedImage.alt = `${eventUi.generatedAlt} ${payload.couple.person1} e ${payload.couple.person2}`;
       ui.generatedEnvelope.alt = `Envelope de casamento gerado para ${payload.couple.person1} e ${payload.couple.person2}`;
-      ui.invitationAttemptState.textContent = attemptLabel(generatedAssets.invitation);
-      ui.envelopeAttemptState.textContent = attemptLabel(generatedAssets.envelope);
-      ui.attemptSummary.textContent = generatedAssets.hasEnvelopeContract
-        ? `Convite ${generatedAssets.invitation.attemptsUsed}/${generatedAssets.invitation.maxAttempts} · Envelope ${generatedAssets.envelope.attemptsUsed}/${generatedAssets.envelope.maxAttempts}`
-        : `Tentativas usadas: ${generatedAssets.invitation.attemptsUsed}/${generatedAssets.invitation.maxAttempts}`;
-      ui.attemptSummary.hidden = !generatedAssets.ready;
+      ui.generatedDetails.alt = `Agenda de ${payload.couple.person1} e ${payload.couple.person2}`;
+      // Attempt totals are intentionally shown only after the customer opens
+      // the “Não aprovar” revision modal.
+      ui.invitationAttemptState.textContent = '';
+      ui.envelopeAttemptState.textContent = '';
+      ui.detailsAttemptState.textContent = '';
+      ui.attemptSummary.textContent = '';
+      ui.attemptSummary.hidden = true;
       const invitationDownloadUrl = generatedAssets.invitation.downloadUrl;
       ui.download.href = invitationDownloadUrl
         ? `${invitationDownloadUrl}?name=${encodeURIComponent(displayName.replace(/\.png$/i, ''))}`
@@ -3131,7 +3359,9 @@
       ui.assetRevisionForm.onsubmit = async event => {
         event.preventDefault();
         const target = ui.assetRevisionForm.querySelector('input[name="revisionTarget"]:checked')?.value || '';
-        const selectedAsset = target === 'envelope' ? generatedAssets.envelope : generatedAssets.invitation;
+        const selectedAsset = target === 'envelope'
+          ? generatedAssets.envelope
+          : target === 'agenda' ? generatedAssets.details : generatedAssets.invitation;
         if (!target || !selectedAsset.canRegenerate) {
           ui.assetRevisionError.textContent = 'Escolhe uma peça com tentativas disponíveis.';
           return;
@@ -3144,9 +3374,9 @@
           revisionContext: ui.revisionContext.value,
           templateId: nextPayload.templateId
         };
-        // Legacy single-image jobs use the old endpoint shape. Paired jobs send
-        // the selected asset so only the invitation or envelope is regenerated.
-        if (generatedAssets.hasEnvelopeContract) regenerationPayload.target = target;
+        // Legacy single-image jobs use the old endpoint shape. Current jobs send
+        // the selected asset so only the invitation, Agenda or envelope is regenerated.
+        if (generatedAssets.hasEnvelopeContract || generatedAssets.hasDetailsContract) regenerationPayload.target = target;
         let nextJob;
         try {
           nextJob = await mutateJob(result.requestId, 'regenerate', regenerationPayload);
@@ -3163,9 +3393,9 @@
         ui.generatedPair.hidden = true;
         ui.title.textContent = target === 'envelope'
           ? 'Estamos a criar outro envelope'
-          : 'Estamos a criar outro convite';
+          : target === 'agenda' ? 'Estamos a criar outra Agenda' : 'Estamos a criar outro convite';
         ui.message.textContent = generatedAssets.hasEnvelopeContract
-          ? 'A outra peça fica guardada e voltamos a mostrar as duas quando esta tentativa terminar.'
+          ? 'As outras peças ficam guardadas e voltamos a mostrar tudo quando esta tentativa terminar.'
           : 'Esta tentativa fica guardada no mesmo link do pedido.';
         ui.status.textContent = 'Pedido em fila de geração…';
         updateProgress(ui, 0);
@@ -3253,11 +3483,13 @@
             return;
           }
           ui.title.textContent = generatedAssets.hasEnvelopeContract
-            ? 'Gostas do convite e do envelope?'
+            ? (generatedAssets.hasDetailsContract ? 'Gostas do convite, do envelope e da Agenda?' : 'Gostas do convite e do envelope?')
             : 'Gostas desta imagem?';
           ui.message.textContent = generatedAssets.hasEnvelopeContract
-            ? `Aprova os dois ou escolhe “Não aprovar” para refazer apenas uma peça. Convite ${generatedAssets.invitation.attemptsUsed}/${generatedAssets.invitation.maxAttempts} · Envelope ${generatedAssets.envelope.attemptsUsed}/${generatedAssets.envelope.maxAttempts}.`
-            : `Escolhe se queres aprovar esta imagem ou usar outra tentativa. Tentativas usadas: ${generatedAssets.invitation.attemptsUsed}/${generatedAssets.invitation.maxAttempts}.`;
+            ? (generatedAssets.hasDetailsContract
+              ? 'Aprova os três ou escolhe “Não aprovar” para refazer apenas uma peça.'
+              : 'Aprova os dois ou escolhe “Não aprovar” para refazer apenas uma peça.')
+            : 'Escolhe se queres aprovar esta imagem ou usar outra tentativa.';
           return;
         }
         if (canvaLink.isTemplate) {
@@ -3278,14 +3510,18 @@
           return;
         }
         ui.title.textContent = result.state === 'image_ready'
-          ? (generatedAssets.hasEnvelopeContract ? 'Gostas do convite e do envelope?' : 'Gostas desta imagem?')
+          ? (generatedAssets.hasEnvelopeContract
+            ? (generatedAssets.hasDetailsContract ? 'Gostas do convite, do envelope e da Agenda?' : 'Gostas do convite e do envelope?')
+            : 'Gostas desta imagem?')
           : result.state === 'artifact_failed'
             ? (generatedAssets.hasEnvelopeContract ? 'Imagens aprovadas' : 'Imagem aprovada')
             : 'O teu convite está pronto';
         ui.message.textContent = result.state === 'image_ready'
           ? (generatedAssets.hasEnvelopeContract
-            ? `Podes aprovar ambos ou refazer uma peça. Convite ${generatedAssets.invitation.attemptsUsed}/${generatedAssets.invitation.maxAttempts} · Envelope ${generatedAssets.envelope.attemptsUsed}/${generatedAssets.envelope.maxAttempts}.`
-            : `Podes aprovar para gerar o PDF, ou criar outra versão. Tentativas usadas: ${generatedAssets.invitation.attemptsUsed}/${generatedAssets.invitation.maxAttempts}.`)
+            ? (generatedAssets.hasDetailsContract
+              ? 'Podes aprovar os três ou refazer uma peça.'
+              : 'Podes aprovar ambos ou refazer uma peça.')
+            : 'Podes aprovar para gerar o PDF, ou criar outra versão.')
           : result.state === 'artifact_failed'
             ? 'A imagem está aprovada, mas os ficheiros finais falharam. Volta ao estado do pedido para tentar novamente a finalização.'
             : 'Revê o resultado abaixo. Podes descarregar a PNG e o PDF ou criar a tua cópia editável no Canva.';
@@ -3477,17 +3713,19 @@
       const websiteEnabled = document.getElementById('websiteEnabled');
       if (websiteEnabled) websiteEnabled.closest('.field').hidden = !fullPack;
       const names = {
-        invite_only_pack: 'Invite Only Pack',
-        digital_pdf_pack: 'Digital Invite + PDF',
+        invite_only_pack: 'Template Generator Only',
+        digital_pdf_pack: 'Template + Digital Invite',
         Full_pack: 'Full Pack'
       };
       document.getElementById('purchasedProductName').textContent = names[state.packType];
       syncPurchasedProductCopy();
       syncWebsitePhotosAvailability(!fullPack);
+      if (!fullPack) syncCreationModeAccess('template');
     }
 
     function syncCreationModeAccess(creationMode) {
-      state.creationModeAccess = ['template','custom_import','both'].includes(creationMode) ? creationMode : 'both';
+      const requestedMode = ['template','custom_import','both'].includes(creationMode) ? creationMode : 'both';
+      state.creationModeAccess = state.packType === 'Full_pack' ? requestedMode : 'template';
       syncPurchasedProductCopy();
       document.querySelectorAll('.mode-button').forEach(button => {
         const allowed = state.creationModeAccess === 'both' || button.dataset.mode === state.creationModeAccess;
@@ -3518,6 +3756,25 @@
       syncCreationModeAccess(state.entitlement?.creationMode || 'both');
     }
 
+    function showStripePurchaseWelcome() {
+      if (checkoutReturnState !== 'success' || state.redoRequestId) return;
+      const copy = {
+        pt: ['Pagamento confirmado', 'O teu pack já está ativo. Podes começar a preencher os dados sem introduzir nenhum código.'],
+        en: ['Payment confirmed', 'Your purchased pack is active. You can start entering the details without typing an access code.'],
+        es: ['Pago confirmado', 'Tu pack ya está activo. Puedes empezar a completar los datos sin introducir ningún código.'],
+        fr: ['Paiement confirmé', 'Votre pack est actif. Vous pouvez commencer sans saisir de code d’accès.'],
+        de: ['Zahlung bestätigt', 'Euer Paket ist aktiv. Ihr könnt ohne Eingabe eines Zugangscodes beginnen.']
+      }[state.language] || null;
+      if (!copy) return;
+      redoBanner.classList.remove('error');
+      redoBanner.classList.add('visible');
+      redoBanner.replaceChildren(Object.assign(document.createElement('strong'), { textContent: copy[0] }), document.createTextNode(copy[1]));
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('checkout');
+      history.replaceState(history.state, '', cleanUrl);
+      document.querySelector('#create')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     function applyRestartProject(data) {
       const project = data?.project;
       if (!project || typeof project !== 'object') throw new Error('Os dados guardados deste projeto não estão disponíveis.');
@@ -3544,7 +3801,7 @@
 
       const websiteDetails = project.website?.details || {};
       Object.entries(websiteDetailFields).forEach(([id, key]) => setFieldValue(id, websiteDetails[key]));
-      setEnvelopeColour(websiteDetails.envelopeColor || '#5F694F');
+      setEnvelopeColour(websiteDetails.envelopeColor);
       const savedSections = websiteDetails.sections || {};
       websiteSectionInputs.forEach(input => { input.checked = savedSections[input.dataset.websiteSection] !== false; });
       syncWebsiteSectionPreview();
@@ -3633,6 +3890,7 @@
     syncWebsiteSectionPreview();
     void (async () => {
       await loadBootstrap();
+      showStripePurchaseWelcome();
       await loadRestartProject();
     })();
 
@@ -3732,21 +3990,26 @@
     function closeWebsiteDetails() {
       websiteDetailsOverlay.classList.remove('visible');
       websiteDetailsOverlay.hidden = true;
+      websiteDetailsOverlay.classList.remove('agenda-only');
+      weddingMusicInput.disabled = state.packType !== 'Full_pack';
+      agendaDetailsError.textContent = '';
       document.body.style.overflow = '';
     }
 
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (!validateForm()) return;
-      if (state.packType === 'Full_pack' && document.getElementById('websiteEnabled')?.checked) {
-        openWebsiteDetails();
-        return;
-      }
-      await beginGeneration(buildPayload());
+      openWebsiteDetails();
     });
 
     websiteDetailsForm.addEventListener('submit', async event => {
       event.preventDefault();
+      if (!agendaHasTimes()) {
+        const copy = agendaUiCopy[state.language] || agendaUiCopy.en;
+        agendaDetailsError.textContent = copy.required;
+        document.getElementById('arrivalTime')?.focus();
+        return;
+      }
       closeWebsiteDetails();
       await beginGeneration(buildPayload());
     });
@@ -3754,7 +4017,8 @@
       websiteDetailsForm.reset();
       state.musicFile = null;
       state.retainedMusic = false;
-      setEnvelopeColour('#5F694F');
+      setEnvelopeColour('');
+      applyAgendaDefaults(true);
       syncWebsiteSectionPreview();
       closeWebsiteDetails();
       await beginGeneration(buildPayload());
@@ -3767,7 +4031,11 @@
       if (event.key === 'Escape' && !websiteDetailsOverlay.hidden) closeWebsiteDetails();
     });
 
-    if (/^(localhost|127\.0\.0\.1|\[::1\])$/i.test(window.location.hostname)) {
+    const localHostname = window.location.hostname.replace(/^\[|\]$/g, '').toLowerCase();
+    const isLocalOperatorHost = localHostname === 'localhost'
+      || localHostname === '::1'
+      || /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(localHostname);
+    if (isLocalOperatorHost) {
       localTestControls.hidden = false;
       localTestButton.addEventListener('click', () => localTestImage.click());
       localTestImage.addEventListener('change', async () => {

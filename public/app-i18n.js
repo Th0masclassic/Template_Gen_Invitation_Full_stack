@@ -773,16 +773,16 @@
   };
 
   const templateBase = [
-    ["editorial_photo", "Editorial Photo", "Photographic", "/assets/templates/01_editorial_photo.png"],
-    ["greenery_icons", "Clean Greenery", "Botanical", "/assets/templates/02_greenery_icons.png"],
-    ["sage_botanical", "Soft Sage", "Natural", "/assets/templates/03_sage_botanical.png"],
-    ["minimal_church", "Minimal Church", "Classic", "/assets/templates/04_minimal_church.png"],
-    ["ivory_silk", "Ivory & Silk", "Quiet luxury", "/assets/templates/05_ivory_silk.png"],
-    ["blush_floral", "Blush Floral", "Romantic", "/assets/templates/06_blush_floral.png"],
-    ["aquarela_paris", "Aquarela In Paris", "Contrast", "/assets/templates/07_aquarela.png"],
-    ["coastal_blue", "Coastal Blue", "Light", "/assets/templates/08_coastal_blue.png"],
-    ["terracotta_boho", "Terracotta Boho", "Organic", "/assets/templates/09_terracotta_boho.png"],
-    ["olive_minimal", "Minimal Olive", "Contemporary", "/assets/templates/10_olive_minimal.png"],
+    ["editorial_photo", "Editorial Photo", "Photographic", "/assets/templates/01_editorial_photo.png", "/assets/templates/Details%20Template/01_editorial_photo_details.png"],
+    ["greenery_icons", "Clean Greenery", "Botanical", "/assets/templates/02_greenery_icons.png", "/assets/templates/Details%20Template/02_greenery_icons_details.png"],
+    ["sage_botanical", "Soft Sage", "Natural", "/assets/templates/03_sage_botanical.png", "/assets/templates/Details%20Template/03_sage_botanical_details.png"],
+    ["minimal_church", "Minimal Church", "Classic", "/assets/templates/04_minimal_church.png", "/assets/templates/Details%20Template/04_minimal_church_details.png"],
+    ["ivory_silk", "Ivory & Silk", "Quiet luxury", "/assets/templates/05_ivory_silk.png", "/assets/templates/Details%20Template/05_ivory_silk_details.png"],
+    ["blush_floral", "Blush Floral", "Romantic", "/assets/templates/06_blush_floral.png", "/assets/templates/Details%20Template/06_blush_floral_details.png"],
+    ["aquarela_paris", "Aquarela In Paris", "Contrast", "/assets/templates/07_aquarela.png", "/assets/templates/Details%20Template/07_aquarela_details.png"],
+    ["coastal_blue", "Coastal Blue", "Light", "/assets/templates/08_coastal_blue.png", "/assets/templates/Details%20Template/08_coastal_blue_details.png"],
+    ["terracotta_boho", "Terracotta Boho", "Organic", "/assets/templates/09_terracotta_boho.png", "/assets/templates/Details%20Template/09_terracotta_boho_details.png"],
+    ["olive_minimal", "Minimal Olive", "Contemporary", "/assets/templates/10_olive_minimal.png", "/assets/templates/Details%20Template/10_olive_minimal_details.png"],
   ];
 
   const babyTemplateBase = [
@@ -856,6 +856,7 @@
       name: labels ? labels[index][0] : item[1],
       mood: labels ? labels[index][1] : item[2],
       image: item[3],
+      detailsImage: item[4] || "",
       language,
     }));
   }

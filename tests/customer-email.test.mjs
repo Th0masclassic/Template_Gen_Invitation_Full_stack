@@ -32,22 +32,22 @@ test("all three purchase emails render escaped HTML, bold code, text, and a PDF 
     packType: "Full_pack",
   });
 
-  assert.match(normal.subject, /Invite Only Pack/);
-  assert.match(digital.subject, /Digital Invite \+ PDF/);
-  assert.match(full.subject, /Wedding Full/);
+  assert.match(normal.subject, /Template Generator Only/);
+  assert.match(digital.subject, /Template \+ Digital Invite/);
+  assert.match(full.subject, /Full Pack/);
   assert.match(normal.html, /<strong[^>]*>246810<\/strong>/);
   assert.match(full.html, /<strong[^>]*>246810<\/strong>/);
   assert.match(normal.html, /Ana &amp; &lt;Tiago&gt;/);
   assert.doesNotMatch(normal.html, /Ana & <Tiago>/);
   assert.match(normal.html, /https:\/\/invitelab\.art\/wedding/);
   assert.match(normal.text, /Your access code is: 246810/);
-  assert.match(full.text, /Published wedding website/);
+  assert.match(full.text, /Published event website/);
   assert.match(full.html, /background:#596b52/);
   assert.doesNotMatch(full.html, /lang="pt"|A tua compra|CÓDIGO DE ACESSO/);
   assert.equal(normal.attachments.length, 1);
-  assert.match(normal.attachments[0].filename, /invite-only-guide\.pdf$/);
-  assert.match(digital.attachments[0].filename, /digital-pdf-guide\.pdf$/);
-  assert.match(full.attachments[0].filename, /full-guide\.pdf$/);
+  assert.match(normal.attachments[0].filename, /template-generator-guide\.pdf$/);
+  assert.match(digital.attachments[0].filename, /template-digital-invite-guide\.pdf$/);
+  assert.match(full.attachments[0].filename, /full-pack-guide\.pdf$/);
 
   for (const rendered of [normal, digital, full]) {
     const bytes = Buffer.from(rendered.attachments[0].content, "base64");
@@ -62,9 +62,11 @@ test("delivery email contains only finished deliverables and asks for an Etsy re
   const canvaOnly = renderDeliveryEmail({
     to: "client@example.com",
     canvaUrl: "https://www.canva.com/design/example/edit",
+    agendaUrl: "https://invitelab.art/generated/agenda.png",
     packType: "invite_only_pack",
   });
   assert.match(canvaOnly.html, /Open your editable Canva invitation/);
+  assert.match(canvaOnly.html, /Download your Agenda artwork/);
   assert.doesNotMatch(canvaOnly.html, /Open your interactive PDF|Visit your wedding website|Open your project/);
   assert.match(canvaOnly.html, /Leave a lovely Etsy review/);
 
@@ -72,13 +74,15 @@ test("delivery email contains only finished deliverables and asks for an Etsy re
     to: "client@example.com",
     canvaUrl: "https://www.canva.com/design/example/edit",
     pdfUrl: "https://invitelab.art/generated/final.pdf",
+    agendaUrl: "https://invitelab.art/generated/agenda.png",
     websiteUrl: "https://sites.invitelab.art/sites/example/",
     rsvpAdminUrl: "https://sites.invitelab.art/sites/example/RSVP-ADMIN/",
     packType: "Full_pack",
   });
-  assert.match(full.html, /Visit your wedding website/);
+  assert.match(full.html, /Visit your event website/);
   assert.match(full.html, /Open RSVP Admin/);
   assert.match(full.html, /Open your interactive PDF/);
+  assert.match(full.html, /Download your Agenda artwork/);
 });
 
 test("instruction PDF and email payload stay deterministic for Resend idempotent retries", async () => {

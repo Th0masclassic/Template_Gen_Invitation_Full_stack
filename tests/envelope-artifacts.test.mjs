@@ -7,7 +7,7 @@ import test, { after } from "node:test";
 import { fileURLToPath } from "node:url";
 import { once } from "node:events";
 
-import { PDFArray, PDFDict, PDFDocument, PDFName } from "pdf-lib";
+import { decodePDFRawStream, PDFArray, PDFDict, PDFDocument, PDFName } from "pdf-lib";
 import sharp from "sharp";
 
 const TESTS_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -165,9 +165,11 @@ test("PDF and website use the resolved envelope and its theme", async (context) 
   const requestId = crypto.randomUUID();
   const generatedDir = path.join(PROJECT_ROOT, "generated");
   const invitationFilename = `envelope-test-${requestId}-v1.png`;
+  const detailsFilename = `envelope-test-${requestId}-details-v1.png`;
   const envelopeFilename = `envelope-test-${requestId}-envelope-v1.png`;
   const pdfFilename = `envelope-test-${requestId}.pdf`;
   const invitationPath = path.join(generatedDir, invitationFilename);
+  const detailsPath = path.join(generatedDir, detailsFilename);
   const envelopePath = path.join(generatedDir, envelopeFilename);
   const pdfPath = path.join(generatedDir, "pdf", pdfFilename);
   const siteDir = path.join(generatedDir, "sites", requestId);
@@ -175,6 +177,7 @@ test("PDF and website use the resolved envelope and its theme", async (context) 
   context.after(async () => {
     await Promise.all([
       fs.rm(invitationPath, { force: true }),
+      fs.rm(detailsPath, { force: true }),
       fs.rm(envelopePath, { force: true }),
       fs.rm(pdfPath, { force: true }),
       fs.rm(jobPath, { force: true }),
@@ -190,6 +193,14 @@ test("PDF and website use the resolved envelope and its theme", async (context) 
       background: "#F8F1E7",
     },
   }).png().toFile(invitationPath);
+  await sharp({
+    create: {
+      width: 1024,
+      height: 1824,
+      channels: 3,
+      background: "#EAF0E4",
+    },
+  }).png().toFile(detailsPath);
   await sharp(path.join(PROJECT_ROOT, "website-template", "assets", "envelope-941.webp"))
     .png()
     .toFile(envelopePath);
@@ -203,6 +214,7 @@ test("PDF and website use the resolved envelope and its theme", async (context) 
     imageConfirmed: true,
     project: projectFixture(),
     outputFilename: invitationFilename,
+    detailsFilename,
     envelopeFilename,
     pdfFilename,
     customerPdfFilename: "envelope-test.pdf",
@@ -212,11 +224,13 @@ test("PDF and website use the resolved envelope and its theme", async (context) 
 
   await generateInteractivePdf(job, invitationPath);
   const pdf = await PDFDocument.load(await fs.readFile(pdfPath));
-  assert.equal(pdf.getPageCount(), 2, "RSVP must never add a generated Yes/No page");
+  assert.equal(pdf.getPageCount(), 3, "the PDF must contain envelope, invitation and Agenda pages");
+  assert.equal(job.pdfGeneration.pageCount, 3);
   assert.equal(job.pdfGeneration.architecture, "approved_gpt_artwork_with_gpt_vision_hotspots");
   assert.equal(job.pdfGeneration.visibleControlsAdded, false);
   assert.equal(job.pdfGeneration.attendancePageAdded, false);
-  const [envelopePage, invitationPage] = pdf.getPages();
+  const [envelopePage, invitationPage, detailsPage] = pdf.getPages();
+  assert.ok(pdf.context.lookup(detailsPage.node.Resources(), PDFDict), "page 3 should contain the Agenda artwork");
   assert.deepEqual(job.pdfHotspots, [], "without GPT vision, the invitation must not receive guessed hotspots");
   const invitationAnnotsRef = invitationPage.node.get(PDFName.of("Annots"));
   const invitationAnnots = invitationAnnotsRef
@@ -226,6 +240,22 @@ test("PDF and website use the resolved envelope and its theme", async (context) 
   const resources = pdf.context.lookup(envelopePage.node.Resources(), PDFDict);
   const xObjects = pdf.context.lookup(resources.get(PDFName.of("XObject")), PDFDict);
   assert.ok(xObjects.keys().length >= 1, "page 1 should contain the envelope image");
+  const envelopeImageStream = pdf.context.lookup(xObjects.get(xObjects.keys()[0]));
+  const envelopeImageWidth = Number(envelopeImageStream.dict.get(PDFName.of("Width")).toString());
+  const envelopeImageBytes = decodePDFRawStream(envelopeImageStream).decode();
+  let texturedTopPixels = 0;
+  for (let x = 0; x < envelopeImageWidth; x += 1) {
+    const offset = x * 3;
+    if (
+      envelopeImageBytes[offset] < 250
+      || envelopeImageBytes[offset + 1] < 250
+      || envelopeImageBytes[offset + 2] < 250
+    ) texturedTopPixels += 1;
+  }
+  assert.ok(
+    texturedTopPixels >= envelopeImageWidth * 0.9,
+    "the envelope flap must cover the full top edge instead of leaving a white strip",
+  );
 
   const annotations = pdf.context.lookup(envelopePage.node.get(PDFName.of("Annots")), PDFArray);
   assert.ok(annotations.size() >= 1);
@@ -271,4 +301,109 @@ test("PDF and website use the resolved envelope and its theme", async (context) 
   assert.equal(siteResponse.headers.get("x-frame-options"), null);
   assert.match(siteResponse.headers.get("content-security-policy") || "", /frame-ancestors 'self'/);
 
+});
+
+test("website stages the generated GPT seal and keeps the reference fallback", async (context) => {
+  const requestId = crypto.randomUUID();
+  const fallbackRequestId = crypto.randomUUID();
+  const generatedDir = path.join(PROJECT_ROOT, "generated");
+  const invitationFilename = `generated-seal-test-${requestId}-v1.png`;
+  const envelopeFilename = `generated-seal-test-${requestId}-envelope-v1.png`;
+  const fallbackInvitationFilename = `fallback-seal-test-${fallbackRequestId}-v1.png`;
+  const invitationPath = path.join(generatedDir, invitationFilename);
+  const envelopePath = path.join(generatedDir, envelopeFilename);
+  const siteDir = path.join(generatedDir, "sites", requestId);
+  const fallbackInvitationPath = path.join(generatedDir, fallbackInvitationFilename);
+  const fallbackSiteDir = path.join(generatedDir, "sites", fallbackRequestId);
+  const jobPath = path.join(generatedDir, "jobs", `${requestId}.json`);
+  const fallbackJobPath = path.join(generatedDir, "jobs", `${fallbackRequestId}.json`);
+  context.after(async () => {
+    await Promise.all([
+      fs.rm(invitationPath, { force: true }),
+      fs.rm(envelopePath, { force: true }),
+      fs.rm(jobPath, { force: true }),
+      fs.rm(siteDir, { recursive: true, force: true }),
+      fs.rm(fallbackInvitationPath, { force: true }),
+      fs.rm(fallbackJobPath, { force: true }),
+      fs.rm(fallbackSiteDir, { recursive: true, force: true }),
+    ]);
+  });
+
+  await sharp({
+    create: {
+      width: 1024,
+      height: 1824,
+      channels: 3,
+      background: "#F8F1E7",
+    },
+  }).png().toFile(invitationPath);
+  await sharp({
+    create: {
+      width: 768,
+      height: 1360,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 1 },
+    },
+  })
+    .composite([{
+      input: Buffer.from('<svg width="360" height="360"><circle cx="180" cy="180" r="160" fill="#761317"/><circle cx="180" cy="180" r="130" fill="none" stroke="#E4A09A" stroke-width="6"/></svg>'),
+      left: 204,
+      top: 500,
+    }])
+    .png()
+    .toFile(envelopePath);
+
+  const job = {
+    requestId,
+    state: "approved",
+    progress: 100,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    imageConfirmed: true,
+    project: projectFixture(),
+    outputFilename: invitationFilename,
+    envelopeFilename,
+    websitePhotos: [],
+    site: { state: "pending", publicUrl: null },
+  };
+
+  await prepareWeddingWebsite(job);
+  const sealPath = path.join(siteDir, "envelope-seal.png");
+  const sealBuffer = await fs.readFile(sealPath);
+  const fallbackBuffer = await fs.readFile(
+    path.join(PROJECT_ROOT, "website-template", "assets", "mobile-envelope-layer-seal.png"),
+  );
+  assert.notDeepEqual(sealBuffer, fallbackBuffer);
+  const { data, info } = await sharp(sealPath).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  assert.equal(data[3], 0, "the generated black canvas must be transparent in the website layer");
+  const centerOffset = ((680 * info.width) + 384) * info.channels;
+  assert.equal(data[centerOffset + 3], 255, "the generated seal must remain opaque in the website layer");
+  assert.ok(
+    data[centerOffset] > data[centerOffset + 1] && data[centerOffset + 1] > data[centerOffset + 2],
+    "the generated seal must be normalized to wedding gold even when the model returns red",
+  );
+
+  const manifest = JSON.parse(await fs.readFile(path.join(siteDir, "site-manifest.json"), "utf8"));
+  assert.equal(manifest.envelope.sealFileName, "envelope-seal.png");
+  assert.equal(manifest.envelope.sealSource, "generated");
+
+  const address = server.address();
+  const response = await fetch(`http://127.0.0.1:${address.port}/site/${requestId}/envelope-seal.png`);
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type") || "", /image\/png/);
+
+  await fs.copyFile(invitationPath, fallbackInvitationPath);
+  const fallbackJob = {
+    ...job,
+    requestId: fallbackRequestId,
+    outputFilename: fallbackInvitationFilename,
+    envelopeFilename: "missing-envelope.png",
+    site: { state: "pending", publicUrl: null },
+  };
+  await prepareWeddingWebsite(fallbackJob);
+  assert.deepEqual(
+    await fs.readFile(path.join(fallbackSiteDir, "envelope-seal.png")),
+    fallbackBuffer,
+    "a missing generated envelope must use the transparent reference seal",
+  );
 });

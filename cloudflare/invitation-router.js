@@ -46,7 +46,7 @@ export default {
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' data: https://fonts.gstatic.com",
         "frame-src https://app.youform.com https://youform.com https://*.youform.com",
-        "connect-src 'self' https://app.youform.com https://youform.com https://*.youform.com",
+        "connect-src 'self' https://invitelab.art https://app.youform.com https://youform.com https://*.youform.com",
         "base-uri 'self'",
         "object-src 'none'",
         "form-action 'self' https://youform.com https://*.youform.com",

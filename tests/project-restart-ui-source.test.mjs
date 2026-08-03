@@ -20,7 +20,8 @@ test("a claimed customer can reopen, prefill, and resubmit the existing project"
   assert.match(clientSource, /applyRestartProject\(body\.data\)/);
   assert.match(clientSource, /packTypeSelect\.disabled = true/);
   assert.match(clientSource, /state\.retainedCustomTemplate/);
-  assert.match(clientSource, /details:\s*state\.packType === 'Full_pack'[\s\S]{0,220}websiteDetailsFromForm\(\)/);
+  assert.match(clientSource, /const agenda = Object\.fromEntries/);
+  assert.match(clientSource, /agenda,\s*envelopeColor:\s*allDetails\.envelopeColor/);
   assert.match(clientSource, /Criar nova versão/);
 });
 

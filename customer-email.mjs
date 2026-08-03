@@ -13,42 +13,42 @@ const ACCESS_CODE_RE = /^\d{6}$/;
 
 const PACK_DEFINITIONS = Object.freeze({
   invite_only_pack: Object.freeze({
-    key: "invite-only",
-    name: "Invite Only Pack",
-    subject: "Your InviteLab access code — Invite Only Pack",
+    key: "template-only",
+    name: "Template Generator Only",
+    subject: "Your InviteLab access code — Template Generator Only",
     templateFile: "wedding.html",
-    attachmentFile: "invitelab-invite-only-guide.pdf",
+    attachmentFile: "invitelab-template-generator-guide.pdf",
     accent: rgb(0.36, 0.42, 0.32),
     inclusions: Object.freeze([
-      "Invitation and envelope artwork",
-      "Editable Canva template",
-      "Up to 5 versions of each image during the 24-hour creation window",
+      "Main invitation and localised Agenda artwork",
+      "Editable Canva invitation template",
+      "Up to 5 shared revision requests during the 24-hour creation window",
     ]),
   }),
   digital_pdf_pack: Object.freeze({
-    key: "digital-pdf",
-    name: "Digital Invite + PDF",
-    subject: "Your InviteLab access code — Digital Invite + PDF",
+    key: "template-digital-invite",
+    name: "Template + Digital Invite",
+    subject: "Your InviteLab access code — Template + Digital Invite",
     templateFile: "wedding.html",
-    attachmentFile: "invitelab-digital-pdf-guide.pdf",
+    attachmentFile: "invitelab-template-digital-invite-guide.pdf",
     accent: rgb(0.36, 0.42, 0.32),
     inclusions: Object.freeze([
-      "Editable Canva invitation and final digital PDF",
-      "Personalised envelope artwork",
-      "Up to 5 versions of each image during the 24-hour creation window",
+      "Main invitation and localised Agenda artwork",
+      "Editable Canva invitation and layered envelope preview",
+      "Interactive digital PDF with location and calendar links",
     ]),
   }),
   Full_pack: Object.freeze({
     key: "full",
-    name: "Wedding Full Pack",
-    subject: "Your InviteLab access code — Wedding Full Pack",
+    name: "Full Pack",
+    subject: "Your InviteLab access code — Full Pack",
     templateFile: "wedding.html",
-    attachmentFile: "invitelab-wedding-full-guide.pdf",
+    attachmentFile: "invitelab-full-pack-guide.pdf",
     accent: rgb(0.36, 0.42, 0.32),
     inclusions: Object.freeze([
-      "Editable Canva invitation and final digital PDF",
-      "Personalised envelope artwork",
-      "Published wedding website with private RSVP administration",
+      "Curated template or custom artwork, plus a localised Agenda",
+      "Interactive PDF and layered gold-seal envelope",
+      "Published event website with music, calendar, location and private RSVP administration",
     ]),
   }),
 });
@@ -110,7 +110,7 @@ function normalizePackType(value) {
   if (value === "Full_pack" || String(value || "").toLowerCase() === "full") return "Full_pack";
   throw new CustomerEmailError(
     "INVALID_PURCHASE_PACK",
-    "The purchase pack must be Invite Only, Digital Invite + PDF, or Full Pack.",
+    "The purchase pack must be Template Generator Only, Template + Digital Invite, or Full Pack.",
     { statusCode: 400 },
   );
 }
@@ -291,8 +291,8 @@ export async function createInstructionPdf({
   pdf.setAuthor("InviteLab");
   pdf.setCreator("InviteLab");
   pdf.setProducer("InviteLab");
-  pdf.setSubject("How to use the access code and create a wedding invitation.");
-  pdf.setKeywords(["InviteLab", "wedding", "invitation", "guide"]);
+  pdf.setSubject("How to use the access code and create an InviteLab event invitation.");
+  pdf.setKeywords(["InviteLab", "event", "invitation", "agenda", "guide"]);
   pdf.setCreationDate(FIXED_PDF_DATE);
   pdf.setModificationDate(FIXED_PDF_DATE);
 
@@ -390,17 +390,24 @@ export async function createInstructionPdf({
   y -= 25;
   const steps = definition.key === "full"
     ? [
-      `Open ${safePortalUrl}, enter code ${code}, and add the wedding details.`,
-      "Review the invitation and envelope together. You can request up to 5 versions of each image during the 24-hour creation window.",
+      `Open ${safePortalUrl}, enter code ${code}, and add the event and Agenda details.`,
+      "Review the invitation, Agenda and layered envelope together. You can request up to 5 shared revisions during the 24-hour creation window.",
       "Approve both and wait for the editable Canva link. Open it if you would like to make any final adjustments.",
-      "Return to InviteLab and finish the Full Pack: keep or upload the final invitation and envelope, then complete the website copy and photos.",
+      "Return to InviteLab and finish the Full Pack: keep or upload the final invitation, then complete the website copy and photos.",
       "InviteLab creates the interactive PDF and publishes the website. The finished links are also sent by email.",
     ]
+    : definition.key === "template-digital-invite"
+      ? [
+        `Open ${safePortalUrl}, enter code ${code}, choose a template, and add the event and Agenda details.`,
+        "Review the invitation, Agenda and layered envelope together, then approve the design.",
+        "Open the Canva invitation template if you would like to make final adjustments.",
+        "Download the interactive PDF, which includes the location and add-to-calendar links.",
+      ]
     : [
-      `Open ${safePortalUrl}, enter code ${code}, and add the wedding details.`,
-      "Review the invitation and envelope together. You can request up to 5 versions of each image during the 24-hour creation window.",
-      "Approve both and wait for the editable Canva link.",
-      "Open the Canva template to personalise and export the final invitation.",
+      `Open ${safePortalUrl}, enter code ${code}, choose a template, and add the event and Agenda details.`,
+      "Review the main invitation, Agenda and layered envelope preview together.",
+      "Approve the design and wait for the editable Canva invitation link.",
+      "Download the main invitation and Agenda artwork from your results page.",
     ];
   for (const [index, step] of steps.entries()) {
     page.drawCircle({
@@ -574,6 +581,7 @@ export function renderDeliveryEmail({
   customerName = "",
   pdfUrl = "",
   canvaUrl = "",
+  agendaUrl = "",
   websiteUrl = "",
   rsvpAdminUrl = "",
   packType = "",
@@ -582,6 +590,7 @@ export function renderDeliveryEmail({
   const recipient = normalizeEmail(to, "to");
   const name = cleanText(customerName, 100);
   const safeCanvaUrl = normalizeOptionalHttpsUrl(canvaUrl, "canvaUrl");
+  const safeAgendaUrl = normalizeOptionalHttpsUrl(agendaUrl, "agendaUrl");
   const safePdfUrl = normalizeOptionalHttpsUrl(pdfUrl, "pdfUrl");
   const safeWebsiteUrl = normalizeOptionalHttpsUrl(websiteUrl, "websiteUrl");
   const safeRsvpAdminUrl = normalizeOptionalHttpsUrl(rsvpAdminUrl, "rsvpAdminUrl");
@@ -589,7 +598,8 @@ export function renderDeliveryEmail({
   const hasRsvpAdmin = packType === "Full_pack" && safeWebsiteUrl && safeRsvpAdminUrl;
   const links = [
     ["Open your editable Canva invitation", safeCanvaUrl, "Canva"],
-    ["Visit your wedding website", safeWebsiteUrl, "Website"],
+    ["Download your Agenda artwork", safeAgendaUrl, "Agenda"],
+    ["Visit your event website", safeWebsiteUrl, "Website"],
     ["Open RSVP Admin", hasRsvpAdmin ? safeRsvpAdminUrl : "", "Private"],
     ["Open your interactive PDF", safePdfUrl, "PDF"],
   ].filter(([, url]) => Boolean(url));
@@ -802,6 +812,7 @@ export function createCustomerEmailService({
     customerName,
     pdfUrl,
     canvaUrl,
+    agendaUrl,
     websiteUrl,
     rsvpAdminUrl,
     packType,
@@ -813,6 +824,7 @@ export function createCustomerEmailService({
       customerName,
       pdfUrl,
       canvaUrl,
+      agendaUrl,
       websiteUrl,
       rsvpAdminUrl,
       packType,

@@ -97,7 +97,7 @@ test("listing pack map is listing-ID based and receipt resource URLs reject SSRF
     [LISTING_ID]: "normal",
     444555666: "Full_pack",
   }));
-  assert.deepEqual(mapping.get(LISTING_ID), { packType: "invite_only_pack", creationMode: "both" });
+  assert.deepEqual(mapping.get(LISTING_ID), { packType: "invite_only_pack", creationMode: "template" });
   assert.deepEqual(mapping.get("444555666"), { packType: "Full_pack", creationMode: "both" });
 
   assert.throws(
