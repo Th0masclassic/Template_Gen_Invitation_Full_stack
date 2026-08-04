@@ -303,7 +303,6 @@ export function createAccessCodeStore({ filePath }) {
     const safeCreationMode = normalizeAccessCreationMode(creationMode);
     if (!safePackType) throw new TypeError("A valid packType is required.");
     const safeCustomerEmail = cleanEmail(customerEmail);
-    if (!safeCustomerEmail) throw new TypeError("A valid customerEmail is required.");
     return withLock(resolvedPath, async () => {
       const store = await readJsonStore(resolvedPath);
       const existingRecord = store.codes.find((entry) => entry.externalOrderId === safeExternalOrderId);
@@ -330,6 +329,31 @@ export function createAccessCodeStore({ filePath }) {
       store.updatedAt = new Date().toISOString();
       await writeJsonAtomic(resolvedPath, store);
       return { created: true, record: publicRecord(record) };
+    });
+  }
+
+  async function setCustomerEmail(codeInput, emailInput) {
+    const code = normalizeAccessCode(codeInput);
+    const customerEmail = cleanEmail(emailInput);
+    if (!code) return { ok: false, reason: "invalid_code" };
+    if (!customerEmail) return { ok: false, reason: "invalid_email" };
+    return withLock(resolvedPath, async () => {
+      const store = await readJsonStore(resolvedPath);
+      const record = store.codes.find((entry) => entry.code === code);
+      if (!record) return { ok: false, reason: "not_found" };
+      if (record.revokedAt) {
+        return { ok: false, reason: "revoked", record: publicRecord(record) };
+      }
+      if (record.customerEmail && record.customerEmail !== customerEmail) {
+        return { ok: false, reason: "already_set", record: publicRecord(record) };
+      }
+      if (record.customerEmail === customerEmail) {
+        return { ok: true, reason: "unchanged", record: publicRecord(record) };
+      }
+      record.customerEmail = customerEmail;
+      store.updatedAt = new Date().toISOString();
+      await writeJsonAtomic(resolvedPath, store);
+      return { ok: true, reason: "updated", record: publicRecord(record) };
     });
   }
 
@@ -468,6 +492,7 @@ export function createAccessCodeStore({ filePath }) {
     resolve,
     create,
     createForExternalOrder,
+    setCustomerEmail,
     reserveEmailDelivery,
     completeEmailDelivery,
     failEmailDelivery,

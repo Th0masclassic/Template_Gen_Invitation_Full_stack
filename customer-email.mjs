@@ -10,6 +10,7 @@ const RESEND_EMAILS_URL = "https://api.resend.com/emails";
 const FIXED_PDF_DATE = new Date("2026-01-01T00:00:00.000Z");
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ACCESS_CODE_RE = /^\d{6}$/;
+const ETSY_RECEIPT_RE = /^[1-9]\d{0,19}$/;
 
 const PACK_DEFINITIONS = Object.freeze({
   invite_only_pack: Object.freeze({
@@ -181,6 +182,18 @@ function normalizeAccessCode(value) {
     );
   }
   return code;
+}
+
+function normalizeEtsyReceiptNumber(value) {
+  const receiptNumber = String(value ?? "").trim();
+  if (!ETSY_RECEIPT_RE.test(receiptNumber)) {
+    throw new CustomerEmailError(
+      "INVALID_ETSY_RECEIPT_NUMBER",
+      "The Etsy receipt number must contain digits only.",
+      { statusCode: 400 },
+    );
+  }
+  return receiptNumber;
 }
 
 function escapeHtml(value) {
@@ -576,6 +589,70 @@ The term 'Etsy' is a trademark of Etsy, Inc. This application uses the Etsy API 
   };
 }
 
+export function renderEtsyReceiptAccessEmail({
+  to,
+  customerName = "",
+  receiptNumber,
+  packType,
+  portalUrl,
+  supportEmail,
+} = {}) {
+  const recipient = normalizeEmail(to, "to");
+  const receipt = normalizeEtsyReceiptNumber(receiptNumber);
+  const normalizedPackType = normalizePackType(packType);
+  const definition = PACK_DEFINITIONS[normalizedPackType];
+  const safePortalUrl = normalizePortalUrl(portalUrl);
+  const receiptPortalUrl = new URL("/etsy", safePortalUrl).toString();
+  const safeSupportEmail = normalizeEmail(supportEmail, "supportEmail");
+  const name = cleanText(customerName, 100);
+  const inclusionsHtml = definition.inclusions
+    .map((item) => `<li style="margin:0 0 9px;">${escapeHtml(item)}</li>`)
+    .join("");
+  const inclusionsText = definition.inclusions.map((item) => `- ${item}`).join("\n");
+  return {
+    recipient,
+    packType: normalizedPackType,
+    receiptNumber: receipt,
+    subject: `Your InviteLab Etsy purchase is connected - ${definition.name}`,
+    html: `<!doctype html>
+<html lang="en">
+<body style="margin:0;padding:0;background:#eef1e9;color:#293127;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#eef1e9;">
+    <tr><td align="center" style="padding:30px 12px;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:620px;background:#fffef9;border:1px solid #d9dfd3;border-radius:26px;overflow:hidden;">
+        <tr><td style="padding:42px 42px 36px;background:#596b52;color:#fff;">
+          <div style="font-size:11px;line-height:16px;letter-spacing:3px;font-weight:700;color:#e6ecdf;">INVITELAB &nbsp;·&nbsp; ETSY PURCHASE</div>
+          <h1 style="margin:22px 0 10px;font-family:Georgia,'Times New Roman',serif;font-size:38px;line-height:44px;font-weight:400;">Your purchase is connected.</h1>
+          <p style="margin:0;color:#eef2e9;font-size:15px;line-height:24px;">Your ${escapeHtml(definition.name)} is ready to start.</p>
+        </td></tr>
+        <tr><td style="padding:34px 42px 10px;">
+          <p style="margin:0 0 14px;font-size:16px;line-height:26px;">Hello${name ? ` <strong>${escapeHtml(name)}</strong>` : ""},</p>
+          <p style="margin:0;color:#5c6559;font-size:15px;line-height:25px;">We confirmed your paid Etsy order. The receipt number below is your private InviteLab credential; no separate six-digit code is required.</p>
+        </td></tr>
+        <tr><td style="padding:22px 42px;">
+          <div style="padding:20px;border:1px solid #d7dece;border-radius:16px;background:#f3f6ef;text-align:center;">
+            <div style="font-size:10px;line-height:14px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:#727d6d;">ETSY RECEIPT NUMBER</div>
+            <div style="margin-top:8px;font-size:27px;line-height:34px;font-weight:800;letter-spacing:2px;color:#3f4e3a;">${escapeHtml(receipt)}</div>
+          </div>
+        </td></tr>
+        <tr><td style="padding:4px 42px 28px;text-align:center;">
+          <a href="${escapeHtml(receiptPortalUrl)}" style="display:inline-block;background:#596b52;color:#fff;padding:14px 24px;border-radius:999px;text-decoration:none;font-size:14px;font-weight:700;">Open your wedding studio</a>
+          <p style="margin:16px 0 0;color:#687064;font-size:13px;line-height:21px;">Use the same receipt number whenever you return and to open RSVP Admin if your pack includes a wedding website.</p>
+        </td></tr>
+        <tr><td style="padding:24px 42px 28px;border-top:1px solid #e1e5dc;">
+          <p style="margin:0 0 13px;font-size:14px;font-weight:700;">Your pack includes</p>
+          <ul style="margin:0;padding-left:20px;color:#5c6559;font-size:14px;line-height:22px;">${inclusionsHtml}</ul>
+        </td></tr>
+        <tr><td style="padding:22px 42px;background:#e5eadf;color:#63705f;text-align:center;font-size:12px;line-height:19px;">Need help? ${escapeHtml(safeSupportEmail)}</td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+    text: `Your InviteLab Etsy purchase is connected.\n\nHello${name ? ` ${name}` : ""},\n\nWe confirmed your paid Etsy order for ${definition.name}.\n\nYour Etsy receipt number is: ${receipt}\n\nThis receipt number is your private InviteLab credential. Open ${receiptPortalUrl} and enter it whenever you return. Use the same receipt number for RSVP Admin if your pack includes a wedding website.\n\nYour pack includes:\n${inclusionsText}\n\nNeed help? ${safeSupportEmail}`,
+  };
+}
+
 export function renderDeliveryEmail({
   to,
   customerName = "",
@@ -585,6 +662,8 @@ export function renderDeliveryEmail({
   websiteUrl = "",
   rsvpAdminUrl = "",
   packType = "",
+  rsvpCredentialType = "access_code",
+  rsvpCredentialValue = "",
   etsyReviewUrl = "https://www.etsy.com/your/purchases",
 } = {}) {
   const recipient = normalizeEmail(to, "to");
@@ -596,6 +675,15 @@ export function renderDeliveryEmail({
   const safeRsvpAdminUrl = normalizeOptionalHttpsUrl(rsvpAdminUrl, "rsvpAdminUrl");
   const safeEtsyReviewUrl = normalizeOptionalHttpsUrl(etsyReviewUrl, "etsyReviewUrl");
   const hasRsvpAdmin = packType === "Full_pack" && safeWebsiteUrl && safeRsvpAdminUrl;
+  const etsyReceiptNumber = rsvpCredentialType === "etsy_receipt"
+    ? normalizeEtsyReceiptNumber(rsvpCredentialValue)
+    : "";
+  const rsvpCredentialHtml = etsyReceiptNumber
+    ? `<strong>Private RSVP area:</strong> use Etsy receipt number <strong>${escapeHtml(etsyReceiptNumber)}</strong> to view responses and download the guest list.`
+    : "<strong>Private RSVP area:</strong> use the same six-digit access code from your purchase email to view responses and download the guest list.";
+  const rsvpCredentialText = etsyReceiptNumber
+    ? `Your RSVP Admin is private. Use Etsy receipt number ${etsyReceiptNumber}.`
+    : "Your RSVP Admin is private. Use the same six-digit access code from your purchase email.";
   const links = [
     ["Open your editable Canva invitation", safeCanvaUrl, "Canva"],
     ["Download your Agenda artwork", safeAgendaUrl, "Agenda"],
@@ -640,7 +728,7 @@ export function renderDeliveryEmail({
         <tr><td style="padding:24px 42px 12px;">
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">${buttons}</table>
         </td></tr>
-        ${hasRsvpAdmin ? '<tr><td style="padding:2px 42px 24px;"><div style="padding:15px 17px;border-radius:15px;background:#f2f5ee;color:#556050;font-size:13px;line-height:21px;"><strong>Private RSVP area:</strong> use the same six-digit access code from your purchase email to view responses and download the guest list.</div></td></tr>' : ''}
+        ${hasRsvpAdmin ? `<tr><td style="padding:2px 42px 24px;"><div style="padding:15px 17px;border-radius:15px;background:#f2f5ee;color:#556050;font-size:13px;line-height:21px;">${rsvpCredentialHtml}</div></td></tr>` : ""}
         <tr><td style="padding:24px 42px 36px;">
           <div style="border-top:1px solid #e0e4da;padding-top:24px;text-align:center;">
             <p style="margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-size:21px;line-height:29px;">Did we make your day a little easier?</p>
@@ -654,7 +742,7 @@ export function renderDeliveryEmail({
   </table>
 </body>
 </html>`,
-    text: `Your InviteLab invitation is ready.\n\nHello${name ? ` ${name}` : ""},\n\nThank you for trusting InviteLab with your celebration.\n\n${hasRsvpAdmin ? "Your RSVP Admin is private. Use the same six-digit access code from your purchase email.\n\n" : ""}${links.map(([label, url]) => `${label}: ${url}`).join("\n")}\n\nIf InviteLab made your day a little easier, we would be grateful for your Etsy review: ${safeEtsyReviewUrl}`,
+    text: `Your InviteLab invitation is ready.\n\nHello${name ? ` ${name}` : ""},\n\nThank you for trusting InviteLab with your celebration.\n\n${hasRsvpAdmin ? `${rsvpCredentialText}\n\n` : ""}${links.map(([label, url]) => `${label}: ${url}`).join("\n")}\n\nIf InviteLab made your day a little easier, we would be grateful for your Etsy review: ${safeEtsyReviewUrl}`,
   };
 }
 
@@ -807,6 +895,87 @@ export function createCustomerEmailService({
     };
   }
 
+  async function sendEtsyReceiptAccessEmail({
+    to,
+    customerName = "",
+    receiptNumber,
+    packType,
+    idempotencyKey,
+  } = {}) {
+    const safeIdempotencyKey = normalizeIdempotencyKey(idempotencyKey);
+    const email = renderEtsyReceiptAccessEmail({
+      to,
+      customerName,
+      receiptNumber,
+      packType,
+      portalUrl: safePortalUrl,
+      supportEmail: safeSupportEmail,
+    });
+    const payload = {
+      from: safeFrom,
+      to: [email.recipient],
+      subject: email.subject,
+      html: email.html,
+      text: email.text,
+      tags: [
+        { name: "message_type", value: "etsy_receipt_access" },
+        { name: "pack", value: PACK_DEFINITIONS[email.packType].key },
+      ],
+    };
+    if (safeReplyTo) payload.reply_to = safeReplyTo;
+    let response;
+    try {
+      response = await fetchImpl(endpoint, {
+        method: "POST",
+        redirect: "error",
+        headers: {
+          Authorization: `Bearer ${safeApiKey}`,
+          "Content-Type": "application/json; charset=utf-8",
+          "Idempotency-Key": safeIdempotencyKey,
+        },
+        body: JSON.stringify(payload),
+        signal: timeoutSignal(safeTimeoutMs),
+      });
+    } catch (cause) {
+      throw new CustomerEmailError(
+        "RESEND_REQUEST_FAILED",
+        "The Etsy receipt email provider could not be reached.",
+        { statusCode: 502, retryable: true, cause },
+      );
+    }
+    const body = await response.json().catch(() => null);
+    if (!response.ok || !body?.id) {
+      throw new CustomerEmailError(
+        "RESEND_ETSY_RECEIPT_EMAIL_REJECTED",
+        "Resend rejected the Etsy receipt confirmation email.",
+        {
+          statusCode: 502,
+          providerStatus: response.status,
+          retryable: response.status === 408
+            || response.status === 409
+            || response.status === 429
+            || response.status >= 500,
+        },
+      );
+    }
+    const providerMessageId = cleanText(body.id, 200);
+    if (!providerMessageId) {
+      throw new CustomerEmailError(
+        "RESEND_MESSAGE_ID_MISSING",
+        "Resend accepted the Etsy receipt email without returning an email id.",
+        { statusCode: 502, retryable: true },
+      );
+    }
+    return {
+      provider: "resend",
+      providerMessageId,
+      idempotencyKey: safeIdempotencyKey,
+      recipient: email.recipient,
+      receiptNumber: email.receiptNumber,
+      packType: email.packType,
+    };
+  }
+
   async function sendDeliveryEmail({
     to,
     customerName,
@@ -816,6 +985,8 @@ export function createCustomerEmailService({
     websiteUrl,
     rsvpAdminUrl,
     packType,
+    rsvpCredentialType,
+    rsvpCredentialValue,
     idempotencyKey,
   } = {}) {
     const safeIdempotencyKey = normalizeIdempotencyKey(idempotencyKey);
@@ -828,6 +999,8 @@ export function createCustomerEmailService({
       websiteUrl,
       rsvpAdminUrl,
       packType,
+      rsvpCredentialType,
+      rsvpCredentialValue,
       etsyReviewUrl: safeEtsyReviewUrl,
     });
     const payload = { from: safeFrom, to: [email.recipient], subject: email.subject, html: email.html, text: email.text, tags: [{ name: "message_type", value: "project_delivery" }] };
@@ -906,6 +1079,7 @@ export function createCustomerEmailService({
     provider: "resend",
     sendAutomationAlert,
     sendPurchaseAccessEmail,
+    sendEtsyReceiptAccessEmail,
     sendDeliveryEmail,
   };
 }

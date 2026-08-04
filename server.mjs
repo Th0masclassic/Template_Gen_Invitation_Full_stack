@@ -33,9 +33,12 @@ import {
 import { ChatGptCanvaWorker } from "./chatgpt-canva-worker.mjs";
 import { createCustomerEmailService } from "./customer-email.mjs";
 import {
+  EtsyFulfillmentError,
   createEtsyApiClient,
   createEtsyFulfillmentService,
   createEtsyOAuthTokenProvider,
+  etsyReceiptNumberFromExternalOrderId,
+  normalizeEtsyReceiptNumber,
   parseEtsyListingPackMap,
 } from "./etsy-fulfillment.mjs";
 import { createKeyedPromiseQueue } from "./keyed-promise-queue.mjs";
@@ -1011,7 +1014,6 @@ async function persistEtsyToken(token) {
 }
 
 async function prepareEtsyFulfillmentSystem() {
-  prepareCustomerEmailService();
   if (!ETSY_INTEGRATION_ENABLED) {
     etsyFulfillmentService = null;
     return;
@@ -1032,17 +1034,6 @@ async function prepareEtsyFulfillmentSystem() {
     timeoutMs: ETSY_API_TIMEOUT_MS,
     onToken: persistEtsyToken,
   });
-  const emailService = customerEmailService || createCustomerEmailService({
-    apiKey: RESEND_API_KEY,
-    from: RESEND_FROM_EMAIL,
-    replyTo: RESEND_REPLY_TO_EMAIL,
-    portalUrl: CUSTOMER_PORTAL_URL,
-    supportEmail: CUSTOMER_SUPPORT_EMAIL,
-    etsyReviewUrl: ETSY_REVIEW_URL,
-    alertEmail: AUTOMATION_ALERT_EMAIL,
-    timeoutMs: ETSY_API_TIMEOUT_MS,
-  });
-  customerEmailService = emailService;
   const etsyApiClient = createEtsyApiClient({
     shopId: ETSY_SHOP_ID,
     keystring: ETSY_API_KEYSTRING,
@@ -1055,7 +1046,6 @@ async function prepareEtsyFulfillmentSystem() {
     webhookSecret: ETSY_WEBHOOK_SIGNING_SECRET,
     listingPackMap,
     accessCodeStore,
-    emailService,
     etsyApiClient,
     webhookToleranceSeconds: ETSY_WEBHOOK_TOLERANCE_SECONDS,
   });
@@ -1139,6 +1129,52 @@ async function deliverStripePurchaseAccessEmail(record, session) {
     );
     if (!completed) throw Object.assign(new Error("STRIPE_EMAIL_COMPLETION_NOT_SAVED"), { statusCode: 502 });
     return completed;
+  } catch (error) {
+    await accessCodeStore.failEmailDelivery(
+      record.code,
+      attemptId,
+      error?.code || error?.message || "EMAIL_DELIVERY_FAILED",
+    ).catch(() => {});
+    throw error;
+  }
+}
+
+async function deliverEtsyReceiptAccessEmail(record, {
+  receiptId,
+  customerName = "",
+} = {}) {
+  const emailService = customerEmailService || prepareCustomerEmailService();
+  if (!emailService?.sendEtsyReceiptAccessEmail) {
+    return { state: "not_configured", record };
+  }
+  const attemptId = `etsy-receipt/${receiptId}/access-email-v1`;
+  const reservation = await accessCodeStore.reserveEmailDelivery(record.code, attemptId);
+  if (!reservation.ok) {
+    if (reservation.reason === "delivered") {
+      return { state: "already_delivered", record: reservation.record || record };
+    }
+    if (reservation.reason === "in_progress") {
+      return { state: "in_progress", record: reservation.record || record };
+    }
+    throw Object.assign(new Error("ETSY_EMAIL_RESERVATION_FAILED"), { statusCode: 502 });
+  }
+  try {
+    const delivery = await emailService.sendEtsyReceiptAccessEmail({
+      to: record.customerEmail,
+      customerName,
+      receiptNumber: receiptId,
+      packType: record.packType,
+      idempotencyKey: attemptId,
+    });
+    const completed = await accessCodeStore.completeEmailDelivery(
+      record.code,
+      attemptId,
+      delivery.providerMessageId,
+    );
+    if (!completed) {
+      throw Object.assign(new Error("ETSY_EMAIL_COMPLETION_NOT_SAVED"), { statusCode: 502 });
+    }
+    return { state: "delivered", record: completed };
   } catch (error) {
     await accessCodeStore.failEmailDelivery(
       record.code,
@@ -1240,7 +1276,8 @@ async function sendAutomationFailureAlert({
 
 async function sendProjectDeliveryEmail(job) {
   const recipient = String(job.accessCode?.customerEmail || "").trim();
-  if (!recipient || !customerEmailService || job.deliveryEmail?.state === "delivered") return;
+  const emailService = customerEmailService || prepareCustomerEmailService();
+  if (!recipient || !emailService || job.deliveryEmail?.state === "delivered") return;
   const publicBase = normalizePublicBaseUrl(PUBLIC_BASE_URL);
   if (!publicBase || !/^https:\/\//i.test(publicBase)) return;
   const absolute = (value) => value ? new URL(value, publicBase).toString() : "";
@@ -1256,6 +1293,9 @@ async function sendProjectDeliveryEmail(job) {
   const websiteUrl = String(job.site?.publicUrl || "").trim();
   const rsvpAdminUrl = websiteUrl
     ? new URL("RSVP-ADMIN/", websiteUrl).toString()
+    : "";
+  const etsyReceiptNumber = job.accessCode?.source === "etsy"
+    ? etsyReceiptNumberFromExternalOrderId(job.accessCode.externalOrderId, ETSY_SHOP_ID)
     : "";
   const canvaState = String(job.canva?.state || "");
   const canvaIsBusy = !canvaUrl && (
@@ -1276,7 +1316,7 @@ async function sendProjectDeliveryEmail(job) {
   job.deliveryEmail = { state: "sending", startedAt: new Date().toISOString(), error: null };
   await saveJob(job);
   try {
-    const delivery = await customerEmailService.sendDeliveryEmail({
+    const delivery = await emailService.sendDeliveryEmail({
       to: recipient,
       pdfUrl,
       canvaUrl,
@@ -1284,6 +1324,8 @@ async function sendProjectDeliveryEmail(job) {
       websiteUrl,
       rsvpAdminUrl,
       packType,
+      rsvpCredentialType: etsyReceiptNumber ? "etsy_receipt" : "access_code",
+      rsvpCredentialValue: etsyReceiptNumber,
       idempotencyKey: `project-delivery/${job.requestId}/v2`,
     });
     job.deliveryEmail = { state: "delivered", deliveredAt: new Date().toISOString(), providerMessageId: delivery.providerMessageId, error: null };
@@ -1503,6 +1545,7 @@ async function requireUnusedCustomerAccessCode(request, response, next) {
 function renderAccessCodeGatePage({ returnTo = "/wedding", eventType = "wedding" } = {}) {
   const safeReturnTo = normalizeCustomerReturnTo(returnTo, eventType === "baby_shower" ? "/babyshower" : "/wedding");
   const eventLabel = eventType === "baby_shower" ? "baby shower" : "convite de casamento";
+  const etsyAccessUrl = `/etsy?returnTo=${encodeURIComponent(safeReturnTo)}`;
   return `<!doctype html>
 <html lang="pt-PT">
 <head>
@@ -1516,7 +1559,7 @@ function renderAccessCodeGatePage({ returnTo = "/wedding", eventType = "wedding"
     .shell{width:min(100%,520px)}.brand{text-align:center;margin-bottom:20px;letter-spacing:.2em;text-transform:uppercase;font-size:13px;font-weight:800}.card{background:rgba(255,254,250,.96);border:1px solid rgba(255,255,255,.75);border-radius:28px;padding:clamp(28px,6vw,48px);box-shadow:var(--shadow);backdrop-filter:blur(16px)}
     .eyebrow{margin:0 0 10px;color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}.card h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,7vw,52px);line-height:1.02;font-weight:500;margin:0 0 18px}.lead{margin:0 0 28px;color:var(--muted);line-height:1.65;font-size:16px}
     label{display:block;font-size:13px;font-weight:800;margin-bottom:9px}.code{width:100%;height:66px;border:1px solid var(--line);border-radius:17px;background:#fff;padding:0 18px;text-align:center;font-size:30px;font-weight:800;letter-spacing:.34em;font-variant-numeric:tabular-nums;color:var(--ink);outline:none}.code:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(104,119,95,.14)}
-    button{width:100%;height:56px;margin-top:14px;border:0;border-radius:16px;background:var(--accent);color:white;font-size:15px;font-weight:800;cursor:pointer;transition:.18s ease}button:hover{background:var(--accent-dark);transform:translateY(-1px)}button:disabled{opacity:.65;cursor:wait;transform:none}.message{min-height:24px;margin:14px 2px 0;font-size:14px;color:#9b3131}.help{text-align:center;margin:18px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+    button,.etsy-link{width:100%;height:56px;margin-top:14px;border:0;border-radius:16px;background:var(--accent);color:white;font-size:15px;font-weight:800;cursor:pointer;transition:.18s ease}.etsy-link{display:flex;align-items:center;justify-content:center;text-decoration:none;margin:0}.etsy-link:hover,button:hover{background:var(--accent-dark);transform:translateY(-1px)}button:disabled{opacity:.65;cursor:wait;transform:none}.divider{display:flex;align-items:center;gap:12px;margin:24px 0 19px;color:var(--muted);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.divider::before,.divider::after{content:"";height:1px;flex:1;background:var(--line)}.message{min-height:24px;margin:14px 2px 0;font-size:14px;color:#9b3131}.help{text-align:center;margin:18px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
   </style>
 </head>
 <body>
@@ -1525,9 +1568,11 @@ function renderAccessCodeGatePage({ returnTo = "/wedding", eventType = "wedding"
     <section class="card">
       <p class="eyebrow">Acesso reservado</p>
       <h1>Começa o teu ${escapeHtml(eventLabel)}.</h1>
-      <p class="lead">Introduz o código de 6 dígitos recebido depois da tua compra. Cada código cria apenas um projeto.</p>
+      <p class="lead">Se compraste na Etsy, entra com o número do recibo. As compras diretas continuam a usar o código de 6 dígitos.</p>
+      <a class="etsy-link" href="${escapeHtml(etsyAccessUrl)}">Usar número de recibo Etsy</a>
+      <div class="divider">ou código de acesso</div>
       <form id="accessForm" novalidate>
-        <label for="accessCode">Código de acesso</label>
+        <label for="accessCode">Código de acesso InviteLab</label>
         <input class="code" id="accessCode" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000" aria-describedby="accessMessage" required autofocus>
         <button id="submitCode" type="submit">Entrar no InviteLab</button>
         <p class="message" id="accessMessage" role="alert"></p>
@@ -1579,6 +1624,16 @@ app.get(["/", "/index.html"], (_request, response) => {
   response.setHeader("Pragma", "no-cache");
   response.setHeader("Expires", "0");
   response.type("html").sendFile(path.join(PUBLIC_DIR, "index.html"));
+});
+app.get(["/etsy", "/etsy/", "/claim", "/claim/"], (request, response) => {
+  if (request.path.endsWith("/")) {
+    const queryIndex = request.originalUrl.indexOf("?");
+    const query = queryIndex >= 0 ? request.originalUrl.slice(queryIndex) : "";
+    response.redirect(308, `${request.path.replace(/\/+$/, "")}${query}`);
+    return;
+  }
+  response.setHeader("Cache-Control", "no-store");
+  response.type("html").sendFile(path.join(PUBLIC_DIR, "etsy-access.html"));
 });
 app.get(["/wedding", "/wedding/", "/babyshower", "/babyshower/"], async (request, response, next) => {
   try {
@@ -1819,6 +1874,148 @@ app.post(
       });
     } catch (error) {
       next(error);
+    }
+  },
+);
+
+app.post(
+  "/api/customer/etsy-receipt",
+  rateLimit({ windowMs: 15 * 60 * 1000, max: 10, keyPrefix: "customer-etsy-receipt" }),
+  async (request, response, next) => {
+    try {
+      response.setHeader("Cache-Control", "private, no-store");
+      if (!ACCESS_CODE_REQUIRED || !ETSY_INTEGRATION_ENABLED || !etsyFulfillmentService) {
+        response.status(503).json({
+          success: false,
+          error: {
+            code: "ETSY_RECEIPT_ACCESS_NOT_CONFIGURED",
+            message: "Etsy purchase verification is temporarily unavailable.",
+          },
+        });
+        return;
+      }
+      const receiptNumber = normalizeEtsyReceiptNumber(request.body?.receiptNumber);
+      if (!receiptNumber) {
+        response.status(400).json({
+          success: false,
+          error: {
+            code: "ETSY_RECEIPT_NUMBER_INVALID",
+            message: "Enter the numeric receipt number shown in your Etsy purchase.",
+          },
+        });
+        return;
+      }
+      const suppliedEmail = String(request.body?.email || "").trim().toLowerCase();
+      const customerEmail = normalizeRsvpEmail(suppliedEmail);
+      if (suppliedEmail && !customerEmail) {
+        response.status(400).json({
+          success: false,
+          error: {
+            code: "CUSTOMER_EMAIL_INVALID",
+            message: "Enter a valid email address for your InviteLab delivery.",
+          },
+        });
+        return;
+      }
+      const access = await etsyFulfillmentService.resolveReceiptAccess(receiptNumber);
+      let record = access.record;
+      const defaultReturnTo = record.eventType === "baby_shower" ? "/babyshower" : "/wedding";
+      const requestedReturnTo = normalizeCustomerReturnTo(request.body?.returnTo, defaultReturnTo);
+      const parsedReturnTo = new URL(requestedReturnTo, "https://invitelab.invalid");
+      const returnTo = parsedReturnTo.pathname === defaultReturnTo
+        ? `${parsedReturnTo.pathname}${parsedReturnTo.search}`
+        : defaultReturnTo;
+      if (!record.customerEmail && !customerEmail) {
+        response.json({
+          success: true,
+          data: {
+            state: "email_required",
+            credential: "etsy_receipt",
+            emailRequired: true,
+          },
+        });
+        return;
+      }
+      if (!record.customerEmail) {
+        const emailUpdate = await accessCodeStore.setCustomerEmail(record.code, customerEmail);
+        if (!emailUpdate.ok || !emailUpdate.record?.customerEmail) {
+          response.status(emailUpdate.reason === "revoked" ? 401 : 409).json({
+            success: false,
+            error: {
+              code: "ETSY_CUSTOMER_EMAIL_NOT_SAVED",
+              message: "We could not save the delivery email. Please verify the receipt again.",
+            },
+          });
+          return;
+        }
+        record = emailUpdate.record;
+      }
+      let emailDelivery = record.emailDelivery?.state === "delivered"
+        ? "already_delivered"
+        : "not_configured";
+      if (record.customerEmail && record.emailDelivery?.state !== "delivered") {
+        try {
+          const delivery = await deliverEtsyReceiptAccessEmail(record, {
+            receiptId: access.receiptId,
+            customerName: access.customerName,
+          });
+          emailDelivery = delivery.state;
+          record = delivery.record || record;
+        } catch (emailError) {
+          emailDelivery = "failed";
+          console.error("Etsy receipt confirmation email failed:", {
+            receiptId: access.receiptId,
+            code: safeInternalErrorCode(emailError, "ETSY_RECEIPT_EMAIL_FAILED"),
+          });
+        }
+      }
+      setAccessSessionCookie(request, response, record.code);
+      response.json({
+        success: true,
+        data: {
+          state: record.state,
+          credential: "etsy_receipt",
+          emailRequired: false,
+          emailDelivery,
+          redirectUrl: record.state === "claimed" && record.requestId
+            ? `/results/${encodeURIComponent(record.requestId)}`
+            : returnTo,
+        },
+      });
+    } catch (error) {
+      if (!(error instanceof EtsyFulfillmentError)) {
+        next(error);
+        return;
+      }
+      console.warn("Etsy receipt access verification failed:", {
+        code: safeInternalErrorCode(error, "ETSY_RECEIPT_ACCESS_FAILED"),
+        providerStatus: error.providerStatus || null,
+        retryable: Boolean(error.retryable),
+      });
+      if (error.code === "ETSY_RECEIPT_ACCESS_AMBIGUOUS") {
+        response.status(409).json({
+          success: false,
+          error: {
+            code: error.code,
+            message: "This Etsy order contains multiple InviteLab products. Contact InviteLab support so we can open the correct project.",
+          },
+        });
+        return;
+      }
+      const temporary = Boolean(error.retryable)
+        || error.code === "ETSY_OAUTH_TOKEN_NOT_CONFIGURED"
+        || error.code === "ETSY_API_REQUEST_FAILED"
+        || Number(error.providerStatus || 0) === 429
+        || Number(error.providerStatus || 0) >= 500;
+      response.status(temporary ? 503 : 401).json({
+        success: false,
+        error: {
+          code: temporary ? "ETSY_RECEIPT_CHECK_TEMPORARY" : "ETSY_RECEIPT_NOT_VALID",
+          message: temporary
+            ? "Etsy could not confirm the purchase right now. Wait a moment and try again."
+            : "We could not match this receipt to a paid InviteLab Etsy purchase.",
+        },
+      });
     }
   },
 );
@@ -5136,6 +5333,102 @@ function renderRsvpAdminWebsite({ requestId, apiUrl = "", localAccess = false } 
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>RSVP Admin</title><style>body{margin:0;background:#f4f6f0;color:#263022;font-family:Inter,system-ui,sans-serif;padding:24px}.page{width:min(1080px,100%);margin:auto}.card{background:#fff;border:1px solid #d8dfd2;border-radius:20px;padding:clamp(20px,4vw,38px);box-shadow:0 18px 50px rgba(45,59,37,.09)}h1,h2{font-family:Georgia,serif;font-weight:500;margin:0 0 8px}.muted{color:#66705f;line-height:1.6}.access{display:flex;gap:10px;margin-top:22px}.access input{min-height:44px;max-width:220px;letter-spacing:.14em;text-align:center;border:1px solid #c8d1c0;border-radius:10px;font:inherit}.button{min-height:44px;border:0;border-radius:999px;padding:0 18px;background:#53634e;color:#fff;font:inherit;font-weight:700;cursor:pointer}.button.secondary{background:#fff;color:#364332;border:1px solid #c8d1c0}.dashboard{display:none;margin-top:28px}.dashboard.visible{display:block}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0}.stat{padding:16px;border-radius:14px;background:#f5f8f2;text-align:center}.stat strong{display:block;font:500 30px Georgia,serif}.actions{display:flex;flex-wrap:wrap;gap:10px}.table-wrap{overflow:auto;margin-top:18px;border:1px solid #dce2d7;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{padding:12px;border-bottom:1px solid #e5e9e1;text-align:left;font-size:14px;vertical-align:top}th{background:#f6f8f4;font-size:12px;text-transform:uppercase;letter-spacing:.06em}.yes{color:#315b39;font-weight:700}.no{color:#9a3b36;font-weight:700}#status{min-height:20px;color:#a13d37}@media(max-width:600px){body{padding:12px}.access{flex-wrap:wrap}.access input{max-width:none;flex:1}.stats{grid-template-columns:1fr}}</style></head><body><main class="page"><section class="card"><p class="muted">InviteLab</p><h1>RSVP Admin</h1><p class="muted">${intro}</p>${accessForm}<p id="status" role="status" aria-live="polite"></p><div class="dashboard" id="dashboard"><div class="stats"><div class="stat"><strong id="total">0</strong><span>Total</span></div><div class="stat"><strong id="yes">0</strong><span>Attending</span></div><div class="stat"><strong id="no">0</strong><span>Not attending</span></div></div><div class="actions"><button class="button secondary" type="button" id="refresh">Refresh</button><a class="button secondary" id="download" download>Download CSV</a></div><div class="table-wrap" id="tableWrap" hidden><table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Contact</th><th>Reply</th><th>Message</th></tr></thead><tbody id="rows"></tbody></table></div></div></section></main><script>const config=${config};const $=id=>document.getElementById(id);const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let code=sessionStorage.getItem('invitelab-rsvp-code')||'';const accessCode=$('accessCode');if(accessCode)accessCode.value=code;async function load(){code=accessCode?.value.replace(/\\D/g,'').slice(0,6)||'';if(config.accessRequired&&code.length!==6){$('status').textContent='Enter the six-digit access code.';return;}$('status').textContent='Loading responses...';const url=new URL(config.apiUrl,window.location.href);if(config.accessRequired)url.searchParams.set('code',code);try{const response=await fetch(url,{cache:'no-store'});const body=await response.json().catch(()=>null);if(!response.ok||!body?.success)throw new Error(body?.error?.message||'Could not load responses.');if(config.accessRequired)sessionStorage.setItem('invitelab-rsvp-code',code);const entries=body.data?.entries||[],summary=body.data?.summary||{};$('total').textContent=summary.total??entries.length;$('yes').textContent=summary.attending??0;$('no').textContent=summary.notAttending??0;const csvUrl=new URL(url.pathname.replace(/\\/?$/,'/csv'),url);if(config.accessRequired)csvUrl.searchParams.set('code',code);$('download').href=csvUrl.toString();$('rows').innerHTML=entries.map(e=>'<tr><td>'+esc(e.receivedAt||'—')+'</td><td>'+esc(e.name||'—')+'</td><td>'+esc(e.email||'—')+'</td><td>'+esc(e.contact||'—')+'</td><td class="'+(e.attendance==='yes'?'yes':e.attendance==='no'?'no':'')+'">'+esc(e.attendance||'—')+'</td><td>'+esc(e.message||'—')+'</td></tr>').join('');$('tableWrap').hidden=!entries.length;$('dashboard').classList.add('visible');$('status').textContent=entries.length?'Responses updated.':'There are no responses yet.';}catch(error){$('status').textContent=error.message;}}if(accessCode)$('accessForm').addEventListener('submit',event=>{event.preventDefault();load();});$('refresh').addEventListener('click',load);if(!config.accessRequired)load();</script></body></html>`;
 }
 
+function renderCustomerRsvpAdminWebsite({
+  requestId,
+  apiUrl = "",
+  localAccess = false,
+  receiptAccess = false,
+} = {}) {
+  const credential = receiptAccess
+    ? {
+        type: "etsy_receipt",
+        queryParameter: "receipt",
+        storageKey: "invitelab-rsvp-etsy-receipt",
+        maxLength: 20,
+        exactLength: 0,
+        label: "Etsy receipt number",
+        placeholder: "Receipt number",
+        intro: "View guest replies and download your RSVP list. Enter the same Etsy receipt number used to open your InviteLab wedding studio.",
+        invalidMessage: "Enter the Etsy receipt number for this project.",
+      }
+    : {
+        type: "access_code",
+        queryParameter: "code",
+        storageKey: "invitelab-rsvp-code",
+        maxLength: 6,
+        exactLength: 6,
+        label: "InviteLab access code",
+        placeholder: "000000",
+        intro: "View guest replies and download your RSVP list. Enter the six-digit InviteLab access code for this project.",
+        invalidMessage: "Enter the six-digit access code.",
+      };
+  const config = safeJsonForHtml({
+    apiUrl: apiUrl || `/api/public/rsvp-admin/${encodeURIComponent(String(requestId || ""))}`,
+    accessRequired: !localAccess,
+    credentialType: credential.type,
+    queryParameter: credential.queryParameter,
+    storageKey: credential.storageKey,
+    maxLength: credential.maxLength,
+    exactLength: credential.exactLength,
+    invalidMessage: credential.invalidMessage,
+  });
+  const accessForm = localAccess
+    ? ""
+    : `<form class="access" id="accessForm"><label for="accessCredential">${escapeHtml(credential.label)}</label><input id="accessCredential" inputmode="numeric" autocomplete="off" maxlength="${credential.maxLength}" pattern="[0-9]+" placeholder="${escapeHtml(credential.placeholder)}" required><button class="button" type="submit">Open responses</button></form>`;
+  const intro = localAccess
+    ? "Local preview mode is active. Responses open automatically for this test website."
+    : credential.intro;
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>RSVP Admin</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f4f6f0;color:#263022;font-family:Inter,system-ui,sans-serif;padding:24px}.page{width:min(1080px,100%);margin:auto}.card{background:#fff;border:1px solid #d8dfd2;border-radius:20px;padding:clamp(20px,4vw,38px);box-shadow:0 18px 50px rgba(45,59,37,.09)}h1,h2{font-family:Georgia,serif;font-weight:500;margin:0 0 8px}.muted{color:#66705f;line-height:1.6}.access{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin-top:22px}.access label{width:100%;font-size:13px;font-weight:700}.access input{min-height:44px;width:min(100%,320px);letter-spacing:.08em;text-align:center;border:1px solid #c8d1c0;border-radius:10px;padding:0 12px;font:inherit;font-variant-numeric:tabular-nums}.button{min-height:44px;border:0;border-radius:999px;padding:0 18px;background:#53634e;color:#fff;font:inherit;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}.button.secondary{background:#fff;color:#364332;border:1px solid #c8d1c0}.dashboard{display:none;margin-top:28px}.dashboard.visible{display:block}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0}.stat{padding:16px;border-radius:14px;background:#f5f8f2;text-align:center}.stat strong{display:block;font:500 30px Georgia,serif}.actions{display:flex;flex-wrap:wrap;gap:10px}.table-wrap{overflow:auto;margin-top:18px;border:1px solid #dce2d7;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{padding:12px;border-bottom:1px solid #e5e9e1;text-align:left;font-size:14px;vertical-align:top}th{background:#f6f8f4;font-size:12px;text-transform:uppercase;letter-spacing:.06em}.yes{color:#315b39;font-weight:700}.no{color:#9a3b36;font-weight:700}#status{min-height:20px;color:#a13d37}@media(max-width:600px){body{padding:12px}.access input,.access .button{width:100%;max-width:none}.stats{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main class="page"><section class="card">
+    <p class="muted">InviteLab</p><h1>RSVP Admin</h1><p class="muted">${escapeHtml(intro)}</p>
+    ${accessForm}<p id="status" role="status" aria-live="polite"></p>
+    <div class="dashboard" id="dashboard"><div class="stats"><div class="stat"><strong id="total">0</strong><span>Total</span></div><div class="stat"><strong id="yes">0</strong><span>Attending</span></div><div class="stat"><strong id="no">0</strong><span>Not attending</span></div></div><div class="actions"><button class="button secondary" type="button" id="refresh">Refresh</button><a class="button secondary" id="download" download>Download CSV</a></div><div class="table-wrap" id="tableWrap" hidden><table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Contact</th><th>Reply</th><th>Message</th></tr></thead><tbody id="rows"></tbody></table></div></div>
+  </section></main>
+  <script>
+    const config=${config};
+    const byId=(id)=>document.getElementById(id);
+    const escapeValue=(value)=>String(value??'').replace(/[&<>"']/g,(char)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const accessCredential=byId('accessCredential');
+    let credential=sessionStorage.getItem(config.storageKey)||'';
+    if(accessCredential)accessCredential.value=credential;
+    function normalizedCredential(){return (accessCredential?.value||'').replace(/\D/g,'').slice(0,config.maxLength);}
+    function validCredential(value){return value&&value!=='0'&&(!config.exactLength||value.length===config.exactLength);}
+    async function load(){
+      credential=normalizedCredential();
+      if(config.accessRequired&&!validCredential(credential)){byId('status').textContent=config.invalidMessage;return;}
+      byId('status').textContent='Loading responses...';
+      const url=new URL(config.apiUrl,window.location.href);
+      if(config.accessRequired)url.searchParams.set(config.queryParameter,credential);
+      try{
+        const response=await fetch(url,{cache:'no-store'});
+        const body=await response.json().catch(()=>null);
+        if(!response.ok||!body?.success)throw new Error(body?.error?.message||'Could not load responses.');
+        if(config.accessRequired)sessionStorage.setItem(config.storageKey,credential);
+        const entries=body.data?.entries||[],summary=body.data?.summary||{};
+        byId('total').textContent=summary.total??entries.length;byId('yes').textContent=summary.attending??0;byId('no').textContent=summary.notAttending??0;
+        const csvUrl=new URL(url.pathname.replace(/\/?$/,'/csv'),url);if(config.accessRequired)csvUrl.searchParams.set(config.queryParameter,credential);byId('download').href=csvUrl.toString();
+        byId('rows').innerHTML=entries.map((entry)=>'<tr><td>'+escapeValue(entry.receivedAt||'—')+'</td><td>'+escapeValue(entry.name||'—')+'</td><td>'+escapeValue(entry.email||'—')+'</td><td>'+escapeValue(entry.contact||'—')+'</td><td class="'+(entry.attendance==='yes'?'yes':entry.attendance==='no'?'no':'')+'">'+escapeValue(entry.attendance||'—')+'</td><td>'+escapeValue(entry.message||'—')+'</td></tr>').join('');
+        byId('tableWrap').hidden=!entries.length;byId('dashboard').classList.add('visible');byId('status').textContent=entries.length?'Responses updated.':'There are no responses yet.';
+      }catch(error){byId('status').textContent=error.message;}
+    }
+    if(accessCredential){accessCredential.addEventListener('input',()=>{accessCredential.value=normalizedCredential();byId('status').textContent='';});byId('accessForm').addEventListener('submit',(event)=>{event.preventDefault();load();});}
+    byId('refresh').addEventListener('click',load);if(!config.accessRequired)load();
+  </script>
+</body>
+</html>`;
+}
+
 async function prepareWeddingWebsite(job) {
   if (!job.imageConfirmed || job.project?.website?.enabled === false) return null;
   if (
@@ -5233,10 +5526,12 @@ async function prepareWeddingWebsite(job) {
   const rsvpAdminApiUrl = job.localWebsiteTest || !publicApiBaseUrl
     ? rsvpAdminRequestPath
     : new URL(rsvpAdminRequestPath, publicApiBaseUrl).toString();
-  const rsvpAdminHtml = renderRsvpAdminWebsite({
+  const rsvpAdminHtml = renderCustomerRsvpAdminWebsite({
     requestId: job.requestId,
     apiUrl: rsvpAdminApiUrl,
     localAccess: Boolean(job.localWebsiteTest),
+    receiptAccess: job.accessCode?.source === "etsy"
+      && Boolean(etsyReceiptNumberFromExternalOrderId(job.accessCode.externalOrderId, ETSY_SHOP_ID)),
   });
   try {
     const templateAssetCopy = fs.cp(
@@ -13216,6 +13511,21 @@ async function loadPublicRsvpAdminJob(request) {
   if (!job || !job.project?.attendance?.enabled || job.project?.website?.enabled === false) return null;
   if (!ACCESS_CODE_REQUIRED) return job;
   if (RSVP_ADMIN_LOCAL_BYPASS && job.localWebsiteTest && isLocalOperatorRequest(request)) return job;
+  if (job.accessCode?.source === "etsy") {
+    const expectedReceipt = etsyReceiptNumberFromExternalOrderId(
+      job.accessCode.externalOrderId,
+      ETSY_SHOP_ID,
+    );
+    const receivedReceipt = normalizeEtsyReceiptNumber(request.query?.receipt);
+    if (!expectedReceipt || receivedReceipt !== expectedReceipt) return false;
+    const records = await accessCodeStore.list();
+    const record = records.find((entry) => (
+      entry.source === "etsy"
+      && entry.externalOrderId === job.accessCode.externalOrderId
+    ));
+    if (!record || record.state !== "claimed" || record.requestId !== job.requestId) return false;
+    return job;
+  }
   const code = normalizeAccessCode(request.query?.code);
   const record = code ? await accessCodeStore.resolve(code) : null;
   if (!record || record.state !== "claimed" || record.requestId !== job.requestId) return false;
@@ -13230,7 +13540,7 @@ app.get(
       allowRsvpAdminCors(request, response);
       const job = await loadPublicRsvpAdminJob(request);
       if (!job) {
-        response.status(job === false ? 403 : 404).json({ success: false, error: { code: job === false ? "PROJECT_ACCESS_REQUIRED" : "RSVP_NOT_FOUND", message: job === false ? "Enter the access code for this project." : "RSVP not available." } });
+        response.status(job === false ? 403 : 404).json({ success: false, error: { code: job === false ? "PROJECT_ACCESS_REQUIRED" : "RSVP_NOT_FOUND", message: job === false ? "Enter the Etsy receipt number or InviteLab access code for this project." : "RSVP not available." } });
         return;
       }
       const entries = (await loadRsvpSubmissionRecords(job.requestId)).map(rsvpAdminEntry);

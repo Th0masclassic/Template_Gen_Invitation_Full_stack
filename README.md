@@ -50,11 +50,15 @@ http://127.0.0.1:3000/babyshower
 `/` redireciona para `/wedding`. Mudar o tipo de evento no seletor também
 atualiza o URL, sem perder o idioma escolhido.
 
-## Etsy e códigos de acesso
+## Etsy, recibos e códigos de acesso
 
-O webhook Etsy pode criar e enviar automaticamente um código privado de
-**6 dígitos** depois de uma compra paga. O gestor local e o terminal continuam
-disponíveis para vendas diretas, testes e apoio ao cliente.
+Uma compra Etsy é aberta com o **número do recibo Etsy**, sem depender de
+`buyer_email` e sem mostrar um código de seis dígitos ao comprador. Em
+`/etsy`, o servidor confirma o recibo pago diretamente na API Etsy; depois da
+confirmação, pede o email onde serão enviados o comprovativo e os links finais.
+O número do recibo continua a ser a credencial privada do gerador e do RSVP
+Admin. O gestor local e os códigos de seis dígitos continuam disponíveis para
+vendas diretas, Stripe, testes e apoio ao cliente.
 
 Abrir o gestor local:
 
@@ -130,10 +134,11 @@ Registar na Etsy o endpoint público
 `POST /api/integrations/etsy/webhooks` para os eventos `order.paid` e
 `order.canceled`. O servidor valida a assinatura no corpo bruto, confirma o
 recibo pago pela API Etsy, aplica o mapa de listings e trata repetições sem
-duplicar códigos ou emails. O email contém o código em negrito e anexa o guia
-PDF específico do Wedding Normal ou Wedding Full. Tokens OAuth atualizados são
-guardados em `generated/etsy/oauth-token.json`; esta pasta nunca deve ser
-publicada.
+duplicar direitos de acesso. O webhook não exige o email do comprador. O email
+é recolhido apenas depois de o comprador validar o recibo em `/etsy`, e o envio
+da confirmação usa uma chave idempotente para não duplicar mensagens. Tokens
+OAuth atualizados são guardados em `generated/etsy/oauth-token.json`; esta
+pasta nunca deve ser publicada.
 
 Cada pack deve ter um `listing_id` Etsy próprio; a integração não distingue
 variações dentro do mesmo listing. O mapa automático atual cria produtos de
@@ -234,8 +239,9 @@ outra entrada nem aumenta a contagem.
 ### RSVP Admin do cliente
 
 O comprador recebe o link do projeto por email. No Full Pack, esse mesmo link
-inclui o painel **RSVP Admin**, protegido pelo código de acesso de seis dígitos
-associado ao projeto. O painel permite:
+inclui o painel **RSVP Admin**. Projetos Etsy usam o mesmo número do recibo que
+abriu o gerador; vendas Stripe e diretas continuam protegidas pelo código de
+seis dígitos associado ao projeto. O painel permite:
 
 - ver total, presentes e não presentes;
 - consultar nome, email, contacto, resposta e mensagem;
@@ -502,6 +508,8 @@ de alterar `.env`. Quick Tunnels são temporários; o URL muda quando o processo
 GET  /api/client/bootstrap
 GET  /wedding
 GET  /babyshower
+GET  /etsy
+POST /api/customer/etsy-receipt
 POST /api/customer/generate
 GET  /api/customer/jobs/:requestId
 POST /api/customer/jobs/:requestId/regenerate

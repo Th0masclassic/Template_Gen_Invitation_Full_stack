@@ -7,7 +7,6 @@ const ETSY_API_ORIGINS = new Set([
 const ETSY_TOKEN_URL = "https://api.etsy.com/v3/public/oauth/token";
 const PACK_TYPES = new Set(["invite_only_pack", "digital_pdf_pack", "Full_pack"]);
 const SUPPORTED_EVENTS = new Set(["order.paid", "order.canceled"]);
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DEFAULT_WEBHOOK_TOLERANCE_SECONDS = 300;
 const DEFAULT_API_TIMEOUT_MS = 15_000;
 const MAX_TRANSACTION_QUANTITY = 25;
@@ -39,7 +38,7 @@ function cleanText(value, maxLength) {
 
 function positiveIntegerString(value, field) {
   const normalized = String(value ?? "").trim();
-  if (!/^\d+$/.test(normalized) || normalized === "0") {
+  if (!/^\d{1,20}$/.test(normalized) || normalized === "0") {
     throw new EtsyFulfillmentError(
       "ETSY_INVALID_IDENTIFIER",
       `${field} must be a positive Etsy identifier.`,
@@ -49,9 +48,20 @@ function positiveIntegerString(value, field) {
   return normalized.replace(/^0+(?=\d)/, "");
 }
 
-function normalizeEmail(value) {
-  const email = cleanText(value, 254).toLowerCase();
-  return EMAIL_RE.test(email) ? email : "";
+export function normalizeEtsyReceiptNumber(value) {
+  const normalized = String(value ?? "").trim();
+  if (!/^\d{1,20}$/.test(normalized) || normalized === "0") return "";
+  return normalized.replace(/^0+(?=\d)/, "");
+}
+
+export function etsyReceiptNumberFromExternalOrderId(value, expectedShopId = "") {
+  const match = String(value || "").match(/^etsy:(\d+):(\d+):(\d+):(\d+)$/);
+  if (!match) return "";
+  const shopId = normalizeEtsyReceiptNumber(match[1]);
+  const receiptId = normalizeEtsyReceiptNumber(match[2]);
+  const expected = expectedShopId ? normalizeEtsyReceiptNumber(expectedShopId) : "";
+  if (!shopId || !receiptId || (expected && shopId !== expected)) return "";
+  return receiptId;
 }
 
 function normalizePackType(value) {
@@ -693,16 +703,9 @@ function externalOrderId({ shopId, receiptId, transactionId, unitIndex }) {
   return `etsy:${shopId}:${receiptId}:${transactionId}:${unitIndex}`;
 }
 
-function emailIdempotencyKey(orderId) {
-  return `etsy-order-paid/${orderId}/purchase-access-v1`;
-}
-
-function assertFulfillmentDependencies(accessCodeStore, emailService) {
+function assertFulfillmentDependencies(accessCodeStore) {
   const storeMethods = [
     "createForExternalOrder",
-    "reserveEmailDelivery",
-    "completeEmailDelivery",
-    "failEmailDelivery",
     "list",
     "revoke",
   ];
@@ -711,9 +714,6 @@ function assertFulfillmentDependencies(accessCodeStore, emailService) {
       throw new TypeError(`accessCodeStore.${method} must be a function.`);
     }
   }
-  if (typeof emailService?.sendPurchaseAccessEmail !== "function") {
-    throw new TypeError("emailService.sendPurchaseAccessEmail must be a function.");
-  }
 }
 
 export function createEtsyFulfillmentService({
@@ -721,7 +721,6 @@ export function createEtsyFulfillmentService({
   webhookSecret,
   listingPackMap,
   accessCodeStore,
-  emailService,
   etsyApiClient,
   webhookToleranceSeconds = DEFAULT_WEBHOOK_TOLERANCE_SECONDS,
   now = Date.now,
@@ -736,7 +735,7 @@ export function createEtsyFulfillmentService({
       { statusCode: 503 },
     );
   }
-  assertFulfillmentDependencies(accessCodeStore, emailService);
+  assertFulfillmentDependencies(accessCodeStore);
   if (typeof etsyApiClient?.fetchReceipt !== "function") {
     throw new TypeError("etsyApiClient.fetchReceipt must be a function.");
   }
@@ -761,14 +760,17 @@ export function createEtsyFulfillmentService({
     return { matched: matches.length, revoked };
   }
 
-  async function fulfillPaidReceipt(receipt, webhook) {
+  async function ensurePaidReceiptEntitlements(receipt, webhook) {
     if (receiptIsCanceled(receipt)) {
       const revocation = await revokeReceiptEntitlements(webhook.receiptId);
       return {
-        status: "canceled_before_fulfillment",
-        eventType: webhook.eventType,
-        receiptId: webhook.receiptId,
-        ...revocation,
+        result: {
+          status: "canceled_before_fulfillment",
+          eventType: webhook.eventType,
+          receiptId: webhook.receiptId,
+          ...revocation,
+        },
+        records: [],
       };
     }
     if (!receiptIsPaid(receipt)) {
@@ -778,15 +780,6 @@ export function createEtsyFulfillmentService({
         { statusCode: 502, retryable: true },
       );
     }
-    const customerEmail = normalizeEmail(receipt.buyer_email || receipt.payment_email);
-    if (!customerEmail) {
-      throw new EtsyFulfillmentError(
-        "ETSY_BUYER_EMAIL_UNAVAILABLE",
-        "The Etsy receipt did not include a buyer email address. Confirm buyer_email access.",
-        { statusCode: 503, retryable: true },
-      );
-    }
-    const customerName = cleanText(receipt.name, 100);
     const transactions = receiptTransactions(receipt);
     if (!transactions.length) {
       throw new EtsyFulfillmentError(
@@ -802,11 +795,9 @@ export function createEtsyFulfillmentService({
       receiptId: webhook.receiptId,
       matchedUnits: 0,
       codesCreated: 0,
-      emailsDelivered: 0,
-      emailsAlreadyDelivered: 0,
-      emailsInProgress: 0,
       ignoredTransactions: 0,
     };
+    const records = [];
 
     for (const transaction of transactions) {
       const listingId = positiveIntegerString(transaction?.listing_id, "transaction.listing_id");
@@ -835,7 +826,7 @@ export function createEtsyFulfillmentService({
           packType: product.packType,
           creationMode: product.creationMode,
           eventType: "wedding",
-          customerEmail,
+          customerEmail: "",
         });
         if (created.created) result.codesCreated += 1;
         const record = created.record;
@@ -849,71 +840,56 @@ export function createEtsyFulfillmentService({
             { statusCode: 409, retryable: false },
           );
         }
-        const fulfilledPackType = record.packType || product.packType;
-        const attemptId = emailIdempotencyKey(orderId);
-        const reservation = await accessCodeStore.reserveEmailDelivery(
-          record.code,
-          attemptId,
-        );
-        if (!reservation.ok) {
-          if (reservation.reason === "delivered") {
-            result.emailsAlreadyDelivered += 1;
-            continue;
-          }
-          if (reservation.reason === "in_progress") {
-            result.emailsInProgress += 1;
-            continue;
-          }
-          throw new EtsyFulfillmentError(
-            "ETSY_EMAIL_RESERVATION_FAILED",
-            `Could not reserve the purchase email (${reservation.reason || "unknown"}).`,
-            { statusCode: 502, retryable: true },
-          );
-        }
-        try {
-          const delivery = await emailService.sendPurchaseAccessEmail({
-            to: customerEmail,
-            customerName,
-            accessCode: record.code,
-            packType: fulfilledPackType,
-            eventType: record.eventType || "wedding",
-            idempotencyKey: attemptId,
-          });
-          const completed = await accessCodeStore.completeEmailDelivery(
-            record.code,
-            attemptId,
-            delivery.providerMessageId,
-          );
-          if (!completed) {
-            throw new EtsyFulfillmentError(
-              "ETSY_EMAIL_COMPLETION_NOT_SAVED",
-              "The purchase email was sent but its delivery state could not be saved.",
-              { statusCode: 502, retryable: true },
-            );
-          }
-          result.emailsDelivered += 1;
-        } catch (error) {
-          await accessCodeStore.failEmailDelivery(
-            record.code,
-            attemptId,
-            error?.code || error?.message || "EMAIL_DELIVERY_FAILED",
-          ).catch(() => {});
-          if (error instanceof EtsyFulfillmentError) throw error;
-          throw new EtsyFulfillmentError(
-            "ETSY_PURCHASE_EMAIL_FAILED",
-            "The Etsy purchase email could not be sent.",
-            {
-              statusCode: Number(error?.statusCode) || 502,
-              retryable: error?.retryable !== false,
-              cause: error,
-            },
-          );
-        }
+        records.push(record);
       }
     }
 
     if (!result.matchedUnits) result.status = "ignored_no_mapped_listing";
-    return result;
+    return { result, records };
+  }
+
+  async function fulfillPaidReceipt(receipt, webhook) {
+    return (await ensurePaidReceiptEntitlements(receipt, webhook)).result;
+  }
+
+  async function resolveReceiptAccess(receiptNumber) {
+    const receiptId = positiveIntegerString(receiptNumber, "receiptNumber");
+    const resourceUrl = `https://api.etsy.com/v3/application/shops/${safeShopId}/receipts/${receiptId}`;
+    const receipt = await etsyApiClient.fetchReceipt(resourceUrl);
+    validateReceiptIdentity(receipt, { shopId: safeShopId, receiptId });
+    if (receiptIsCanceled(receipt)) {
+      await revokeReceiptEntitlements(receiptId);
+      throw new EtsyFulfillmentError(
+        "ETSY_RECEIPT_CANCELED",
+        "The Etsy receipt is canceled and cannot be used.",
+        { statusCode: 409, retryable: false },
+      );
+    }
+    const { result, records } = await ensurePaidReceiptEntitlements(receipt, {
+      eventType: "receipt.access",
+      receiptId,
+    });
+    if (!result.matchedUnits || result.status === "ignored_no_mapped_listing") {
+      throw new EtsyFulfillmentError(
+        "ETSY_RECEIPT_NOT_ELIGIBLE",
+        "The Etsy receipt does not contain an InviteLab listing.",
+        { statusCode: 404, retryable: false },
+      );
+    }
+    const activeRecords = records.filter((record) => record.state !== "revoked");
+    if (activeRecords.length !== 1) {
+      throw new EtsyFulfillmentError(
+        "ETSY_RECEIPT_ACCESS_AMBIGUOUS",
+        "The Etsy receipt contains more than one InviteLab entitlement.",
+        { statusCode: 409, retryable: false },
+      );
+    }
+    return {
+      receiptId,
+      customerName: cleanText(receipt.name, 100),
+      record: activeRecords[0],
+      result,
+    };
   }
 
   async function handleWebhook({
@@ -953,6 +929,7 @@ export function createEtsyFulfillmentService({
     shopId: safeShopId,
     listingPackMap: new Map(safeListingPackMap),
     handleWebhook,
+    resolveReceiptAccess,
   };
 }
 
