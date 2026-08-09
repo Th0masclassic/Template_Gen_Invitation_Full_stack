@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 
-const STORE_SCHEMA_VERSION = 3;
+const STORE_SCHEMA_VERSION = 4;
 const CODE_RE = /^\d{6}$/;
 const LOCK_RETRY_MS = 35;
 const LOCK_TIMEOUT_MS = 10_000;
@@ -48,6 +48,11 @@ function cleanEventType(value) {
   return null;
 }
 
+function cleanTemplateId(value) {
+  const templateId = String(value ?? "").trim().toLowerCase();
+  return /^[a-z0-9_]{1,48}$/.test(templateId) ? templateId : "";
+}
+
 function cleanSource(value) {
   const source = String(value || "").trim().toLowerCase();
   return ["manual", "etsy", "stripe"].includes(source) ? source : "manual";
@@ -87,6 +92,7 @@ function normalizeRecord(record) {
     packType: normalizeAccessPackType(record?.packType),
     creationMode: normalizeAccessCreationMode(record?.creationMode),
     eventType: cleanEventType(record?.eventType),
+    templateId: cleanTemplateId(record?.templateId),
     externalOrderId: cleanExternalOrderId(record?.externalOrderId),
     customerEmail: cleanEmail(record?.customerEmail),
     emailDelivery: normalizeEmailDelivery(record?.emailDelivery),
@@ -106,6 +112,7 @@ function publicRecord(record) {
     packType: record.packType || null,
     creationMode: record.creationMode || "both",
     eventType: record.eventType || null,
+    templateId: record.templateId || null,
     externalOrderId: record.externalOrderId || null,
     customerEmail: record.customerEmail || null,
     emailDelivery: record.emailDelivery || null,
@@ -238,6 +245,7 @@ export function createAccessCodeStore({ filePath }) {
     packType = null,
     creationMode = "both",
     eventType = null,
+    templateId = "",
     externalOrderId = "",
     customerEmail = "",
   } = {}) {
@@ -247,6 +255,7 @@ export function createAccessCodeStore({ filePath }) {
     const safePackType = normalizeAccessPackType(packType);
     const safeCreationMode = normalizeAccessCreationMode(creationMode);
     const safeEventType = cleanEventType(eventType);
+    const safeTemplateId = cleanTemplateId(templateId);
     const safeExternalOrderId = cleanExternalOrderId(externalOrderId);
     const safeCustomerEmail = cleanEmail(customerEmail);
     if (safeExternalOrderId && safeCount !== 1) {
@@ -271,6 +280,7 @@ export function createAccessCodeStore({ filePath }) {
           packType: safePackType,
           creationMode: safeCreationMode,
           eventType: safeEventType,
+          templateId: safeTemplateId,
           externalOrderId: safeExternalOrderId,
           customerEmail: safeCustomerEmail,
           emailDelivery: null,
@@ -295,6 +305,7 @@ export function createAccessCodeStore({ filePath }) {
     packType,
     creationMode = "both",
     eventType = "wedding",
+    templateId = "",
     customerEmail,
   }) {
     const safeExternalOrderId = cleanExternalOrderId(externalOrderId);
@@ -317,6 +328,7 @@ export function createAccessCodeStore({ filePath }) {
         packType: safePackType,
         creationMode: safeCreationMode,
         eventType,
+        templateId,
         externalOrderId: safeExternalOrderId,
         customerEmail: safeCustomerEmail,
         emailDelivery: null,
@@ -354,6 +366,41 @@ export function createAccessCodeStore({ filePath }) {
       store.updatedAt = new Date().toISOString();
       await writeJsonAtomic(resolvedPath, store);
       return { ok: true, reason: "updated", record: publicRecord(record) };
+    });
+  }
+
+  async function bindTemplate(codeInput, { templateId, eventType } = {}) {
+    const code = normalizeAccessCode(codeInput);
+    const safeTemplateId = cleanTemplateId(templateId);
+    const safeEventType = cleanEventType(eventType);
+    if (!code || !safeTemplateId || !safeEventType) return { ok: false, reason: "invalid" };
+    return withLock(resolvedPath, async () => {
+      const store = await readJsonStore(resolvedPath);
+      const record = store.codes.find((entry) => entry.code === code);
+      if (!record) return { ok: false, reason: "not_found" };
+      if (record.revokedAt) return { ok: false, reason: "revoked", record: publicRecord(record) };
+      if (record.packType !== "invite_only_pack") {
+        return { ok: false, reason: "wrong_pack", record: publicRecord(record) };
+      }
+      if (
+        (record.templateId && record.templateId !== safeTemplateId)
+        || (record.eventType && record.eventType !== safeEventType)
+      ) {
+        return { ok: false, reason: "conflict", record: publicRecord(record) };
+      }
+      if (
+        record.templateId === safeTemplateId
+        && record.eventType === safeEventType
+        && record.creationMode === "template"
+      ) {
+        return { ok: true, reason: "unchanged", record: publicRecord(record) };
+      }
+      record.templateId = safeTemplateId;
+      record.eventType = safeEventType;
+      record.creationMode = "template";
+      store.updatedAt = new Date().toISOString();
+      await writeJsonAtomic(resolvedPath, store);
+      return { ok: true, reason: "bound", record: publicRecord(record) };
     });
   }
 
@@ -493,6 +540,7 @@ export function createAccessCodeStore({ filePath }) {
     create,
     createForExternalOrder,
     setCustomerEmail,
+    bindTemplate,
     reserveEmailDelivery,
     completeEmailDelivery,
     failEmailDelivery,

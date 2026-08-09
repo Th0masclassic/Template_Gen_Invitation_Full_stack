@@ -517,6 +517,9 @@
       grid-template-columns: repeat(3, minmax(0,1fr));
       gap: 14px;
     }
+    .template-lock-notice { display:flex; gap:12px; align-items:flex-start; margin:0 0 18px; padding:15px 17px; border:1px solid rgba(82,99,78,.22); border-radius:16px; background:linear-gradient(135deg,#edf3ea,#fffdfa); color:#40513d; line-height:1.5; }
+    .template-lock-notice::before { content:"✓"; flex:0 0 auto; display:grid; place-items:center; width:24px; height:24px; border-radius:50%; background:#52634e; color:#fff; font-size:12px; font-weight:900; }
+    .template-lock-notice strong { display:block; color:var(--ink); }
 
     .template-card {
       position: relative;
@@ -529,6 +532,8 @@
       transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
     .template-card:hover { transform: translateY(-4px); box-shadow: 0 18px 38px rgba(57,44,34,.13); }
+    .template-card:disabled { cursor:default; opacity:1; }
+    .template-card:disabled:hover { transform:none; box-shadow:none; }
     .template-card[aria-pressed="true"] {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(111,124,104,.13), 0 18px 38px rgba(57,44,34,.13);
@@ -702,6 +707,8 @@
     }
     .photo-uploader strong { display: block; font-size: 14px; }
     .photo-uploader span { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .photo-style-note { margin:10px 0 0; padding:11px 13px; border-radius:12px; background:#eef3eb; color:#475643; font-size:12px; line-height:1.5; }
+    .photo-style-note::before { content:'✦'; margin-right:7px; color:var(--accent); font-weight:900; }
 
     .website-photo-uploader { min-height: 132px; }
     .website-photo-meta {
@@ -1495,7 +1502,7 @@
           </aside>
         </div>
 
-        <div class="mode-switch" role="group" aria-label="Modo de criação">
+        <div class="mode-switch" id="modeSwitch" role="group" aria-label="Modo de criação">
           <button class="mode-button" type="button" data-mode="template" aria-pressed="true">
             <strong>Escolher um template</strong>
             Usa um dos 10 estilos como base.
@@ -1510,10 +1517,11 @@
           <section class="section-body" id="templates">
             <div class="section-title-row">
               <div>
-                <h3>Escolhe a inspiração</h3>
-                <p>No modo personalizado esta escolha é opcional.</p>
+                <h3 id="templateSectionTitle">Escolhe a inspiração</h3>
+                <p id="templateSectionHelp">No modo personalizado esta escolha é opcional.</p>
               </div>
             </div>
+            <div class="template-lock-notice" id="templateLockNotice" hidden></div>
             <div class="template-grid" id="templateGrid"></div>
             <div class="field full" id="customTemplateField" hidden style="margin-top:18px"><label>Template personalizado</label><div class="photo-uploader" id="customTemplateDropzone"><input id="customTemplate" name="customTemplate" type="file" accept="image/jpeg,image/png,image/webp" /><div><div class="photo-icon" aria-hidden="true">＋</div><strong id="customTemplateTitle">Adicionar imagem do template</strong><span id="customTemplateSubtitle">JPG, PNG ou WebP · máximo 20 MB · compressão automática</span></div></div></div>
 
@@ -1546,12 +1554,12 @@
                 <label for="time">Hora <small>(opcional)</small></label>
                 <input id="time" name="time" type="time" />
               </div>
-              <div class="field full" data-required-field>
+              <div class="field full" id="locationField" data-required-field>
                 <label for="location">Local</label>
                 <input id="location" name="location" maxlength="100" placeholder="Quinta X" required />
                 <span class="error-text">Indica o local do casamento.</span>
               </div>
-              <div class="field full">
+              <div class="field full" id="mapsField">
                 <label for="mapsUrl">Link ou referencia Google Maps <small>(opcional)</small></label>
                 <input id="mapsUrl" name="mapsUrl" maxlength="500" placeholder="Cola o link, escreve o local ou deixa vazio" inputmode="text" />
                 <small>Usamos este link no botão Localização. Se ficar vazio, procuramos automaticamente pelo local indicado.</small>
@@ -1590,15 +1598,16 @@
                 <p class="website-photo-status" id="websitePhotosStatus" aria-live="polite"></p>
               </div>
               <div class="field full">
-                <label for="photo">Fotografia do casal <small>(opcional)</small></label>
+                <label id="photoLabel" for="photo">Fotografia do casal <small>(opcional)</small></label>
                 <div class="photo-uploader" id="photoDropzone">
-                  <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" />
+                  <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="photoSubtitle photoStyleNote" />
                   <div>
                     <div class="photo-icon" aria-hidden="true">＋</div>
                     <strong id="photoTitle">Adicionar uma fotografia</strong>
                     <span id="photoSubtitle">JPG, PNG ou WebP · máximo 20 MB · compressão automática</span>
                   </div>
                 </div>
+                <p class="photo-style-note" id="photoStyleNote" hidden></p>
               </div>
             </div>
 
@@ -1850,6 +1859,9 @@
       demoMode: false,
       submitEndpoint: '/api/customer/generate'
     };
+    const routedTemplateLock = window.INVITELAB_TEMPLATE_ONLY && typeof window.INVITELAB_TEMPLATE_ONLY === 'object'
+      ? window.INVITELAB_TEMPLATE_ONLY
+      : null;
     const requestedRedoId = new URL(window.location.href).searchParams.get('redo') || '';
     const checkoutReturnState = new URL(window.location.href).searchParams.get('checkout') || '';
     const redoRequestId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestedRedoId)
@@ -1871,6 +1883,7 @@
     }
 
     function updateEventPath(eventType, mode = 'push') {
+      if (state?.templateLock) return;
       const nextPath = EVENT_PATHS[eventType] || EVENT_PATHS.wedding;
       const url = new URL(window.location.href);
       if (url.pathname === nextPath && mode !== 'replace') return;
@@ -1879,12 +1892,12 @@
       history[mode === 'replace' ? 'replaceState' : 'pushState'](nextState, '', url);
     }
 
-    const initialEventType = eventTypeFromPath(window.location.pathname) || 'wedding';
+    const initialEventType = routedTemplateLock?.eventType || eventTypeFromPath(window.location.pathname) || 'wedding';
     let templates = window.WeddingI18n.getTemplates(initialEventType);
 
     const state = {
       mode: 'template',
-      selectedTemplate: templates[0],
+      selectedTemplate: templates.find(item => item.id === routedTemplateLock?.templateId) || templates[0],
       photoFile: null,
       photoDataUrl: null,
       customTemplateFile: null,
@@ -1897,6 +1910,7 @@
       language: window.WeddingI18n.locale,
       bootstrap: null,
       entitlement: null,
+      templateLock: routedTemplateLock,
       redoRequestId,
       redoReady: !redoRequestId,
       retainedPhoto: false,
@@ -1939,6 +1953,10 @@
     const localTestImage = document.getElementById('localTestImage');
     const localTestButton = document.getElementById('localTestButton');
     const redoBanner = document.getElementById('redoBanner');
+    const modeSwitch = document.getElementById('modeSwitch');
+    const templateLockNotice = document.getElementById('templateLockNotice');
+    const templateSectionTitle = document.getElementById('templateSectionTitle');
+    const templateSectionHelp = document.getElementById('templateSectionHelp');
 
     // The main editor is translated by WeddingI18n. These newer website
     // controls also need their own copy so that no Portuguese leaks into a
@@ -2019,7 +2037,14 @@
 
     function syncPurchasedProductCopy() {
       const copy = currentWebsiteUi();
-      const product = copy.product[state.packType];
+      const lockedProductCopy = {
+        pt: { description:'Personaliza apenas o template comprado.', features:['Convite principal personalizado','Template Canva editável','Fotografia opcional redesenhada no estilo escolhido','Sem local, Agenda, envelope, PDF ou website'] },
+        en: { description:'Personalise only the template you purchased.', features:['Personalised main invitation','Editable Canva template','Optional photo repainted in the selected style','No venue, Agenda, envelope, PDF or website'] },
+        es: { description:'Personaliza únicamente la plantilla comprada.', features:['Invitación principal personalizada','Plantilla editable de Canva','Foto opcional recreada con el estilo elegido','Sin lugar, Agenda, sobre, PDF ni sitio web'] },
+        fr: { description:'Personnalisez uniquement le modèle acheté.', features:['Invitation principale personnalisée','Modèle Canva modifiable','Photo facultative repeinte dans le style choisi','Sans lieu, programme, enveloppe, PDF ni site web'] },
+        de: { description:'Personalisiert nur die gekaufte Vorlage.', features:['Personalisierte Haupteinladung','Bearbeitbare Canva-Vorlage','Optionales Foto im gewählten Stil neu gestaltet','Ohne Ort, Tagesablauf, Umschlag, PDF oder Website'] }
+      }[state.language] || null;
+      const product = state.templateLock ? lockedProductCopy : copy.product[state.packType];
       if (!product) return;
       document.getElementById('purchasedProductDescription').textContent = product.description;
       document.getElementById('purchasedProductFeatures').replaceChildren(...product.features.map(feature => {
@@ -2154,8 +2179,11 @@
     eventTypeInput.value = initialEventType;
 
     function renderTemplates() {
-      grid.innerHTML = templates.map((template, index) => `
-        <button type="button" class="template-card" data-template-id="${template.id}" aria-pressed="${template.id === state.selectedTemplate?.id || (!state.selectedTemplate && index === 0)}">
+      const visibleTemplates = state.templateLock
+        ? templates.filter(template => template.id === state.templateLock.templateId)
+        : templates;
+      grid.innerHTML = visibleTemplates.map((template, index) => `
+        <button type="button" class="template-card" data-template-id="${template.id}" aria-pressed="${template.id === state.selectedTemplate?.id || (!state.selectedTemplate && index === 0)}"${state.templateLock ? ' disabled' : ''}>
           <span class="selected-check" aria-hidden="true">✓</span>
           <span class="template-visual${template.detailsImage ? ' has-details' : ''}">
             <img class="template-invite" src="${template.image}" alt="Template ${template.name}" loading="lazy" />
@@ -2169,6 +2197,7 @@
     }
 
     function selectTemplate(id) {
+      if (state.templateLock && id !== state.templateLock.templateId) return;
       const template = templates.find(item => item.id === id);
       if (!template) return;
       state.selectedTemplate = template;
@@ -2185,6 +2214,7 @@
 
     function applyEventSelection(eventType, options = {}) {
       const nextEventType = eventType === 'baby_shower' ? 'baby_shower' : 'wedding';
+      if (state.templateLock && nextEventType !== state.templateLock.eventType) return;
       const selectedId = state.selectedTemplate?.id;
       state.eventType = nextEventType;
       eventTypeInput.value = nextEventType;
@@ -2203,6 +2233,94 @@
       renderWebsitePhotos();
       updatePreview();
       if (options.historyMode) updateEventPath(nextEventType, options.historyMode);
+    }
+
+    function applyTemplateLock(lock) {
+      if (!lock || typeof lock !== 'object' || !lock.templateId) return;
+      state.templateLock = {
+        templateId: String(lock.templateId),
+        eventType: lock.eventType === 'baby_shower' ? 'baby_shower' : 'wedding',
+        name: String(lock.name || lock.templateId)
+      };
+      applyEventSelection(state.templateLock.eventType, { resetDefaultMessage: false });
+      const template = templates.find(item => item.id === state.templateLock.templateId);
+      if (!template) throw new Error('The purchased template is not available. Contact InviteLab support.');
+      state.templateLock.name = template.name;
+      state.selectedTemplate = template;
+      renderTemplates();
+      selectTemplate(template.id);
+      setMode('template');
+      modeSwitch.hidden = true;
+      customTemplateField.hidden = true;
+      document.body.dataset.templateLocked = 'true';
+      templateLockNotice.hidden = false;
+      const lockedCopy = {
+        pt: { eyebrow:'O teu template comprado', title:`Personaliza ${template.name} para a tua celebração.`, hero:'O design já está confirmado. Adiciona os nomes, a data, a hora, o local e a mensagem — nós tratamos da geração do teu template.', start:'Adicionar os detalhes →', stepTitle:'Template confirmado', stepText:'O design comprado está protegido', panelTitle:'Personaliza o teu convite', panelText:'Preenche os dados que vão aparecer no template selecionado.', sectionTitle:'O teu template comprado', sectionHelp:'O design foi selecionado através do link seguro da tua encomenda.', notice:'Este é o design incluído na tua compra. Podes personalizar os detalhes abaixo; o estilo fica protegido e não pode ser trocado.' },
+        en: { eyebrow:'Your purchased template', title:`Personalise ${template.name} for your celebration.`, hero:'Your design is already confirmed. Add the names, date, time, venue and message — we will create your personalised template.', start:'Add your details →', stepTitle:'Template confirmed', stepText:'Your purchased design is protected', panelTitle:'Personalise your invitation', panelText:'Enter the details that will appear in the selected template.', sectionTitle:'Your purchased template', sectionHelp:'The design was selected by the secure link in your order.', notice:'This is the design included with your purchase. Personalise the details below; the protected style cannot be changed.' },
+        es: { eyebrow:'Tu plantilla comprada', title:`Personaliza ${template.name} para vuestra celebración.`, hero:'El diseño ya está confirmado. Añade los nombres, la fecha, la hora, el lugar y el mensaje; nosotros crearemos la plantilla personalizada.', start:'Añadir los datos →', stepTitle:'Plantilla confirmada', stepText:'El diseño comprado está protegido', panelTitle:'Personaliza tu invitación', panelText:'Introduce los datos que aparecerán en la plantilla seleccionada.', sectionTitle:'Tu plantilla comprada', sectionHelp:'El diseño se seleccionó mediante el enlace seguro de tu pedido.', notice:'Este es el diseño incluido en tu compra. Personaliza los datos; el estilo está protegido y no se puede cambiar.' },
+        fr: { eyebrow:'Votre modèle acheté', title:`Personnalisez ${template.name} pour votre célébration.`, hero:'Le design est déjà confirmé. Ajoutez les prénoms, la date, l’heure, le lieu et le message ; nous créerons votre modèle personnalisé.', start:'Ajouter les détails →', stepTitle:'Modèle confirmé', stepText:'Le design acheté est protégé', panelTitle:'Personnalisez votre invitation', panelText:'Saisissez les informations qui apparaîtront dans le modèle sélectionné.', sectionTitle:'Votre modèle acheté', sectionHelp:'Le design a été sélectionné via le lien sécurisé de votre commande.', notice:'Ce design est inclus dans votre achat. Personnalisez les informations ci-dessous ; le style est protégé et ne peut pas être changé.' },
+        de: { eyebrow:'Eure gekaufte Vorlage', title:`Personalisiert ${template.name} für eure Feier.`, hero:'Das Design ist bereits bestätigt. Ergänzt Namen, Datum, Uhrzeit, Ort und Nachricht – wir erstellen eure persönliche Vorlage.', start:'Details hinzufügen →', stepTitle:'Vorlage bestätigt', stepText:'Das gekaufte Design ist geschützt', panelTitle:'Einladung personalisieren', panelText:'Tragt die Angaben ein, die in der ausgewählten Vorlage erscheinen sollen.', sectionTitle:'Eure gekaufte Vorlage', sectionHelp:'Das Design wurde über den sicheren Link eurer Bestellung ausgewählt.', notice:'Dieses Design ist in eurem Kauf enthalten. Personalisiert unten die Angaben; der Stil ist geschützt und kann nicht gewechselt werden.' }
+      }[state.language] || null;
+      const lockedPhotoCopy = {
+        pt: { label:'Substituir a imagem de exemplo', optional:'(opcional)', title:'Carregar a tua fotografia', help:'JPG, PNG ou WebP · máximo 20 MB', note:'Com fotografia: recriamos as pessoas e o cenário da tua imagem no estilo artístico deste template. Sem fotografia: mantemos a ilustração de exemplo e alteramos apenas os teus dados.' },
+        en: { label:'Replace the sample image', optional:'(optional)', title:'Upload your photograph', help:'JPG, PNG or WebP · 20 MB maximum', note:'With a photo: we repaint the people and scene from your image in this template’s artistic style. Without a photo: we keep the sample artwork and change only your details.' },
+        es: { label:'Sustituir la imagen de ejemplo', optional:'(opcional)', title:'Sube tu fotografía', help:'JPG, PNG o WebP · máximo 20 MB', note:'Con foto: recreamos las personas y la escena de tu imagen con el estilo artístico de esta plantilla. Sin foto: conservamos la ilustración de ejemplo y cambiamos solo tus datos.' },
+        fr: { label:'Remplacer l’image d’exemple', optional:'(facultatif)', title:'Importez votre photo', help:'JPG, PNG ou WebP · 20 Mo maximum', note:'Avec une photo : nous repeignons les personnes et la scène de votre image dans le style artistique de ce modèle. Sans photo : nous conservons l’illustration d’exemple et modifions uniquement vos informations.' },
+        de: { label:'Beispielbild ersetzen', optional:'(optional)', title:'Eigenes Foto hochladen', help:'JPG, PNG oder WebP · maximal 20 MB', note:'Mit Foto: Wir gestalten die Personen und die Szene eures Bildes im künstlerischen Stil dieser Vorlage neu. Ohne Foto: Die Beispielillustration bleibt erhalten und nur eure Angaben werden geändert.' }
+      }[state.language] || null;
+      const photoLabel = document.getElementById('photoLabel');
+      const photoOptional = document.createElement('small');
+      photoOptional.textContent = lockedPhotoCopy.optional;
+      photoLabel.replaceChildren(document.createTextNode(`${lockedPhotoCopy.label} `), photoOptional);
+      dropzone.dataset.emptyTitle = lockedPhotoCopy.title;
+      dropzone.dataset.emptyHelp = lockedPhotoCopy.help;
+      if (!state.photoFile && !state.retainedPhoto) {
+        photoTitle.textContent = lockedPhotoCopy.title;
+        photoSubtitle.textContent = lockedPhotoCopy.help;
+      }
+      const photoStyleNote = document.getElementById('photoStyleNote');
+      photoStyleNote.textContent = lockedPhotoCopy.note;
+      photoStyleNote.hidden = false;
+      const lockCopy = document.createElement('span');
+      const lockName = document.createElement('strong');
+      lockName.textContent = template.name;
+      lockCopy.append(lockName, document.createTextNode(lockedCopy.notice));
+      templateLockNotice.replaceChildren(lockCopy);
+      templateSectionTitle.textContent = lockedCopy.sectionTitle;
+      templateSectionHelp.textContent = lockedCopy.sectionHelp;
+      const heroCopy = document.querySelector('.hero-copy');
+      heroCopy.querySelector('.eyebrow').textContent = lockedCopy.eyebrow;
+      heroCopy.querySelector('h1').textContent = lockedCopy.title;
+      heroCopy.querySelector('p').textContent = lockedCopy.hero;
+      heroCopy.querySelector('.button.primary').textContent = lockedCopy.start;
+      heroCopy.querySelector('.button.secondary').hidden = true;
+      const firstStepCopy = document.querySelector('.steps .step span:last-child');
+      const firstStepTitle = document.createElement('strong');
+      firstStepTitle.textContent = lockedCopy.stepTitle;
+      firstStepCopy.replaceChildren(firstStepTitle, document.createTextNode(lockedCopy.stepText));
+      const panelHeader = document.querySelector('.workspace .panel .panel-header');
+      panelHeader.querySelector('h2').textContent = lockedCopy.panelTitle;
+      panelHeader.querySelector('p').textContent = lockedCopy.panelText;
+      syncPackFields('invite_only_pack');
+      syncCreationModeAccess('template');
+      const websiteToggle = document.getElementById('websiteEnabled');
+      if (websiteToggle) {
+        websiteToggle.checked = false;
+        websiteToggle.disabled = true;
+      }
+      const locationField = document.getElementById('locationField');
+      const locationInput = document.getElementById('location');
+      const mapsField = document.getElementById('mapsField');
+      const mapsInput = document.getElementById('mapsUrl');
+      locationField.hidden = true;
+      locationField.removeAttribute('data-required-field');
+      locationInput.required = false;
+      locationInput.disabled = true;
+      locationInput.value = '';
+      mapsField.hidden = true;
+      mapsInput.disabled = true;
+      mapsInput.value = '';
+      syncPurchasedProductCopy();
     }
 
     function setMode(mode) {
@@ -2228,14 +2346,14 @@
       const p1 = document.getElementById('person1').value.trim() || eventUi.person1Fallback;
       const p2 = document.getElementById('person2').value.trim() || eventUi.person2Fallback;
       const date = formatDate(document.getElementById('date').value);
-      const location = document.getElementById('location').value.trim() || eventUi.venueFallback;
+      const location = state.templateLock ? '' : document.getElementById('location').value.trim() || eventUi.venueFallback;
       const hasAttendance = state.packType === 'Full_pack' && Boolean(document.getElementById('websiteEnabled')?.checked);
       document.getElementById('previewNames').textContent = `${p1} & ${p2}`;
-      document.getElementById('previewPdfState').textContent = [
+      document.getElementById('previewPdfState').textContent = state.templateLock ? '—' : [
         window.WeddingI18n.t('location'),
         hasAttendance ? window.WeddingI18n.t('attendance') : null
       ].filter(Boolean).join(' · ');
-      document.getElementById('previewDetails').textContent = `${date} · ${location}`;
+      document.getElementById('previewDetails').textContent = [date, location].filter(Boolean).join(' · ');
     }
 
     const MAX_SOURCE_PHOTO_BYTES = 20 * 1024 * 1024;
@@ -2493,8 +2611,8 @@
         state.photoDataUrl = null;
         photoInput.value = '';
         const eventUi = window.WeddingI18n.getEventUi(state.eventType);
-        photoTitle.textContent = eventUi.photoAdd;
-        photoSubtitle.textContent = eventUi.photoHelp;
+        photoTitle.textContent = dropzone.dataset.emptyTitle || eventUi.photoAdd;
+        photoSubtitle.textContent = dropzone.dataset.emptyHelp || eventUi.photoHelp;
         previewPhotoState.textContent = window.WeddingI18n.t('optionalState');
       }
     }
@@ -2523,7 +2641,7 @@
     function buildPayload() {
       const data = new FormData(form);
       const allDetails = websiteDetailsFromForm();
-      const agenda = Object.fromEntries([
+      const agenda = state.templateLock ? {} : Object.fromEntries([
         'arrivalTime','ceremonyTime','receptionTime','mealTime','cakeTime','partyTime',
         'arrivalDescription','ceremonyDescription','receptionDescription','mealDescription','cakeDescription','partyDescription'
       ].map(key => [key, allDetails[key] || '']));
@@ -2540,13 +2658,13 @@
         invitation: {
           date: data.get('date'),
           time: data.get('time'),
-          location: data.get('location'),
+          location: state.templateLock ? '' : data.get('location'),
           message: data.get('message')
         },
         agenda,
         envelopeColor: allDetails.envelopeColor || '',
         links: {
-          mapsUrl: data.get('mapsUrl')
+            mapsUrl: state.templateLock ? '' : data.get('mapsUrl')
         },
         attendance: {
           enabled: state.packType === 'Full_pack' && Boolean(document.getElementById('websiteEnabled')?.checked),
@@ -3548,6 +3666,7 @@
 
       const response = await fetch(endpoint, {
         method: 'POST',
+        headers: state.templateLock ? { 'X-InviteLab-Template-Only': '1' } : undefined,
         body
       });
       const data = await response.json().catch(() => null);
@@ -3578,9 +3697,11 @@
     }
 
     async function mutateJob(requestId, action, payload = null) {
+      const headers = payload ? { 'Content-Type': 'application/json' } : {};
+      if (state.templateLock) headers['X-InviteLab-Template-Only'] = '1';
       const response = await fetch(`/api/customer/jobs/${encodeURIComponent(requestId)}/${action}`, {
         method: 'POST',
-        headers: payload ? { 'Content-Type': 'application/json' } : undefined,
+        headers,
         body: payload ? JSON.stringify(payload) : undefined
       });
       const data = await response.json().catch(() => null);
@@ -3754,6 +3875,16 @@
         packTypeSelect.title = 'O pack é definido pelo código recebido na compra.';
       }
       syncCreationModeAccess(state.entitlement?.creationMode || 'both');
+      if (state.entitlement?.templateId) {
+        const entitlementTemplate = window.WeddingI18n
+          .getTemplates(state.entitlement.eventType || state.eventType, state.language)
+          .find(item => item.id === state.entitlement.templateId);
+        applyTemplateLock({
+          templateId: state.entitlement.templateId,
+          eventType: state.entitlement.eventType || state.eventType,
+          name: entitlementTemplate?.name || state.entitlement.templateId
+        });
+      }
     }
 
     function showStripePurchaseWelcome() {
@@ -3837,11 +3968,15 @@
 
     async function loadBootstrap() {
       try {
-        const response = await fetch('/api/client/bootstrap', { cache: 'no-store' });
+        const response = await fetch('/api/client/bootstrap', {
+          cache: 'no-store',
+          headers: state.templateLock ? { 'X-InviteLab-Template-Only': '1' } : undefined
+        });
         const body = await response.json();
         if (body.success) {
           state.bootstrap = body.data;
           applyEntitlement(body.data?.entitlement);
+          if (body.data?.templateLock) applyTemplateLock(body.data.templateLock);
         }
       } catch {
         state.bootstrap = null;
@@ -3876,13 +4011,15 @@
         applyEventSelection(state.eventType);
         syncWebsiteUiCopy();
         syncPurchasedProductCopy();
+        if (state.templateLock) applyTemplateLock(state.templateLock);
       }
     });
 
     applyEventSelection(initialEventType, {
       historyMode: 'replace',
-      resetDefaultMessage: initialEventType === 'baby_shower'
+      resetDefaultMessage: true
     });
+    if (state.templateLock) applyTemplateLock(state.templateLock);
     syncPackFields(packTypeSelect.value);
     syncCreationModeAccess('both');
     syncWebsiteUiCopy();
@@ -3999,6 +4136,10 @@
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (!validateForm()) return;
+      if (state.templateLock) {
+        await beginGeneration(buildPayload());
+        return;
+      }
       openWebsiteDetails();
     });
 
@@ -4035,7 +4176,7 @@
     const isLocalOperatorHost = localHostname === 'localhost'
       || localHostname === '::1'
       || /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(localHostname);
-    if (isLocalOperatorHost) {
+    if (isLocalOperatorHost && !state.templateLock) {
       localTestControls.hidden = false;
       localTestButton.addEventListener('click', () => localTestImage.click());
       localTestImage.addEventListener('change', async () => {

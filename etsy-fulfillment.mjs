@@ -92,10 +92,34 @@ function normalizeCreationMode(value) {
   );
 }
 
+function normalizeMappedTemplateId(value) {
+  const templateId = String(value || "").trim().toLowerCase();
+  if (!templateId) return "";
+  if (/^[a-z0-9_]{1,48}$/.test(templateId)) return templateId;
+  throw new EtsyFulfillmentError(
+    "ETSY_INVALID_TEMPLATE_MAPPING",
+    `Unsupported InviteLab template mapping: ${cleanText(value, 80)}.`,
+    { statusCode: 500 },
+  );
+}
+
+function normalizeMappedEventType(value, templateId = "") {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return templateId.startsWith("baby_") ? "baby_shower" : "wedding";
+  if (["wedding", "baby_shower"].includes(normalized)) return normalized;
+  throw new EtsyFulfillmentError(
+    "ETSY_INVALID_EVENT_MAPPING",
+    `Unsupported InviteLab event mapping: ${cleanText(value, 80)}.`,
+    { statusCode: 500 },
+  );
+}
+
 function normalizeListingProduct(value) {
-  const product = (packType, creationMode) => Object.freeze({
+  const product = (packType, creationMode, templateId = "", eventType = "wedding") => Object.freeze({
     packType,
     creationMode: packType === "Full_pack" ? creationMode : "template",
+    templateId,
+    eventType,
   });
   if (typeof value === "string") {
     return product(normalizePackType(value), "both");
@@ -104,7 +128,9 @@ function normalizeListingProduct(value) {
     return product(normalizePackType(value), "both");
   }
   const packType = normalizePackType(value.packType ?? value.pack);
-  return product(packType, normalizeCreationMode(value.creationMode ?? value.mode ?? "both"));
+  const templateId = normalizeMappedTemplateId(value.templateId ?? value.template ?? "");
+  const eventType = normalizeMappedEventType(value.eventType ?? value.event, templateId);
+  return product(packType, normalizeCreationMode(value.creationMode ?? value.mode ?? "both"), templateId, eventType);
 }
 
 export function parseEtsyListingPackMap(value) {
@@ -825,7 +851,8 @@ export function createEtsyFulfillmentService({
           source: "etsy",
           packType: product.packType,
           creationMode: product.creationMode,
-          eventType: "wedding",
+          eventType: product.eventType,
+          templateId: product.templateId,
           customerEmail: "",
         });
         if (created.created) result.codesCreated += 1;
@@ -833,6 +860,8 @@ export function createEtsyFulfillmentService({
         if (
           (record.packType && record.packType !== product.packType)
           || (record.creationMode && record.creationMode !== product.creationMode)
+          || (record.eventType && record.eventType !== product.eventType)
+          || (record.templateId && record.templateId !== product.templateId)
         ) {
           throw new EtsyFulfillmentError(
             "ETSY_EXTERNAL_ORDER_PACK_MISMATCH",

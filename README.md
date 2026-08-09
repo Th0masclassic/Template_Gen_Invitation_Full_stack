@@ -57,14 +57,59 @@ Uma compra Etsy é aberta com o **número do recibo Etsy**, sem depender de
 `/etsy`, o servidor confirma o recibo pago diretamente na API Etsy; depois da
 confirmação, pede o email onde serão enviados o comprovativo e os links finais.
 O número do recibo continua a ser a credencial privada do gerador e do RSVP
-Admin. O gestor local e os códigos de seis dígitos continuam disponíveis para
+Admin. O painel privado e os códigos de seis dígitos continuam disponíveis para
 vendas diretas, Stripe, testes e apoio ao cliente.
 
-Abrir o gestor local:
+Abrir o painel privado:
 
 ```text
-http://127.0.0.1:3000/operator/access-codes
+https://invitelab.art/admin
 ```
+
+O painel permite escolher visualmente qualquer imagem em `public/assets/templates`,
+gerar o respetivo URL assinado `/tempOnly/{imagem}/gen?grant=...` para colocar
+no PDF do listing Etsy e criar códigos de apoio. O URL assinado seleciona e
+bloqueia o template comprado; o cliente continua a validar o número do recibo
+Etsy antes de abrir o gerador. O produto fica limitado ao template, sem website
+e sem PDF digital.
+
+No gerador, o comprador pode carregar opcionalmente uma fotografia. Nesse caso,
+o GPT Image recebe o template comprado como referência de layout e técnica
+artística e a fotografia como fonte obrigatória para as pessoas, pose, roupa e
+cenário. Pessoas e locais de exemplo que existam apenas no template são
+removidos; a fotografia é redesenhada em aguarela, lápis, guache ou na técnica
+detetada no template. Sem fotografia, o artwork de exemplo é mantido e apenas
+os dados do convite são substituídos.
+
+No percurso bloqueado `tempOnly`, o formulário não pede local, Maps nem Agenda.
+O servidor gera apenas o convite: não solicita nem apresenta Agenda, envelope,
+PDF ou website. O comprador pode pedir alterações visuais até perfazer cinco
+versões guardadas; todas permanecem visíveis e a versão selecionada no momento
+da aprovação é a única enviada para o Canva. Os restantes packs mantêm o
+fluxo normal com local, Agenda, envelope e os artefactos incluídos no produto.
+
+Configurar o login antes de publicar:
+
+```dotenv
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD_HASH=COLOCA_O_HASH_SCRYPT_GERADO
+ADMIN_SESSION_SECRET=COLOCA_UM_SEGREDO_ALEATORIO_COM_PELO_MENOS_32_CARATERES
+ADMIN_SESSION_MAX_AGE_SECONDS=28800
+ADMIN_SESSION_IDLE_TIMEOUT_SECONDS=1800
+TEMPLATE_LINK_SECRET=COLOCA_OUTRO_SEGREDO_ALEATORIO_E_DIFERENTE
+```
+
+Gerar o hash com a password mascarada no terminal, sem a guardar no código,
+no histórico da shell ou nos argumentos do processo:
+
+```powershell
+npm run admin:password
+```
+
+Copiar apenas o hash devolvido para `ADMIN_PASSWORD_HASH`. O login usa password
+scrypt, sessão assinada
+e revogável no servidor, expira após 30 minutos sem atividade, usa cookie
+`HttpOnly`/`SameSite=Strict`, valida CSRF e limita tentativas.
 
 Também é possível gerar e gerir códigos pelo terminal, dentro da pasta do
 projeto:
@@ -121,7 +166,7 @@ ETSY_WEBHOOK_SIGNING_SECRET=whsec_...
 ETSY_OAUTH_ACCESS_TOKEN=
 ETSY_OAUTH_REFRESH_TOKEN=...
 ETSY_OAUTH_EXPIRES_AT=
-ETSY_LISTING_PACK_MAP={"1234567890":{"packType":"invite_only_pack","creationMode":"template"},"2345678901":{"packType":"digital_pdf_pack","creationMode":"both"},"3456789012":{"packType":"Full_pack","creationMode":"both"}}
+ETSY_LISTING_PACK_MAP={"1234567890":{"packType":"invite_only_pack","creationMode":"template","eventType":"wedding","templateId":"aquarela_paris"},"2345678901":{"packType":"digital_pdf_pack","creationMode":"both"},"3456789012":{"packType":"Full_pack","creationMode":"both"}}
 
 RESEND_API_KEY=re_...
 RESEND_FROM_EMAIL=InviteLab <orders@invitelab.art>

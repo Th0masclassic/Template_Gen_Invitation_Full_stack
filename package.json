@@ -7,14 +7,15 @@
   "scripts": {
     "start": "node --env-file-if-exists=.env server.mjs",
     "dev": "node --env-file-if-exists=.env --watch server.mjs",
-    "check": "node --check server.mjs && node --check server-config.mjs && node --check envelope-compositor.mjs && node --check stripe-checkout.mjs && node --check rsvp-utils.mjs && node --check access-code-store.mjs && node --check scripts/access-codes.mjs && node --check etsy-fulfillment.mjs && node --check customer-email.mjs && node --check chatgpt-canva-worker.mjs && node --check canva-link.mjs && node --check canva-template-link-service.mjs && node --check keyed-promise-queue.mjs && node --check wedding-site.mjs && node --check public/app-i18n.js && node --check website-template/script.js && node --check cloudflare/invitation-router.js",
-    "test": "node --test tests/*.test.mjs",
+    "check": "node --check server.mjs && node --check server-config.mjs && node --check admin-auth.mjs && node --check template-only-links.mjs && node --check template-only-policy.mjs && node --check template-photo-guidance.mjs && node --check envelope-compositor.mjs && node --check stripe-checkout.mjs && node --check rsvp-utils.mjs && node --check access-code-store.mjs && node --check scripts/access-codes.mjs && node --check scripts/admin-password.mjs && node --check etsy-fulfillment.mjs && node --check customer-email.mjs && node --check chatgpt-canva-worker.mjs && node --check canva-link.mjs && node --check canva-template-link-service.mjs && node --check keyed-promise-queue.mjs && node --check wedding-site.mjs && node --check public/app-i18n.js && node --check website-template/script.js && node --check cloudflare/invitation-router.js",
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs",
     "test:browser:edge": "node tests/browser-compat.mjs",
     "test:browser:safari": "node tests/safari-compat.mjs",
     "tunnel": "cloudflared tunnel --url http://127.0.0.1:3000",
     "token:create": "node scripts/access-codes.mjs create",
     "token:list": "node scripts/access-codes.mjs list",
-    "token:revoke": "node scripts/access-codes.mjs revoke"
+    "token:revoke": "node scripts/access-codes.mjs revoke",
+    "admin:password": "node scripts/admin-password.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1095.0",

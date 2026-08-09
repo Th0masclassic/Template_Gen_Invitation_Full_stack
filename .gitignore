@@ -4,7 +4,6 @@ generated/*
 output/*
 tmp/*
 _backup_before_results_iframe_*/
-server-config.mjs
 .env
 .env.local
 .DS_Store
